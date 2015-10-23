@@ -1,5 +1,4 @@
 require "ddt/version"
-require "ddt/generator"
 require "ddt/rspec_generator"
 
 module Ddt
