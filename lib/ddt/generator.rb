@@ -1,0 +1,3 @@
+class Ddt::Generator
+
+end
