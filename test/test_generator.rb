@@ -1,4 +1,5 @@
 require 'ddt'
+require 'digest/md5'
 
 class Fibonacci
 
@@ -9,24 +10,28 @@ class Fibonacci
     return fib(n - 1) + fib(n - 2)
   end
 
+  def self.say_hello
+    "hello"
+  end
+
 end
 
+results_ddt = Ddt::Generator.generate_for(Fibonacci) do
 
-fib = Fibonacci.new
+  instance = Fibonacci.new
 
+  (1..10).each do |n|
+    instance.fib(n)
+  end
 
-(1..10).each do |n|
-  puts "n=#{n} #{fib.fib(n)}"
+  Fibonacci.say_hello
 end
 
- if (fib.fib(1) == 1)
-   puts "correct"
- else
-   puts "wrong"
- end
+puts results_ddt
 
-result = Ddt::Generator.generate_for(Fibonacci) do |instance|
-  instance.fib(1)
+results_md5 = Ddt::Generator.generate_for(Digest::MD5) do
+  sample = "This is the digest"
+  Digest::MD5.hexdigest(sample)
 end
 
-puts result
+puts results_md5
