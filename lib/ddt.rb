@@ -1,10 +1,21 @@
 require "ddt/version"
 require "ddt/rspec_generator"
 require 'binding_of_caller'
+require 'ddt/deconstructor'
 
 module Ddt
 
+  def self.value_ize(value)
+    if (value.kind_of? String)
+      "#{value.dump}"
+    else
+      "#{value.to_s}"
+    end
+  end
+
   class Generator
+
+
 
     def self.impostor_for(module_space, klass)
       newStandInKlass = Class.new()
@@ -55,7 +66,6 @@ module Ddt
       newStandInKlass.class_eval(
           "
         def initialize(*args, &block)
-          puts \"new standin class #{klass.name}\"
 
           @_instance_init = {params: [], block: nil}
 
@@ -68,6 +78,21 @@ module Ddt
           @_method_calls_by_method = {}
           @_methods_for_test = []
           @_let_variables = {}
+
+
+          @_init_let_variables = {}
+
+          caller_context = binding.of_caller(2)
+          v_locals = caller_context.eval('local_variables')
+
+          args.each do |a|
+            v_locals.each { |v|
+              variable_value = caller_context.eval(\"\#{v.to_s}\")
+              if (a.object_id == variable_value.object_id)
+                  @_init_let_variables[v] = a
+              end
+            }
+          end
 
           self.class._add_instances(self)
         end
@@ -89,7 +114,11 @@ module Ddt
         end
 
         def let_variables
-           @_let_variables
+          @_let_variables
+        end
+
+        def init_let_variables
+          @_init_let_variables
         end
 
         def method_calls_by_method
@@ -204,6 +233,7 @@ module Ddt
 
       unwatch_new_instances
 
+
       module_space.send(:remove_const,"#{last_part}Impostor".to_sym)
       module_space.send(:remove_const,"#{last_part}".to_sym)
       module_space.const_set(last_part, klass)
@@ -214,6 +244,8 @@ module Ddt
          test_generator.generate(instance)
       end
       test_generator.end_spec
+      clean_watches
+
       test_generator.output
     end
 
@@ -225,9 +257,10 @@ module Ddt
 
         def _set_init_arguments(*args, &block)
           @_init_arguments = @_init_arguments || {}
-          @_init_arguments[:args]  = args
+          @_init_arguments[:params]  = args
           @_init_arguments[:block] = block
         end
+
       end
 
       Class.class_eval do
@@ -241,13 +274,17 @@ module Ddt
       end
     end
 
-    def self.unwatch_new_instances
+    def self.clean_watches
       Class.class_eval do
         remove_method :new
         alias_method :new, :_ddt_old_new
       end
-      Object.class_eval do
-        remove_method :_get_init_arguments, :_set_init_arguments
+    end
+
+    def self.unwatch_new_instances
+      Class.class_eval do
+        remove_method :new
+        alias_method :new, :_ddt_old_new
       end
     end
 
