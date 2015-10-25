@@ -52,7 +52,7 @@ class Ddt::Deconstructor
     declarations[:declaration].each do |d|
       var_name = "#{indentation}var_#{d[:id]}"
 
-      if (variable_map.include?(d[:id]))
+      if (!variable_map.nil? && variable_map.include?(d[:id]))
         var_name = "#{indentation}#{variable_map[d[:id]].to_s}"
       end
 

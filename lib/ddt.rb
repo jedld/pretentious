@@ -15,8 +15,6 @@ module Ddt
 
   class Generator
 
-
-
     def self.impostor_for(module_space, klass)
       newStandInKlass = Class.new()
       name = klass.name
@@ -259,6 +257,14 @@ module Ddt
           @_init_arguments = @_init_arguments || {}
           @_init_arguments[:params]  = args
           @_init_arguments[:block] = block
+        end
+
+        def _deconstruct
+          Ddt::Deconstructor.new().deconstruct(*self)
+        end
+
+        def _deconstruct_to_ruby(indentation = 0)
+          Ddt::Deconstructor.new().deconstruct_to_ruby(indentation, nil, *self)
         end
 
       end
