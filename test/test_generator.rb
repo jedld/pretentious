@@ -77,11 +77,13 @@ end
 puts results_md5
 
 results_composition = Ddt::Generator.generate_for(TestClass3) do
-  test_class_one = TestClass1.new("This is message 1")
+  another_object = TestClass1.new("test")
+  test_class_one = TestClass1.new({hello: "world", test: another_object})
   test_class_two = TestClass2.new("This is message 2")
 
   class_to_test = TestClass3.new(test_class_one, test_class_two)
   class_to_test.show_messages
+  puts class_to_test._deconstruct.to_json
 
 end
 

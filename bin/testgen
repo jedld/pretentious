@@ -2,3 +2,4 @@
 
 require 'ddt'
 
+# ddt example.rb -o rspec

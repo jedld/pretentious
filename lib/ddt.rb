@@ -8,6 +8,8 @@ module Ddt
   def self.value_ize(value)
     if (value.kind_of? String)
       "#{value.dump}"
+    elsif (value.is_a? Symbol)
+      ":#{value.to_s}"
     else
       "#{value.to_s}"
     end
@@ -44,13 +46,16 @@ module Ddt
               info_block[:params] = arguments
               info_block[:names] = @_instance.method(method_sym).parameters
 
-              if (@_instance.methods.include? method_sym)
-                result = @_instance.send(method_sym, *arguments, &block)
-              else
-                result = @_instance.send(:method_missing, method_sym, *arguments, &block)
+              begin
+                if (@_instance.methods.include? method_sym)
+                  result = @_instance.send(method_sym, *arguments, &block)
+                else
+                  result = @_instance.send(:method_missing, method_sym, *arguments, &block)
+                end
+                info_block[:result] = result
+              rescue Exception=>e
+                info_block[:result] = e
               end
-
-              info_block[:result] = result
 
               @_method_calls << info_block
 
@@ -59,10 +64,16 @@ module Ddt
               end
 
               @_method_calls_by_method[method_sym] << info_block
+              raise e if (e.kind_of? Exception)
               result"
 
-      newStandInKlass.class_eval(
-          "
+      newStandInKlass.class_eval("
+        def setup_instance(*args, &block)
+          @_instance = #{klass.name}_ddt.new(*args, &block)
+        end
+      ")
+
+      newStandInKlass.class_exec do
         def initialize(*args, &block)
 
           @_instance_init = {params: [], block: nil}
@@ -70,7 +81,8 @@ module Ddt
           @_instance_init[:params] = args
           @_instance_init[:block] = block
 
-          @_instance = #{klass.name}_ddt.new(*args, &block)
+          setup_instance(*args, &block)
+
 
           @_method_calls = []
           @_method_calls_by_method = {}
@@ -85,7 +97,7 @@ module Ddt
 
           args.each do |a|
             v_locals.each { |v|
-              variable_value = caller_context.eval(\"\#{v.to_s}\")
+              variable_value = caller_context.eval("#{v.to_s}")
               if (a.object_id == variable_value.object_id)
                   @_init_let_variables[v] = a
               end
@@ -105,10 +117,6 @@ module Ddt
 
         def include_for_tests(method_list = [])
           @_methods_for_test = @_methods_for_test + method_list
-        end
-
-        def method_missing(method_sym, *arguments, &block)
-          #{common_snippet}
         end
 
         def let_variables
@@ -159,7 +167,41 @@ module Ddt
           @_instance.is_a? something
         end
 
+        class << self
+          def _add_instances(instance)
+            @_instances = @_instances || []
+            @_instances << instance unless @_instances.include? instance
+          end
 
+          def let_variables
+            @_let_variables
+          end
+
+          def method_calls_by_method
+            @_method_calls_by_method
+          end
+
+          def method_calls
+            @_method_calls
+          end
+
+          def _add_instances(instance)
+            @_instances = @_instances || []
+            @_instances << instance unless @_instances.include? instance
+          end
+
+          def _instances
+            @_instances
+          end
+
+        end
+
+      end
+
+      newStandInKlass.class_eval("
+        def method_missing(method_sym, *arguments, &block)
+          #{common_snippet}
+        end
 
         class << self
 
@@ -173,28 +215,6 @@ module Ddt
               @_instance = #{klass.name}_ddt
               #{common_snippet}
             end
-
-            def let_variables
-               @_let_variables
-            end
-
-            def method_calls_by_method
-              @_method_calls_by_method
-            end
-
-            def method_calls
-              @_method_calls
-            end
-
-            def _add_instances(instance)
-              @_instances = @_instances || []
-              @_instances << instance unless @_instances.include? instance
-            end
-
-            def _instances
-              @_instances
-            end
-
         end
       ")
 
@@ -260,11 +280,11 @@ module Ddt
         end
 
         def _deconstruct
-          Ddt::Deconstructor.new().deconstruct(*self)
+          Ddt::Deconstructor.new().deconstruct(self)
         end
 
         def _deconstruct_to_ruby(indentation = 0)
-          Ddt::Deconstructor.new().deconstruct_to_ruby(indentation, nil, *self)
+          Ddt::Deconstructor.new().deconstruct_to_ruby(indentation, nil, self)
         end
 
       end

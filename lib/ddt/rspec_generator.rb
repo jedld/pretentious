@@ -68,6 +68,15 @@ class Ddt::RspecGenerator
 
   private
 
+  def generate_expectation(fixture, method, let_variables, params, result)
+    if params.size > 0
+      buffer(declare_dependencies(params, let_variables, 3))
+      buffer("expect(#{fixture}.#{method.to_s}(#{params_generator(params, let_variables)})).to #{pick_matcher(result)}",3)
+    else
+      buffer("expect(#{fixture}.#{method.to_s}).to #{pick_matcher(result)}",3)
+    end
+  end
+
   def generate_specs(context_prefix, fixture, method_calls, let_variables)
     method_calls.each_key do |k|
       info_blocks_arr = method_calls[k]
@@ -145,7 +154,7 @@ class Ddt::RspecGenerator
   end
 
   def remove_primitives(args, let_lookup)
-    args.select { |a| let_lookup.include?(a.object_id) || !( a.is_a?(String) || a.is_a?(Fixnum) || a.is_a?(TrueClass) || a.is_a?(FalseClass))}
+    args.select { |a| let_lookup.include?(a.object_id) || !Ddt::Deconstructor.is_primitive?(a) }
   end
 
   def params_generator(args, let_variables)
