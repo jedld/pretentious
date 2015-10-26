@@ -15,6 +15,12 @@ module Ddt
     end
   end
 
+  def self.watch(&block)
+    Ddt::Generator.watch_new_instances
+    block.call
+    Ddt::Generator.unwatch_new_instances
+  end
+
   class Generator
 
     def self.impostor_for(module_space, klass)
@@ -29,12 +35,12 @@ module Ddt
               @_let_variables = @_let_variables || {}
 
               caller_context = binding.of_caller(1)
-              puts \"local_variables\"
+              #puts \"local_variables\"
               v_locals = caller_context.eval('local_variables')
 
               arguments.each do |a|
                 v_locals.each { |v|
-                  puts \"evaluating \#{a.to_s} => \#{v}\"
+                  #puts \"evaluating \#{a.to_s} => \#{v}\"
                   variable_value = caller_context.eval(\"\#{v.to_s}\")
                   if (a.object_id == variable_value.object_id)
                     @_let_variables[v] = a
@@ -210,7 +216,7 @@ module Ddt
             end
 
             def method_missing(method_sym, *arguments, &block)
-              puts \"method \#{method_sym.to_s}\"
+              #puts \"method \#{method_sym.to_s}\"
               _add_instances(self)
               @_instance = #{klass.name}_ddt
               #{common_snippet}
@@ -258,8 +264,10 @@ module Ddt
       module_space.send(:remove_const,"#{last_part}_ddt".to_sym)
 
       test_generator.begin_spec(klass)
+      num = 1
       newStandInKlass._instances.each do |instance|
-         test_generator.generate(instance)
+        test_generator.generate(instance, num)
+        num+=1
       end
       test_generator.end_spec
       clean_watches

@@ -83,8 +83,9 @@ results_composition = Ddt::Generator.generate_for(TestClass3) do
 
   class_to_test = TestClass3.new(test_class_one, test_class_two)
   class_to_test.show_messages
-  puts class_to_test._deconstruct.to_json
 
+  class_to_test = TestClass3.new(test_class_one, test_class_two)
+  class_to_test.show_messages
 end
 
 puts results_composition
