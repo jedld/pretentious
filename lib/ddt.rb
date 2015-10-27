@@ -226,27 +226,35 @@ module Ddt
       newStandInKlass
     end
 
-    def self.generate_for(klass_or_instance, options = {}, &block)
+    def self.generate_for(*klasses_or_instances, &block)
+      all_results = {}
+      klasses = []
 
-      klass = klass_or_instance.class == Class ? klass_or_instance : klass_or_instance.class
-      test_generator = Ddt::RspecGenerator.new
+      puts ">>>>>>>>>>>>>>>> " + klasses_or_instances
 
-      klass_name_parts = klass.name.split('::')
-      last_part = klass_name_parts.pop
+      klasses_or_instances.each { |klass_or_instance|
+        klass = klass_or_instance.class == Class ? klass_or_instance : klass_or_instance.class
 
-      module_space = Object
 
-      if (klass_name_parts.size > 0)
-        klass_name_parts.each do |part|
-          module_space = module_space.const_get(part)
+        klass_name_parts = klass.name.split('::')
+        last_part = klass_name_parts.pop
+
+        module_space = Object
+
+        if (klass_name_parts.size > 0)
+          klass_name_parts.each do |part|
+            module_space = module_space.const_get(part)
+          end
         end
-      end
 
-      newStandInKlass = impostor_for module_space, klass
+        newStandInKlass = impostor_for module_space, klass
 
-      module_space.send(:remove_const,last_part.to_sym)
-      module_space.const_set("#{last_part}_ddt", klass)
-      module_space.const_set("#{last_part}", newStandInKlass)
+        module_space.send(:remove_const,last_part.to_sym)
+        module_space.const_set("#{last_part}_ddt", klass)
+        module_space.const_set("#{last_part}", newStandInKlass)
+
+        klasses << [module_space, klass, last_part, newStandInKlass]
+      }
 
       watch_new_instances
 
@@ -254,22 +262,34 @@ module Ddt
 
       unwatch_new_instances
 
+      klasses.each { |module_space, klass, last_part, newStandInKlass|
 
-      module_space.send(:remove_const,"#{last_part}Impostor".to_sym)
-      module_space.send(:remove_const,"#{last_part}".to_sym)
-      module_space.const_set(last_part, klass)
-      module_space.send(:remove_const,"#{last_part}_ddt".to_sym)
+        module_space.send(:remove_const,"#{last_part}Impostor".to_sym)
+        module_space.send(:remove_const,"#{last_part}".to_sym)
+        module_space.const_set(last_part, klass)
+        module_space.send(:remove_const,"#{last_part}_ddt".to_sym)
 
-      test_generator.begin_spec(klass)
-      num = 1
-      newStandInKlass._instances.each do |instance|
-        test_generator.generate(instance, num)
-        num+=1
-      end
-      test_generator.end_spec
-      clean_watches
+        test_generator = Ddt::RspecGenerator.new
+        test_generator.begin_spec(klass)
+        num = 1
 
-      test_generator.output
+        newStandInKlass._instances.each do |instance|
+          test_generator.generate(instance, num)
+          num+=1
+        end
+
+        test_generator.end_spec
+
+        result = all_results[klass.name.to_sym]
+        if result.nil?
+          all_results[klass.name.to_sym] = []
+        end
+
+        all_results[klass.name.to_sym] << test_generator.output
+
+      }
+
+      all_results
     end
 
     def self.watch_new_instances

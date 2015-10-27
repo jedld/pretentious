@@ -67,16 +67,16 @@ results_ddt = Ddt::Generator.generate_for(Fibonacci) do
   Fibonacci.say_hello
 end
 
-puts results_ddt
+p results_ddt
 
 results_md5 = Ddt::Generator.generate_for(Digest::MD5) do
   sample = "This is the digest"
   Digest::MD5.hexdigest(sample)
 end
 
-puts results_md5
+p results_md5
 
-results_composition = Ddt::Generator.generate_for(TestClass3) do
+results_composition = Ddt::Generator.generate_for(TestClass3, TestClass2) do
   another_object = TestClass1.new("test")
   test_class_one = TestClass1.new({hello: "world", test: another_object, arr_1: [1,2,3,4,5, another_object],
                                   sub_hash: {yes: true, obj: another_object}})
@@ -89,4 +89,4 @@ results_composition = Ddt::Generator.generate_for(TestClass3) do
   class_to_test.show_messages
 end
 
-puts results_composition
+p results_composition
