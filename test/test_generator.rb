@@ -78,7 +78,8 @@ puts results_md5
 
 results_composition = Ddt::Generator.generate_for(TestClass3) do
   another_object = TestClass1.new("test")
-  test_class_one = TestClass1.new({hello: "world", test: another_object})
+  test_class_one = TestClass1.new({hello: "world", test: another_object, arr_1: [1,2,3,4,5, another_object],
+                                  sub_hash: {yes: true, obj: another_object}})
   test_class_two = TestClass2.new("This is message 2")
 
   class_to_test = TestClass3.new(test_class_one, test_class_two)

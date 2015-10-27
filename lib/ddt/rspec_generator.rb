@@ -50,9 +50,10 @@ class Ddt::RspecGenerator
       buffer("before do",2)
       whitespace
       args = test_instance._init_arguments[:params]
-      buffer(declare_dependencies(args, test_instance.init_let_variables, 3))
+      declarations = {}
+      buffer(declare_dependencies(args, test_instance.init_let_variables, 3 * @_indentation.length, declarations))
       if (args.size > 0)
-        buffer("@fixture = #{test_instance.test_class.name}.new(#{params_generator(args, test_instance.init_let_variables)})",3)
+        buffer("@fixture = #{test_instance.test_class.name}.new(#{params_generator(args, test_instance.init_let_variables, declarations)})",3)
       else
         buffer("@fixture = #{test_instance.test_class.name}.new",3)
       end
@@ -72,10 +73,10 @@ class Ddt::RspecGenerator
 
   private
 
-  def generate_expectation(fixture, method, let_variables, params, result)
+  def generate_expectation(fixture, method, let_variables, declarations, params, result)
     if params.size > 0
 
-      buffer("expect(#{fixture}.#{method.to_s}(#{params_generator(params, let_variables)})).to #{pick_matcher(result)}",3)
+      buffer("expect(#{fixture}.#{method.to_s}(#{params_generator(params, let_variables, declarations)})).to #{pick_matcher(result)}",3)
     else
       buffer("expect(#{fixture}.#{method.to_s}).to #{pick_matcher(result)}",3)
     end
@@ -84,6 +85,7 @@ class Ddt::RspecGenerator
   def generate_specs(context_prefix, fixture, method_calls, let_variables)
     buffer("it 'should pass current expectations' do",2)
     whitespace
+    declaration = {}
     method_calls.each_key do |k|
       info_blocks_arr = method_calls[k]
 
@@ -93,13 +95,12 @@ class Ddt::RspecGenerator
       info_blocks_arr.each do |block|
         params_collection = params_collection | block[:params]
       end
-
-      buffer(declare_dependencies(params_collection, let_variables, 3))
+      buffer(declare_dependencies(params_collection, let_variables, 3 * @_indentation.length, declaration))
 
       info_blocks_arr.each do |block|
 
         buffer("# #{context_prefix}#{k} when passed #{desc_params(block)} should return #{block[:result]}", 3)
-        generate_expectation(fixture, k, let_variables, block[:params], block[:result])
+        generate_expectation(fixture, k, let_variables, declaration, block[:params], block[:result])
 
         whitespace
       end
@@ -169,36 +170,22 @@ class Ddt::RspecGenerator
     params.join(" ,")
   end
 
-  def declare_dependencies(args, variable_map, level)
+  def declare_dependencies(args, variable_map, level, declarations)
     deconstructor = Ddt::Deconstructor.new
 
-
-    let_lookup = {}
-
-    unless (variable_map.nil?)
-      variable_map.each { |k,v|
-        let_lookup[v.object_id] = k
-      }
-    end
-
-    args = remove_primitives(args, let_lookup)
-    deconstructor.deconstruct_to_ruby(level, let_lookup, *args)
+    args = remove_primitives(args, variable_map)
+    deconstructor.deconstruct_to_ruby(level, variable_map, declarations, *args)
   end
 
   def remove_primitives(args, let_lookup)
     args.select { |a| let_lookup.include?(a.object_id) || !Ddt::Deconstructor.is_primitive?(a) }
   end
 
-  def params_generator(args, let_variables)
+  def params_generator(args, let_variables, declared_names)
     params = []
-    deconstruct = nil
-    let_lookup = {}
-    let_variables.each.collect { |k,v|
-        let_lookup[v.object_id] = k
-    }
     args.each do |arg|
-      unless (let_lookup[arg.object_id].nil?)
-        params <<  let_lookup[arg.object_id].to_s
+      if (!let_variables.nil? && let_variables[arg.object_id])
+        params <<  Ddt::Deconstructor.pick_name(let_variables, arg.object_id, declared_names)
       else
         params << Ddt::value_ize(arg)
       end

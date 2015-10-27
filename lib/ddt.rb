@@ -5,6 +5,13 @@ require 'ddt/deconstructor'
 
 module Ddt
 
+  def self.spec_for(*klasses, &block)
+    results = {}
+    klasses.each { |klass|
+      results[klass] = Ddt::Generator.generate_for(klass, {}, &block)
+    }
+  end
+
   def self.value_ize(value)
     if (value.kind_of? String)
       "#{value.dump}"
@@ -38,15 +45,11 @@ module Ddt
               #puts \"local_variables\"
               v_locals = caller_context.eval('local_variables')
 
-              arguments.each do |a|
-                v_locals.each { |v|
-                  #puts \"evaluating \#{a.to_s} => \#{v}\"
-                  variable_value = caller_context.eval(\"\#{v.to_s}\")
-                  if (a.object_id == variable_value.object_id)
-                    @_let_variables[v] = a
-                  end
-                }
-              end
+              v_locals.each { |v|
+                variable_value = caller_context.eval(\"\#{v.to_s}\")
+                @_let_variables[variable_value.object_id] = v
+              }
+
               info_block = {}
               info_block[:method] = method_sym
               info_block[:params] = arguments
@@ -101,14 +104,10 @@ module Ddt
           caller_context = binding.of_caller(2)
           v_locals = caller_context.eval('local_variables')
 
-          args.each do |a|
-            v_locals.each { |v|
-              variable_value = caller_context.eval("#{v.to_s}")
-              if (a.object_id == variable_value.object_id)
-                  @_init_let_variables[v] = a
-              end
-            }
-          end
+          v_locals.each { |v|
+            variable_value = caller_context.eval("#{v.to_s}")
+            @_init_let_variables[variable_value.object_id] = v
+          }
 
           self.class._add_instances(self)
         end
@@ -232,9 +231,7 @@ module Ddt
       klass = klass_or_instance.class == Class ? klass_or_instance : klass_or_instance.class
       test_generator = Ddt::RspecGenerator.new
 
-
-
-      klass_name_parts = klass.name.split("::")
+      klass_name_parts = klass.name.split('::')
       last_part = klass_name_parts.pop
 
       module_space = Object
@@ -285,6 +282,23 @@ module Ddt
           @_init_arguments = @_init_arguments || {}
           @_init_arguments[:params]  = args
           @_init_arguments[:block] = block
+          @_variable_names= {}
+
+          index = 0
+          params = method(:initialize).parameters
+
+          args.each do |arg|
+            p = params[index]
+            if p.size > 1
+              @_variable_names[arg.object_id] = p[1].to_s
+            end
+            index+=1
+          end
+
+        end
+
+        def _variable_map
+          @_variable_names
         end
 
         def _deconstruct
@@ -292,7 +306,7 @@ module Ddt
         end
 
         def _deconstruct_to_ruby(indentation = 0)
-          Ddt::Deconstructor.new().deconstruct_to_ruby(indentation, nil, self)
+          Ddt::Deconstructor.new().deconstruct_to_ruby(indentation, _variable_map, self)
         end
 
       end

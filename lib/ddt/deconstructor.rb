@@ -19,9 +19,8 @@ class Ddt::Deconstructor
         value << dfs_array(v, refs)
       elsif v.is_a? Reference
         refs << v.tree[:id]
-        value << dfs(v.tree)
-      elsif
-        value << v
+        value << Reference.new(dfs(v.tree))
+      elsif value << v
       end
     }
     value
@@ -29,7 +28,7 @@ class Ddt::Deconstructor
 
   def dfs_hash(hash, refs)
     value = {}
-    hash.each { |k,v|
+    hash.each { |k, v|
       if Ddt::Deconstructor.is_primitive?(v)
         value[k] = v
       elsif v.is_a? Hash
@@ -72,7 +71,7 @@ class Ddt::Deconstructor
         ref << dfs(tree[:composition])
       end
 
-      definition[:ref] =  ref
+      definition[:ref] = ref
 
       unless (@dependencies.include? tree[:id])
         @declaration_order << definition
@@ -95,23 +94,24 @@ class Ddt::Deconstructor
     {declaration: @declaration_order, dependency: @dependencies}
   end
 
-  def deconstruct_to_ruby(indentation_level = 0, variable_map = nil, *target_objects)
+  def deconstruct_to_ruby(indentation_level = 0, variable_map = {}, declared_names = {}, *target_objects)
     output_buffer = ""
     indentation = ""
 
     indentation_level.times {
-      indentation << " "
+      indentation << ' '
+    }
+
+    target_objects.each { |target_object|
+      variable_map.merge!(target_object._variable_map) if target_object.methods.include?(:_variable_map) && !target_object._variable_map.nil?
     }
 
     declarations, dependencies = deconstruct *target_objects
     declarations[:declaration].each do |d|
-      var_name = "#{indentation}var_#{d[:id]}"
 
-      if (!variable_map.nil? && variable_map.include?(d[:id]))
-        var_name = "#{indentation}#{variable_map[d[:id]].to_s}"
-      end
+      var_name = Ddt::Deconstructor.pick_name(variable_map, d[:id], declared_names)
+      output_buffer << "#{indentation}#{var_name} = #{construct(d, variable_map, declared_names)}\n"
 
-      output_buffer << "#{indentation}#{var_name} = #{construct(d)}\n"
     end
 
     output_buffer
@@ -124,8 +124,8 @@ class Ddt::Deconstructor
 
   def deconstruct_array(array)
     composition = []
-    array.each { | v|
-      if (is_primitive?(v))
+    array.each { |v|
+      if (Ddt::Deconstructor.is_primitive?(v))
         composition << v
       elsif v.is_a? Hash
         composition << deconstruct_hash(v)
@@ -179,19 +179,57 @@ class Ddt::Deconstructor
     tree
   end
 
+  def self.pick_name(variable_map, object_id, declared_names = {})
+    var_name = "var_#{object_id}"
+
+    object_id_to_declared_names = {}
+
+    declared_names.each { |k,v|
+      object_id_to_declared_names[v[:object_id]] = k
+    }
+
+    #return immediately if already mapped
+    return object_id_to_declared_names[object_id] if (object_id_to_declared_names.include? object_id)
+
+    if (!variable_map.nil? && variable_map.include?(object_id))
+
+      candidate_name = variable_map[object_id].to_s
+
+      if !declared_names.include?(candidate_name)
+        var_name = candidate_name
+        declared_names[candidate_name] = {count: 1, object_id: object_id}
+      else
+
+        if (declared_names[candidate_name][:object_id] == object_id)
+          var_name = candidate_name
+        else
+          new_name = "#{candidate_name}_#{declared_names[candidate_name][:count]}"
+          var_name = "#{new_name}"
+
+          declared_names[candidate_name][:count]+=1
+          declared_names[new_name] = {count: 1, object_id: object_id}
+        end
+
+      end
+    end
+
+    var_name
+  end
+
   private
 
-  def output_array(arr)
+
+  def output_array(arr, variable_map, declared_names)
     output_buffer = '['
     array_elements = []
     arr.each { |v|
       value = Ddt::value_ize(v)
       if (v.is_a? Hash)
-        value = output_hash(v)
+        value = output_hash(v, variable_map, declared_names)
       elsif (v.is_a? Array)
-        value = output_array(v)
+        value = output_array(v, variable_map, declared_names)
       elsif (v.is_a? Reference)
-        value = "var_#{v.tree[:id]}"
+        value = Ddt::Deconstructor.pick_name(variable_map, v.tree, declared_names)
       end
       array_elements << value
     }
@@ -200,18 +238,18 @@ class Ddt::Deconstructor
     output_buffer
   end
 
-  def output_hash(hash)
+  def output_hash(hash, variable_map, declared_names)
     output_buffer = '{'
     hash_elements = []
-    hash.each { |k,v|
+    hash.each { |k, v|
       value = Ddt::value_ize(v)
 
       if (v.is_a? Hash)
-        value = output_hash(v)
+        value = output_hash(v, variable_map, declared_names)
       elsif (v.is_a? Array)
-        value = output_array(v)
+        value = output_array(v, variable_map, declared_names)
       elsif (v.is_a? Reference)
-        value = "var_#{v.tree}"
+        value = Ddt::Deconstructor.pick_name(variable_map, v.tree, declared_names)
       end
 
       if (k.is_a? Symbol)
@@ -225,11 +263,12 @@ class Ddt::Deconstructor
     output_buffer
   end
 
-  def construct(definition)
+  def construct(definition, variable_map, declared_names)
     if (definition[:value])
       if (definition[:value].is_a? Hash)
-        output_hash(definition[:value])
+        output_hash(definition[:value], variable_map, declared_names)
       elsif (definition[:value].is_a? Array)
+        output_array(definition[:value], variable_map, declared_names)
       else
         Ddt::value_ize(definition[:value])
       end
@@ -237,7 +276,7 @@ class Ddt::Deconstructor
       params = []
       if (definition[:ref].size > 0)
         definition[:ref].each do |v|
-          params << "var_#{v}"
+          params << Ddt::Deconstructor.pick_name(variable_map,v, declared_names)
         end
         "#{definition[:class]}.new(#{params.join(', ')})"
       else
