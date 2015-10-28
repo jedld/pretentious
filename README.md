@@ -233,7 +233,7 @@ RSpec.describe TestClass3 do
   end
 ```
 
-Note that creating another instance of TestClass3 will result in the creating of another Scenario
+Note that creating another instance of TestClass3 will result in the creation of another Scenario
 
 ## Things to do after
 
