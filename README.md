@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/pretentious.svg)](https://badge.fury.io/rb/pretentious)
+
 # Ruby::Pretentious
 
 Do you have a pretentious boss or development lead that pushes you to embrace BDD/TDD but for reasons hate it or them?
