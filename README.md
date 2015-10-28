@@ -47,8 +47,8 @@ class Fibonacci
 end
 ```
 
-Inside a Pretentious.spec_for(...) block. Just write boring code that calls the methods of your class like
-how you'd normally use them. Finally Specify the classes that you want to test:
+Inside a Pretentious.spec_for(...) block. Just write boring code that instantiates an object as well as calls the methods
+like how you'd normally use them. Finally Specify the classes that you want to test:
 
 ```ruby
 class Fibonacci
@@ -144,7 +144,7 @@ Only RSpec is supported at this point. But other testing frameworks should be tr
 ## Things to do after
 
 Since your tests are already written, and hopefully nobody notices its written by a machine, you may just leave it
-at that.
+at that. Take note of the limitations though.
 
 But if lest your conscience suffers, it is best to go back to the specs and refine them, add more tests and behave like
 a bdd'er/tdd'er.
@@ -153,10 +153,11 @@ a bdd'er/tdd'er.
 
 Computers are bad at mind reading (for now) and they don't really know your expectation of "correctness", as such
 it assumes your code is correct and can only use equality based matchers. It can also only reliably match
-primitive data types and hashs and arrays to degree. More complex expectations are unfortunately left for the human to resolve.
+primitive data types and hashs and arrays to a degree. More complex expectations are unfortunately left for the humans
+to resolve.
 
 Also do note that it tries its best to determine how your fixtures are created, as well as the types
-of your parameters and does so by figuring out the components that your object needs. Failure can happen during this process.
+of your parameters and does so by figuring out (recursively) the components that your object needs. Failure can happen during this process.
 
 Finally, Limit this gem for test environments only.
 
