@@ -1,4 +1,4 @@
-require 'ddt'
+require 'pretentious'
 require 'digest/md5'
 require 'json'
 
@@ -60,7 +60,7 @@ end
 
 #examples
 
-results_ddt = Ddt::Generator.generate_for(Fibonacci) do
+results_ddt = Pretentious::Generator.generate_for(Fibonacci) do
 
   instance = Fibonacci.new
 
@@ -73,14 +73,14 @@ end
 
 results_ddt.each_value { |v| puts v}
 
-results_md5 = Ddt::Generator.generate_for(Digest::MD5) do
+results_md5 = Pretentious::Generator.generate_for(Digest::MD5) do
   sample = "This is the digest"
   Digest::MD5.hexdigest(sample)
 end
 
 results_md5.each_value { |v| puts v}
 
-results_composition = Ddt::Generator.generate_for(TestClass3, TestClass2, TestClass1) do
+results_composition = Pretentious::Generator.generate_for(TestClass3, TestClass2, TestClass1) do
   another_object = TestClass1.new("test")
   test_class_one = TestClass1.new({hello: "world", test: another_object, arr_1: [1,2,3,4,5, another_object],
                                   sub_hash: {yes: true, obj: another_object}})

@@ -1,13 +1,13 @@
-require "ddt/version"
-require "ddt/rspec_generator"
+require "pretentious/version"
+require "pretentious/rspec_generator"
 require 'binding_of_caller'
-require 'ddt/deconstructor'
+require 'pretentious/deconstructor'
 
-module Ddt
+module Pretentious
 
   def self.spec_for(*klasses, &block)
     @results = @results || {}
-    @results.merge!(Ddt::Generator.generate_for(*klasses, &block))
+    @results.merge!(Pretentious::Generator.generate_for(*klasses, &block))
   end
 
   def self.clear_results
@@ -24,16 +24,16 @@ module Ddt
     elsif (value.is_a? Symbol)
       ":#{value.to_s}"
     elsif (value.is_a? Hash)
-      Ddt::Deconstructor.pick_name(let_variables, value.object_id, declared_names)
+      Pretentious::Deconstructor.pick_name(let_variables, value.object_id, declared_names)
     else
       "#{value.to_s}"
     end
   end
 
   def self.watch(&block)
-    Ddt::Generator.watch_new_instances
+    Pretentious::Generator.watch_new_instances
     block.call
-    Ddt::Generator.unwatch_new_instances
+    Pretentious::Generator.unwatch_new_instances
   end
 
   class Generator
@@ -278,7 +278,7 @@ module Ddt
         module_space.const_set(last_part, klass)
         module_space.send(:remove_const,"#{last_part}_ddt".to_sym)
 
-        test_generator = Ddt::RspecGenerator.new
+        test_generator = Pretentious::RspecGenerator.new
         test_generator.begin_spec(klass)
         num = 1
 
@@ -331,11 +331,11 @@ module Ddt
         end
 
         def _deconstruct
-          Ddt::Deconstructor.new().deconstruct(self)
+          Pretentious::Deconstructor.new().deconstruct(self)
         end
 
         def _deconstruct_to_ruby(indentation = 0)
-          Ddt::Deconstructor.new().deconstruct_to_ruby(indentation, _variable_map, self)
+          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, _variable_map, self)
         end
 
       end

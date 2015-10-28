@@ -1,4 +1,4 @@
-class Ddt::Deconstructor
+class Pretentious::Deconstructor
 
   class Reference
     attr_accessor :tree
@@ -11,7 +11,7 @@ class Ddt::Deconstructor
   def dfs_array(arr, refs)
     value = []
     arr.each { |v|
-      if Ddt::Deconstructor.is_primitive?(v)
+      if Pretentious::Deconstructor.is_primitive?(v)
         value << v
       elsif v.is_a? Hash
         value << dfs_hash(v, refs)
@@ -29,7 +29,7 @@ class Ddt::Deconstructor
   def dfs_hash(hash, refs)
     value = {}
     hash.each { |k, v|
-      if Ddt::Deconstructor.is_primitive?(v)
+      if Pretentious::Deconstructor.is_primitive?(v)
         value[k] = v
       elsif v.is_a? Hash
         value[k] = dfs_hash(v, refs)
@@ -109,7 +109,7 @@ class Ddt::Deconstructor
     declarations, dependencies = deconstruct *target_objects
     declarations[:declaration].each do |d|
 
-      var_name = Ddt::Deconstructor.pick_name(variable_map, d[:id], declared_names)
+      var_name = Pretentious::Deconstructor.pick_name(variable_map, d[:id], declared_names)
       output_buffer << "#{indentation}#{var_name} = #{construct(d, variable_map, declared_names)}\n"
 
     end
@@ -125,7 +125,7 @@ class Ddt::Deconstructor
   def deconstruct_array(array)
     composition = []
     array.each { |v|
-      if (Ddt::Deconstructor.is_primitive?(v))
+      if (Pretentious::Deconstructor.is_primitive?(v))
         composition << v
       elsif v.is_a? Hash
         composition << deconstruct_hash(v)
@@ -141,7 +141,7 @@ class Ddt::Deconstructor
   def deconstruct_hash(hash)
     composition = {}
     hash.each { |k, v|
-      if (Ddt::Deconstructor.is_primitive?(v))
+      if (Pretentious::Deconstructor.is_primitive?(v))
         composition[k] = v
       elsif v.is_a? Hash
         composition[k] = deconstruct_hash(v)
@@ -227,13 +227,13 @@ class Ddt::Deconstructor
     output_buffer = '['
     array_elements = []
     arr.each { |v|
-      value = Ddt::value_ize(v, variable_map, declared_names)
+      value = Pretentious::value_ize(v, variable_map, declared_names)
       if (v.is_a? Hash)
         value = output_hash(v, variable_map, declared_names)
       elsif (v.is_a? Array)
         value = output_array(v, variable_map, declared_names)
       elsif (v.is_a? Reference)
-        value = Ddt::Deconstructor.pick_name(variable_map, v.tree, declared_names)
+        value = Pretentious::Deconstructor.pick_name(variable_map, v.tree, declared_names)
       end
       array_elements << value
     }
@@ -246,19 +246,19 @@ class Ddt::Deconstructor
     output_buffer = '{'
     hash_elements = []
     hash.each { |k, v|
-      value = Ddt::value_ize(v, variable_map, declared_names)
+      value = Pretentious::value_ize(v, variable_map, declared_names)
       if (v.is_a? Hash)
         value = output_hash(v, variable_map, declared_names)
       elsif (v.is_a? Array)
         value = output_array(v, variable_map, declared_names)
       elsif (v.is_a? Reference)
-        value = Ddt::Deconstructor.pick_name(variable_map, v.tree, declared_names)
+        value = Pretentious::Deconstructor.pick_name(variable_map, v.tree, declared_names)
       end
 
       if (k.is_a? Symbol)
         hash_elements << "#{k}: #{value}"
       else
-        hash_elements << "#{Ddt::value_ize(k, variable_map, declared_names)} => #{value}"
+        hash_elements << "#{Pretentious::value_ize(k, variable_map, declared_names)} => #{value}"
       end
     }
     output_buffer << hash_elements.join(', ')
@@ -273,13 +273,13 @@ class Ddt::Deconstructor
       elsif (definition[:value].is_a? Array)
         output_array(definition[:value], variable_map, declared_names)
       else
-        Ddt::value_ize(definition[:value], variable_map, declared_names)
+        Pretentious::value_ize(definition[:value], variable_map, declared_names)
       end
     else
       params = []
       if (definition[:ref].size > 0)
         definition[:ref].each do |v|
-          params << Ddt::Deconstructor.pick_name(variable_map,v, declared_names)
+          params << Pretentious::Deconstructor.pick_name(variable_map,v, declared_names)
         end
         "#{definition[:class]}.new(#{params.join(', ')})"
       else

@@ -1,6 +1,6 @@
 require 'digest/md5'
 require 'json'
-require 'ddt'
+require 'pretentious'
 
 class Fibonacci
 

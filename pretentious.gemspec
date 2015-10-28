@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'ddt/version'
+require 'pretentious/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "ddt"
-  spec.version       = Ddt::VERSION
+  spec.name          = "pretentious"
+  spec.version       = Pretentious::VERSION
   spec.authors       = ["Joseph Emmanuel Dayo"]
   spec.email         = ["joseph.dayo@gmail.com"]
   spec.summary       = %q{Gem to deal with pretentious tdd developers}

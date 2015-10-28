@@ -1,3 +1,5 @@
+require 'digest/md5'
+
 class Fibonacci
 
   def fib(n)
@@ -57,7 +59,7 @@ class TestClass3
 
 end
 
-Ddt.spec_for(Fibonacci) do
+Pretentious.spec_for(Fibonacci) do
 
 
   instance = Fibonacci.new
@@ -70,7 +72,7 @@ Ddt.spec_for(Fibonacci) do
 
 end
 
-Ddt.spec_for(TestClass1, TestClass2, TestClass3) do
+Pretentious.spec_for(TestClass1, TestClass2, TestClass3) do
 
   another_object = TestClass1.new("test")
   test_class_one = TestClass1.new({hello: "world", test: another_object, arr_1: [1,2,3,4,5, another_object],
@@ -83,4 +85,9 @@ Ddt.spec_for(TestClass1, TestClass2, TestClass3) do
   class_to_test = TestClass3.new(test_class_one, test_class_two)
   class_to_test.show_messages
 
+end
+
+Pretentious.spec_for(Digest::MD5) do
+  sample = "This is the digest"
+  Digest::MD5.hexdigest(sample)
 end

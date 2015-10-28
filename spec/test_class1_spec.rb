@@ -19,11 +19,11 @@ RSpec.describe TestClass1 do
   context 'Scenario 2' do
     before do
 
-      var_2190162600 = "test"
-      another_object = TestClass1.new(var_2190162600)
-      var_2190156840 = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
+      var_2167529620 = "test"
+      another_object = TestClass1.new(var_2167529620)
+      var_2167516320 = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
 
-      @fixture = TestClass1.new(var_2190156840)
+      @fixture = TestClass1.new(var_2167516320)
 
     end
 

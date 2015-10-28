@@ -1,7 +1,7 @@
-class Ddt::RspecGenerator
+class Pretentious::RspecGenerator
 
   def initialize(options = {})
-    @deconstructor = Ddt::Deconstructor.new
+    @deconstructor = Pretentious::Deconstructor.new
     indentation_count = options[:indentation] || 2
     @output_buffer = ""
     @_indentation = ""
@@ -100,7 +100,7 @@ class Ddt::RspecGenerator
       info_blocks_arr = method_calls[k]
       info_blocks_arr.each do |block|
         params_collection = params_collection | block[:params]
-        if (!Ddt::Deconstructor.is_primitive?(block[:result]) && !block[:result].kind_of?(Exception))
+        if (!Pretentious::Deconstructor.is_primitive?(block[:result]) && !block[:result].kind_of?(Exception))
           params_collection << block[:result]
         end
       end
@@ -160,7 +160,7 @@ class Ddt::RspecGenerator
     elsif result.kind_of? Exception
       'raise_error'
     else
-      "eq(#{Ddt::value_ize(result, nil, nil)})"
+      "eq(#{Pretentious::value_ize(result, nil, nil)})"
     end
   end
 
@@ -189,23 +189,23 @@ class Ddt::RspecGenerator
   end
 
   def declare_dependencies(args, variable_map, level, declarations)
-    deconstructor = Ddt::Deconstructor.new
+    deconstructor = Pretentious::Deconstructor.new
 
     args = remove_primitives(args, variable_map)
     deconstructor.deconstruct_to_ruby(level, variable_map, declarations, *args)
   end
 
   def remove_primitives(args, let_lookup)
-    args.select { |a| let_lookup.include?(a.object_id) || !Ddt::Deconstructor.is_primitive?(a) }
+    args.select { |a| let_lookup.include?(a.object_id) || !Pretentious::Deconstructor.is_primitive?(a) }
   end
 
   def params_generator(args, let_variables, declared_names)
     params = []
     args.each do |arg|
       if (!let_variables.nil? && let_variables[arg.object_id])
-        params <<  Ddt::Deconstructor.pick_name(let_variables, arg.object_id, declared_names)
+        params <<  Pretentious::Deconstructor.pick_name(let_variables, arg.object_id, declared_names)
       else
-        params << Ddt::value_ize(arg, let_variables, declared_names)
+        params << Pretentious::value_ize(arg, let_variables, declared_names)
       end
 
     end
