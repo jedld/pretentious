@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["joseph.dayo@gmail.com"]
   spec.summary       = %q{Gem to deal with pretentious tdd developers}
   spec.description   = %q{Do you have a pretentious boss or dev lead that pushes you to embrace tdd but for reasons hate it or them? here is a gem to deal with that.}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/jedld/pretentious"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
