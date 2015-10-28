@@ -24,6 +24,12 @@ end
 
 filename = ARGV[0]
 
+if filename.nil?
+  puts "an example file is required."
+  puts options
+  exit(1)
+end
+
 example_body = ""
 
 index = 0
