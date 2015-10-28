@@ -165,7 +165,7 @@ end
 
 awesome!
 
-You can also try this out with build in libraries like MD5 for example
+You can also try this out with built-in libraries like MD5 for example ...
 
 ```ruby
 #example.rb
