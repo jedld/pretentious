@@ -1,0 +1,66 @@
+#!/usr/bin/env ruby
+
+require 'ddt'
+require 'optparse'
+require 'ripper'
+require "readline"
+require 'json'
+require 'fileutils'
+
+$test_framework = :rspec
+$output_folder = 'spec'
+
+# testgen example.rb -t rspec -o rspec/
+options = OptionParser.new do |o|
+  o.banner =
+"Usage: ddtgen FILENAME [options] # Generates tests using the specified example file\n"
+  o.separator ""
+  o.separator "options:"
+  o.on('-t','--test-type','test framework to use (default :rspec)') { |b| $test_framework = b.to_sym}
+  o.on('-o','--output-dir','folder to place the files in') { |b| $output_folder = b}
+  o.parse!
+end
+
+
+filename = ARGV[0]
+
+example_body = ""
+
+index = 0
+File.open(filename, "r") do |f|
+  f.each_line do |line|
+     example_body << "#{line}\n"
+  end
+end
+
+eval(example_body)
+
+#collect results
+
+FileUtils.mkdir_p $output_folder
+
+module DdtUtils
+   def self.to_underscore(str)
+     str.gsub(/(.)([A-Z])/,'\1_\2').downcase
+   end
+end
+
+Ddt.last_results.each { |klass, result|
+
+  klass_name_parts = klass.name.split('::')
+  last_part = klass_name_parts.pop
+
+  filename = File.join($output_folder,"#{DdtUtils.to_underscore(last_part)}_spec.rb")
+  File.open(filename, 'w') {
+    |f| f.write(result)
+  }
+  puts "#{filename}"
+}
+
+filename = File.join($output_folder,"spec_helper.rb")
+unless File.exists?(filename)
+    File.open(filename, 'w') {
+        |f| f.write("#Place your requires here")
+      }
+    puts "#{filename}"
+end

@@ -27,6 +27,10 @@ class TestClass1
   def print_message
     puts @message
   end
+
+  def something_is_wrong
+    raise StandardError.new
+  end
 end
 
 class TestClass2
@@ -67,16 +71,16 @@ results_ddt = Ddt::Generator.generate_for(Fibonacci) do
   Fibonacci.say_hello
 end
 
-p results_ddt
+results_ddt.each_value { |v| puts v}
 
 results_md5 = Ddt::Generator.generate_for(Digest::MD5) do
   sample = "This is the digest"
   Digest::MD5.hexdigest(sample)
 end
 
-p results_md5
+results_md5.each_value { |v| puts v}
 
-results_composition = Ddt::Generator.generate_for(TestClass3, TestClass2) do
+results_composition = Ddt::Generator.generate_for(TestClass3, TestClass2, TestClass1) do
   another_object = TestClass1.new("test")
   test_class_one = TestClass1.new({hello: "world", test: another_object, arr_1: [1,2,3,4,5, another_object],
                                   sub_hash: {yes: true, obj: another_object}})
@@ -87,6 +91,15 @@ results_composition = Ddt::Generator.generate_for(TestClass3, TestClass2) do
 
   class_to_test = TestClass3.new(test_class_one, test_class_two)
   class_to_test.show_messages
+
+  puts another_object._deconstruct_to_ruby
+
+  begin
+    another_object.something_is_wrong
+  rescue Exception=>e
+  end
+
+
 end
 
-p results_composition
+results_composition.each_value { |v| puts v}

@@ -1,3 +1,7 @@
+require 'digest/md5'
+require 'json'
+require 'ddt'
+
 class Fibonacci
 
   def fib(n)
@@ -12,6 +16,7 @@ class Fibonacci
   end
 
 end
+
 
 class TestClass1
 
@@ -54,33 +59,5 @@ class TestClass3
     @class2.print_message
     "awesome!!!"
   end
-
-end
-
-Ddt.spec_for(Fibonacci) do
-
-
-  instance = Fibonacci.new
-
-  (1..10).each do |n|
-    instance.fib(n)
-  end
-
-  Fibonacci.say_hello
-
-end
-
-Ddt.spec_for(TestClass1, TestClass2, TestClass3) do
-
-  another_object = TestClass1.new("test")
-  test_class_one = TestClass1.new({hello: "world", test: another_object, arr_1: [1,2,3,4,5, another_object],
-                                   sub_hash: {yes: true, obj: another_object}})
-  test_class_two = TestClass2.new("This is message 2")
-
-  class_to_test = TestClass3.new(test_class_one, test_class_two)
-  class_to_test.show_messages
-
-  class_to_test = TestClass3.new(test_class_one, test_class_two)
-  class_to_test.show_messages
 
 end

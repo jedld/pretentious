@@ -6,17 +6,25 @@ require 'ddt/deconstructor'
 module Ddt
 
   def self.spec_for(*klasses, &block)
-    results = {}
-    klasses.each { |klass|
-      results[klass] = Ddt::Generator.generate_for(klass, {}, &block)
-    }
+    @results = @results || {}
+    @results.merge!(Ddt::Generator.generate_for(*klasses, &block))
   end
 
-  def self.value_ize(value)
+  def self.clear_results
+    @results = {}
+  end
+
+  def self.last_results
+    @results
+  end
+
+  def self.value_ize(value, let_variables, declared_names)
     if (value.kind_of? String)
       "#{value.dump}"
     elsif (value.is_a? Symbol)
       ":#{value.to_s}"
+    elsif (value.is_a? Hash)
+      Ddt::Deconstructor.pick_name(let_variables, value.object_id, declared_names)
     else
       "#{value.to_s}"
     end
@@ -63,6 +71,8 @@ module Ddt
                 end
                 info_block[:result] = result
               rescue Exception=>e
+                info_block[:result] = e
+              rescue StandardError=>e
                 info_block[:result] = e
               end
 
@@ -205,6 +215,7 @@ module Ddt
 
       newStandInKlass.class_eval("
         def method_missing(method_sym, *arguments, &block)
+          #puts \"\#{method_sym} \#{arguments}\"
           #{common_snippet}
         end
 
@@ -229,8 +240,6 @@ module Ddt
     def self.generate_for(*klasses_or_instances, &block)
       all_results = {}
       klasses = []
-
-      puts ">>>>>>>>>>>>>>>> " + klasses_or_instances
 
       klasses_or_instances.each { |klass_or_instance|
         klass = klass_or_instance.class == Class ? klass_or_instance : klass_or_instance.class
@@ -280,12 +289,12 @@ module Ddt
 
         test_generator.end_spec
 
-        result = all_results[klass.name.to_sym]
+        result = all_results[klass]
         if result.nil?
-          all_results[klass.name.to_sym] = []
+          all_results[klass] = []
         end
 
-        all_results[klass.name.to_sym] << test_generator.output
+        all_results[klass] = test_generator.output
 
       }
 

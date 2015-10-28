@@ -27,6 +27,8 @@ class Ddt::RspecGenerator
   end
 
   def begin_spec(test_class)
+    buffer("require 'spec_helper'")
+    whitespace
     buffer("RSpec.describe #{test_class.name} do")
     whitespace
   end
@@ -74,11 +76,16 @@ class Ddt::RspecGenerator
   private
 
   def generate_expectation(fixture, method, let_variables, declarations, params, result)
-    if params.size > 0
-
-      buffer("expect(#{fixture}.#{method.to_s}(#{params_generator(params, let_variables, declarations)})).to #{pick_matcher(result)}",3)
+    statement = if params.size > 0
+      "#{fixture}.#{method.to_s}(#{params_generator(params, let_variables, declarations)})"
     else
-      buffer("expect(#{fixture}.#{method.to_s}).to #{pick_matcher(result)}",3)
+      "#{fixture}.#{method.to_s}"
+    end
+
+    if (result.kind_of? Exception)
+      buffer("expect { #{statement} }.to #{pick_matcher(result)}",3)
+    else
+      buffer("expect( #{statement} ).to #{pick_matcher(result)}",3)
     end
   end
 
@@ -86,16 +93,23 @@ class Ddt::RspecGenerator
     buffer("it 'should pass current expectations' do",2)
     whitespace
     declaration = {}
+    #collect all params
+    params_collection = []
+
     method_calls.each_key do |k|
       info_blocks_arr = method_calls[k]
-
-      #collect all params
-      params_collection = []
-
       info_blocks_arr.each do |block|
         params_collection = params_collection | block[:params]
+        if (!Ddt::Deconstructor.is_primitive?(block[:result]) && !block[:result].kind_of?(Exception))
+          params_collection << block[:result]
+        end
       end
-      buffer(declare_dependencies(params_collection, let_variables, 3 * @_indentation.length, declaration))
+    end
+
+    buffer(declare_dependencies(params_collection, let_variables, 3 * @_indentation.length, declaration))
+
+    method_calls.each_key do |k|
+      info_blocks_arr = method_calls[k]
 
       info_blocks_arr.each do |block|
 
@@ -138,11 +152,15 @@ class Ddt::RspecGenerator
 
   def pick_matcher(result)
     if result.is_a? TrueClass
-     "be true"
+     'be true'
     elsif result.is_a? FalseClass
-      "be false"
+      'be false'
+    elsif result.nil?
+      'be_nil'
+    elsif result.kind_of? Exception
+      'raise_error'
     else
-      "eq #{Ddt::value_ize(result)}"
+      "eq(#{Ddt::value_ize(result, nil, nil)})"
     end
   end
 
@@ -187,7 +205,7 @@ class Ddt::RspecGenerator
       if (!let_variables.nil? && let_variables[arg.object_id])
         params <<  Ddt::Deconstructor.pick_name(let_variables, arg.object_id, declared_names)
       else
-        params << Ddt::value_ize(arg)
+        params << Ddt::value_ize(arg, let_variables, declared_names)
       end
 
     end

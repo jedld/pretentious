@@ -154,10 +154,14 @@ class Ddt::Deconstructor
     composition
   end
 
+  def get_test_class(target_object)
+    target_object.respond_to?(:test_class) ? target_object.test_class : target_object.class
+  end
+
   #creates a tree on how the object was created
   def build_tree(target_object)
 
-    tree = {class: target_object.class, id: target_object.object_id, composition: []}
+    tree = {class: get_test_class(target_object), id: target_object.object_id, composition: []}
     if (target_object.is_a? Array)
       tree[:composition] = deconstruct_array(target_object)
     elsif target_object.is_a? Hash
@@ -186,7 +190,7 @@ class Ddt::Deconstructor
 
     declared_names.each { |k,v|
       object_id_to_declared_names[v[:object_id]] = k
-    }
+    } if declared_names
 
     #return immediately if already mapped
     return object_id_to_declared_names[object_id] if (object_id_to_declared_names.include? object_id)
@@ -223,7 +227,7 @@ class Ddt::Deconstructor
     output_buffer = '['
     array_elements = []
     arr.each { |v|
-      value = Ddt::value_ize(v)
+      value = Ddt::value_ize(v, variable_map, declared_names)
       if (v.is_a? Hash)
         value = output_hash(v, variable_map, declared_names)
       elsif (v.is_a? Array)
@@ -242,8 +246,7 @@ class Ddt::Deconstructor
     output_buffer = '{'
     hash_elements = []
     hash.each { |k, v|
-      value = Ddt::value_ize(v)
-
+      value = Ddt::value_ize(v, variable_map, declared_names)
       if (v.is_a? Hash)
         value = output_hash(v, variable_map, declared_names)
       elsif (v.is_a? Array)
@@ -255,7 +258,7 @@ class Ddt::Deconstructor
       if (k.is_a? Symbol)
         hash_elements << "#{k}: #{value}"
       else
-        hash_elements << "#{Ddt::value_ize(k)} => #{value}"
+        hash_elements << "#{Ddt::value_ize(k, variable_map, declared_names)} => #{value}"
       end
     }
     output_buffer << hash_elements.join(', ')
@@ -270,7 +273,7 @@ class Ddt::Deconstructor
       elsif (definition[:value].is_a? Array)
         output_array(definition[:value], variable_map, declared_names)
       else
-        Ddt::value_ize(definition[:value])
+        Ddt::value_ize(definition[:value], variable_map, declared_names)
       end
     else
       params = []
