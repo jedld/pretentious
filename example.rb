@@ -64,7 +64,7 @@ Pretentious.spec_for(Fibonacci) do
 
   instance = Fibonacci.new
 
-  (1..10).each do |n|
+  (1..5).each do |n|
     instance.fib(n)
   end
 

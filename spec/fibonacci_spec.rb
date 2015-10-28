@@ -17,11 +17,6 @@ RSpec.describe Fibonacci do
       n_2 = 3
       n_3 = 4
       n_4 = 5
-      n_5 = 6
-      n_6 = 7
-      n_7 = 8
-      n_8 = 9
-      n_9 = 10
 
       # Fibonacci#fib when passed n = 1 should return 1
       expect( @fixture.fib(n) ).to eq(1)
@@ -37,21 +32,6 @@ RSpec.describe Fibonacci do
 
       # Fibonacci#fib when passed n = 5 should return 5
       expect( @fixture.fib(n_4) ).to eq(5)
-
-      # Fibonacci#fib when passed n = 6 should return 8
-      expect( @fixture.fib(n_5) ).to eq(8)
-
-      # Fibonacci#fib when passed n = 7 should return 13
-      expect( @fixture.fib(n_6) ).to eq(13)
-
-      # Fibonacci#fib when passed n = 8 should return 21
-      expect( @fixture.fib(n_7) ).to eq(21)
-
-      # Fibonacci#fib when passed n = 9 should return 34
-      expect( @fixture.fib(n_8) ).to eq(34)
-
-      # Fibonacci#fib when passed n = 10 should return 55
-      expect( @fixture.fib(n_9) ).to eq(55)
 
     end
   end
