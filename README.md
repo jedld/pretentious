@@ -44,7 +44,8 @@ class Fibonacci
 end
 ```
 
-wrap them inside a Ddt.spec_for(...) block. Specify the classes that you want to test:
+Inside a Ddt.spec_for(...) block. Just write boring code that calls the methods of your class like
+how you'd normally use them. Finally Specify the classes that you want to test:
 
 ```ruby
 class Fibonacci
