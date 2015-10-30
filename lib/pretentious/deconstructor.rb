@@ -63,6 +63,8 @@ class Pretentious::Deconstructor
         definition[:value] = dfs_hash(tree[:composition], ref)
       elsif tree[:class] == Array
         definition[:value] = dfs_array(tree[:composition], ref)
+      elsif tree[:class] == Pretentious::RecordedProc
+        definition[:recorded_proc] = tree[:recorded_proc]
       elsif tree[:composition].is_a? Array
         tree[:composition].each { |t|
           ref << dfs(t)
@@ -110,7 +112,7 @@ class Pretentious::Deconstructor
     declarations[:declaration].each do |d|
 
       var_name = Pretentious::Deconstructor.pick_name(variable_map, d[:id], declared_names)
-      output_buffer << "#{indentation}#{var_name} = #{construct(d, variable_map, declared_names)}\n"
+      output_buffer << "#{indentation}#{var_name} = #{construct(d, variable_map, declared_names, indentation)}\n"
 
     end
 
@@ -120,6 +122,42 @@ class Pretentious::Deconstructor
   def self.is_primitive?(value)
     value.is_a?(String) || value.is_a?(Fixnum) || value.is_a?(TrueClass) || value.is_a?(FalseClass) ||
         value.is_a?(NilClass) || value.is_a?(Symbol)
+  end
+
+  def self.block_param_names(proc)
+    parameters_to_join = []
+
+    parameters = proc.target_proc.parameters
+
+    parameters.each { |p|
+      parameters_to_join << p[1].to_s
+    }
+    parameters_to_join
+  end
+
+  def self.block_params_generator(proc, separator = '|')
+
+    if (proc.target_proc.parameters.size > 0)
+      return "#{separator}#{block_param_names(proc).join(', ')}#{separator}"
+    end
+
+    return ''
+  end
+
+  def proc_to_ruby(proc, let_variables, declared, indentation = '')
+    output_buffer = ""
+    output_buffer << "Proc.new { #{self.class.block_params_generator(proc)}\n"
+    output_buffer << self.class.proc_body(proc, let_variables, declared, indentation)
+    output_buffer << "#{indentation}}\n"
+    output_buffer
+  end
+
+  def self.proc_body(proc, let_variables, declared,indentation = '')
+    if (proc.return_value.size == 1)
+      "#{indentation * 2}#{Pretentious::value_ize(proc.return_value[0], let_variables, declared)}\n"
+    else
+      "#{indentation * 2}\# Variable return values ... can't figure out what goes in here...\n"
+    end
   end
 
   def deconstruct_array(array)
@@ -154,6 +192,16 @@ class Pretentious::Deconstructor
     composition
   end
 
+  def deconstruct_proc(proc)
+    if (proc.return_value.size == 1)
+      return build_tree(proc.return_value[1])
+    elsif (proc.return_value.size == 0)
+      []
+    else
+      nil
+    end
+  end
+
   def get_test_class(target_object)
     target_object.respond_to?(:test_class) ? target_object.test_class : target_object.class
   end
@@ -166,8 +214,12 @@ class Pretentious::Deconstructor
       tree[:composition] = deconstruct_array(target_object)
     elsif target_object.is_a? Hash
       tree[:composition] = deconstruct_hash(target_object)
+    elsif target_object.is_a? Pretentious::RecordedProc
+      tree[:composition] = deconstruct_proc(target_object)
+      tree[:recorded_proc] = target_object
+      tree[:id] = target_object.target_proc.object_id
+      tree[:block_params] = self.class.block_param_names(target_object)
     elsif target_object.methods.include? :_get_init_arguments
-
       args = target_object._get_init_arguments
       unless args.nil?
         args[:params].each { |p|
@@ -266,7 +318,7 @@ class Pretentious::Deconstructor
     output_buffer
   end
 
-  def construct(definition, variable_map, declared_names)
+  def construct(definition, variable_map, declared_names, indentation = '')
     if (definition[:value])
       if (definition[:value].is_a? Hash)
         output_hash(definition[:value], variable_map, declared_names)
@@ -275,6 +327,8 @@ class Pretentious::Deconstructor
       else
         Pretentious::value_ize(definition[:value], variable_map, declared_names)
       end
+    elsif (definition[:class] == Pretentious::RecordedProc)
+      proc_to_ruby(definition[:recorded_proc], variable_map, declared_names, indentation)
     else
       params = []
       if (definition[:ref].size > 0)

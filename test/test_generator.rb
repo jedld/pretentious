@@ -56,6 +56,18 @@ class TestClass3
     "awesome!!!"
   end
 
+  def swap_hash(j, &block)
+    h = []
+    j.each do |k,v|
+      h << block.call(v,k)
+    end
+    h
+  end
+
+  def check_proc
+    @class2.call(1,2,3)
+  end
+
 end
 
 #examples
@@ -94,10 +106,18 @@ results_composition = Pretentious::Generator.generate_for(TestClass3, TestClass2
 
   puts another_object._deconstruct_to_ruby
 
+  class_to_test.swap_hash({a: 1, b: 2}) do |v, k|
+    "#{k}_#{v}"
+  end
+
   begin
     another_object.something_is_wrong
   rescue Exception=>e
   end
+
+  class_to_test = TestClass3.new(test_class_one, Proc.new { |a,b,c| "hello world!"})
+  class_to_test.check_proc
+
 
 
 end

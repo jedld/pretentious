@@ -19,11 +19,11 @@ RSpec.describe TestClass1 do
   context 'Scenario 2' do
     before do
 
-      var_2176628100 = "test"
-      another_object = TestClass1.new(var_2176628100)
-      var_2176626120 = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
+      var_2159558060 = "test"
+      another_object = TestClass1.new(var_2159558060)
+      var_2159552800 = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
 
-      @fixture = TestClass1.new(var_2176626120)
+      @fixture = TestClass1.new(var_2159552800)
 
     end
 
@@ -31,10 +31,10 @@ RSpec.describe TestClass1 do
 
 
       # TestClass1#print_message when passed  should return 
-      expect( @fixture.print_message ).to be_nil
+      expect( @fixture.print_message  ).to be_nil
 
       # TestClass1#print_message when passed  should return 
-      expect( @fixture.print_message ).to be_nil
+      expect( @fixture.print_message  ).to be_nil
 
     end
   end

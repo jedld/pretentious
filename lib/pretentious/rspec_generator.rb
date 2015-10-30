@@ -75,11 +75,34 @@ class Pretentious::RspecGenerator
 
   private
 
-  def generate_expectation(fixture, method, let_variables, declarations, params, result)
+
+
+  def proc_function_generator(block, method)
+    "func_#{method.to_s}(#{Pretentious::Deconstructor.block_params_generator(block)})"
+  end
+
+  def get_block_source(block,let_variables, declared,indentation)
+    output = ''
+    output << "{ #{Pretentious::Deconstructor.block_params_generator(block)}\n"
+    output << Pretentious::Deconstructor.proc_body(block, let_variables, declared,indentation)
+    output << "#{indentation}}"
+    output
+  end
+
+  def generate_expectation(fixture, method, let_variables, declarations, params, block, result)
+    block_source = if !block.nil? && block.is_a?(Pretentious::RecordedProc)
+                      get_block_source(block, let_variables, declarations, @_indentation * 3)
+                   else
+                     ''
+    end
+
     statement = if params.size > 0
-      "#{fixture}.#{method.to_s}(#{params_generator(params, let_variables, declarations)})"
+      "#{fixture}.#{method.to_s}(#{params_generator(params, let_variables, declarations)})#{block_source}"
     else
-      "#{fixture}.#{method.to_s}"
+      stmt = []
+      stmt << "#{fixture}.#{method.to_s}"
+      stmt << "#{block_source}" unless block_source.empty?
+      stmt.join(' ')
     end
 
     if (result.kind_of? Exception)
@@ -114,7 +137,7 @@ class Pretentious::RspecGenerator
       info_blocks_arr.each do |block|
 
         buffer("# #{context_prefix}#{k} when passed #{desc_params(block)} should return #{block[:result]}", 3)
-        generate_expectation(fixture, k, let_variables, declaration, block[:params], block[:result])
+        generate_expectation(fixture, k, let_variables, declaration, block[:params], block[:block], block[:result])
 
         whitespace
       end

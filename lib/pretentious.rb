@@ -25,6 +25,8 @@ module Pretentious
       ":#{value.to_s}"
     elsif (value.is_a? Hash)
       Pretentious::Deconstructor.pick_name(let_variables, value.object_id, declared_names)
+    elsif (value.is_a? Pretentious::RecordedProc)
+      Pretentious::Deconstructor.pick_name(let_variables, value.target_proc.object_id, declared_names)
     else
       "#{value.to_s}"
     end
@@ -34,6 +36,41 @@ module Pretentious
     Pretentious::Generator.watch_new_instances
     block.call
     Pretentious::Generator.unwatch_new_instances
+  end
+
+  class RecordedProc < Proc
+
+    def initialize(target_proc)
+      @target_proc = target_proc
+      @return_value = []
+      @args = []
+      @called = false
+    end
+
+    def target_proc
+      @target_proc
+    end
+
+    def return_value
+      @return_value
+    end
+
+    def is_called?
+      @called
+    end
+
+    def call(*args, &block)
+      @called = true
+      @args << args
+      return_value = @target_proc.call(*args, &block)
+
+      unless @return_value.include? return_value
+        @return_value << return_value
+      end
+
+      return_value
+    end
+
   end
 
   class Generator
@@ -58,16 +95,26 @@ module Pretentious
                 @_let_variables[variable_value.object_id] = v
               }
 
+              #{newStandInKlass}.replace_procs_with_recorders(arguments)
+
               info_block = {}
               info_block[:method] = method_sym
               info_block[:params] = arguments
+
+              recordedProc = if (block)
+                          RecordedProc.new(block)
+                         else
+                           nil
+                         end
+              info_block[:block] = recordedProc
+
               info_block[:names] = @_instance.method(method_sym).parameters
 
               begin
                 if (@_instance.methods.include? method_sym)
-                  result = @_instance.send(method_sym, *arguments, &block)
+                  result = @_instance.send(method_sym, *arguments, &recordedProc)
                 else
-                  result = @_instance.send(:method_missing, method_sym, *arguments, &block)
+                  result = @_instance.send(:method_missing, method_sym, *arguments, &recordedProc)
                 end
                 info_block[:result] = result
               rescue Exception=>e
@@ -93,14 +140,26 @@ module Pretentious
       ")
 
       newStandInKlass.class_exec do
+
+
+
         def initialize(*args, &block)
 
           @_instance_init = {params: [], block: nil}
 
-          @_instance_init[:params] = args
-          @_instance_init[:block] = block
+          self.class.replace_procs_with_recorders(args)
 
-          setup_instance(*args, &block)
+          @_instance_init[:params] = args
+
+          recordedProc = if (block)
+                          RecordedProc.new(block)
+                         else
+                           nil
+                         end
+
+          @_instance_init[:block] = recordedProc
+
+          setup_instance(*args, &recordedProc)
 
 
           @_method_calls = []
@@ -183,6 +242,15 @@ module Pretentious
         end
 
         class << self
+
+          def replace_procs_with_recorders(args)
+            (0..args.size).each do |index|
+              if (args[index].kind_of? Proc)
+                args[index] = Pretentious::RecordedProc.new(args[index]) {}
+              end
+            end
+          end
+
           def _add_instances(instance)
             @_instances = @_instances || []
             @_instances << instance unless @_instances.include? instance
