@@ -12,6 +12,18 @@ for various frameworks. It is also useful for "recording" current behavior of ex
 to prepare for refactoring. As a bonus it also exposes an Object Deconstructor which allows you, given
 any object, to obtain a ruby code on how it was created.
 
+
+## Table of Contents
+
+1.  [Installation](#installation)
+2.  [Usage](#usage)
+3.  [Handling complex parameters and object constructors](#Handling-complex-parameters-and-object-constructors)
+4.  [Capturing Exceptions](#Capturing-Exceptions)
+5.  [Object Deconstruction Utility](#Object-Deconstruction-Utility)
+6.  [Things to do after](#Things-to-do-after)
+7.  [Limitations](#Limitations)
+
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -96,7 +108,6 @@ For this example place the following into spec_helper.rb:
 
 ```ruby
 #inside spec_helper.rb
-
 class Fibonacci
 
   def fib(n)
@@ -310,9 +321,9 @@ should generate the following in rspec
 ## Object Deconstruction Utility
 
 As Pretentious as the gem is, there are other uses other than generating tests specs. Tools are also available to
-deconstruct objects. Object deconstruction basically means that the components used to create and initialized are
-extracted from an object until only primitive types remain. The pretentious gem will also generate the
-necessary ruby code to create one form scracth. Below is an example:
+deconstruct objects. Object deconstruction basically means that the components used to create and initialize an object
+are extracted and decomposed until only primitive types remain. The pretentious gem will also generate the
+necessary ruby code to create one from scratch. Below is an example:
 
 Given an instance of an activerecord base connection for example
 
@@ -439,7 +450,7 @@ a bdd'er/tdd'er.
 Computers are bad at mind reading (for now) and they don't really know your expectation of "correctness", as such
 it assumes your code is correct and can only use equality based matchers. It can also only reliably match
 primitive data types, hashes, Procs and arrays to a degree. More complex expectations are unfortunately left for the humans
-to resolve.
+to resolve. This is expected to improve in future versions of the pretentious gem.
 
 Procs that return a constant value will be resolved properly. However variable return values are currently still
 not generated properly will return a stub (future versions may use sourcify to resolve Procs for ruby 1.9)
