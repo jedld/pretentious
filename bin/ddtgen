@@ -39,7 +39,7 @@ File.open(filename, "r") do |f|
   end
 end
 
-eval(example_body)
+eval(example_body, binding, filename, 1)
 
 #collect results
 

@@ -14,10 +14,10 @@ RSpec.describe TestClass2 do
 
 
       # TestClass2#print_message when passed  should return 
-      expect( @fixture.print_message  ).to be_nil
+      expect( @fixture.print_message ).to be_nil
 
       # TestClass2#print_message when passed  should return 
-      expect( @fixture.print_message  ).to be_nil
+      expect( @fixture.print_message ).to be_nil
 
     end
   end

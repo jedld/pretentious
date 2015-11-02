@@ -51,13 +51,30 @@ class Pretentious::RspecGenerator
 
       buffer("before do",2)
       whitespace
-      args = test_instance._init_arguments[:params]
+
       declarations = {}
-      buffer(declare_dependencies(args, test_instance.init_let_variables, 3 * @_indentation.length, declarations))
+      dependencies = []
+
+      args = test_instance._init_arguments[:params]
+      block = test_instance._init_arguments[:block]
+      dependencies = dependencies | args
+
+      unless block.nil?
+        dependencies << block
+      end
+
+      block_source = if !block.nil? && block.is_a?(Pretentious::RecordedProc)
+                       get_block_source(block, test_instance.init_let_variables, declarations, @_indentation * 3)
+                     else
+                       ''
+                     end
+
+
+      buffer(declare_dependencies(dependencies, test_instance.init_let_variables, 3 * @_indentation.length, declarations))
       if (args.size > 0)
-        buffer("@fixture = #{test_instance.test_class.name}.new(#{params_generator(args, test_instance.init_let_variables, declarations)})",3)
+        buffer("@fixture = #{test_instance.test_class.name}.new(#{params_generator(args, test_instance.init_let_variables, declarations)})#{block_source}",3)
       else
-        buffer("@fixture = #{test_instance.test_class.name}.new",3)
+        buffer("@fixture = #{test_instance.test_class.name}.new#{block_source}",3)
       end
       whitespace
       buffer("end",2)
@@ -82,11 +99,12 @@ class Pretentious::RspecGenerator
   end
 
   def get_block_source(block,let_variables, declared,indentation)
-    output = ''
-    output << "{ #{Pretentious::Deconstructor.block_params_generator(block)}\n"
-    output << Pretentious::Deconstructor.proc_body(block, let_variables, declared,indentation)
-    output << "#{indentation}}"
-    output
+    #output = ''
+    #output << "{ #{Pretentious::Deconstructor.block_params_generator(block)}\n"
+    #output << Pretentious::Deconstructor.proc_body(block, let_variables, declared,indentation)
+    #output << "#{indentation}}"
+    #output
+    " &#{Pretentious::Deconstructor.pick_name(let_variables, block.target_proc.object_id, declared)}"
   end
 
   def generate_expectation(fixture, method, let_variables, declarations, params, block, result)
@@ -126,8 +144,15 @@ class Pretentious::RspecGenerator
         if (!Pretentious::Deconstructor.is_primitive?(block[:result]) && !block[:result].kind_of?(Exception))
           params_collection << block[:result]
         end
+
+        unless (block[:block].nil?)
+          params_collection << block[:block]
+        end
+
       end
+
     end
+
 
     buffer(declare_dependencies(params_collection, let_variables, 3 * @_indentation.length, declaration))
 

@@ -27,6 +27,8 @@ module Pretentious
       Pretentious::Deconstructor.pick_name(let_variables, value.object_id, declared_names)
     elsif (value.is_a? Pretentious::RecordedProc)
       Pretentious::Deconstructor.pick_name(let_variables, value.target_proc.object_id, declared_names)
+    elsif (value == nil)
+      "nil"
     else
       "#{value.to_s}"
     end
@@ -40,11 +42,16 @@ module Pretentious
 
   class RecordedProc < Proc
 
-    def initialize(target_proc)
+    def initialize(target_proc, is_given_block = false)
       @target_proc = target_proc
       @return_value = []
       @args = []
+      @given_block = is_given_block
       @called = false
+    end
+
+    def given_block?
+      @given_block
     end
 
     def target_proc
@@ -102,7 +109,7 @@ module Pretentious
               info_block[:params] = arguments
 
               recordedProc = if (block)
-                          RecordedProc.new(block)
+                          RecordedProc.new(block, true)
                          else
                            nil
                          end
@@ -152,7 +159,7 @@ module Pretentious
           @_instance_init[:params] = args
 
           recordedProc = if (block)
-                          RecordedProc.new(block)
+                          RecordedProc.new(block, true)
                          else
                            nil
                          end
@@ -353,7 +360,7 @@ module Pretentious
         newStandInKlass._instances.each do |instance|
           test_generator.generate(instance, num)
           num+=1
-        end
+        end unless newStandInKlass._instances.nil?
 
         test_generator.end_spec
 
@@ -364,7 +371,7 @@ module Pretentious
 
         all_results[klass] = test_generator.output
 
-      }
+      } unless klasses.nil?
 
       all_results
     end
@@ -378,7 +385,9 @@ module Pretentious
         def _set_init_arguments(*args, &block)
           @_init_arguments = @_init_arguments || {}
           @_init_arguments[:params]  = args
-          @_init_arguments[:block] = block
+          unless (block.nil?)
+            @_init_arguments[:block] = RecordedProc.new(block) {}
+          end
           @_variable_names= {}
 
           index = 0

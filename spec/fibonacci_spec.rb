@@ -40,7 +40,7 @@ RSpec.describe Fibonacci do
 
 
       # Fibonacci::say_hello when passed  should return hello
-      expect( Fibonacci.say_hello  ).to eq("hello")
+      expect( Fibonacci.say_hello ).to eq("hello")
 
     end
 end
