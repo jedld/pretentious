@@ -288,6 +288,25 @@ RSpec.describe TestClass3 do
 
 Note that creating another instance of TestClass3 will result in the creation of another Scenario
 
+## Capturing Exceptions
+
+Exceptions thrown by method calls should generate the appropriate exception test case. Just make sure
+that you rescue inside your example file like below:
+
+```ruby
+  begin
+    test_class_one.something_is_wrong
+  rescue Exception=>e
+  end
+```
+
+should generate the following in rspec
+
+```ruby
+  # TestClass1#something_is_wrong when passed  should return StandardError
+  expect { @fixture.something_is_wrong }.to raise_error
+```
+
 ## Things to do after
 
 Since your tests are already written, and hopefully nobody notices its written by a machine, you may just leave it
@@ -300,8 +319,11 @@ a bdd'er/tdd'er.
 
 Computers are bad at mind reading (for now) and they don't really know your expectation of "correctness", as such
 it assumes your code is correct and can only use equality based matchers. It can also only reliably match
-primitive data types and hashs and arrays to a degree. More complex expectations are unfortunately left for the humans
+primitive data types, hashes, Procs and arrays to a degree. More complex expectations are unfortunately left for the humans
 to resolve.
+
+Procs that return a constant value will be resolved properly. However variable return values are currently still
+not generated properly will return a stub (future versions may use sourcify to resolve Procs for ruby 1.9)
 
 Also do note that it tries its best to determine how your fixtures are created, as well as the types
 of your parameters and does so by figuring out (recursively) the components that your object needs. Failure can happen during this process.

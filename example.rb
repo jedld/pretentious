@@ -42,6 +42,11 @@ Pretentious.spec_for(TestClass1, TestClass2, TestClass3, TestClass4) do
     class_to_test4.message
   }
 
+  begin
+    test_class_one.something_is_wrong
+  rescue Exception=>e
+  end
+
 end
 
 Pretentious.spec_for(Digest::MD5) do
