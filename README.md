@@ -17,12 +17,12 @@ any object, to obtain a ruby code on how it was created.
 
 1.  [Installation](#installation)
 2.  [Usage](#usage)
-3.  [Handling complex parameters and object constructors](#Handling-complex-parameters-and-object-constructors)
-4.  [Capturing Exceptions](#Capturing-Exceptions)
-5.  [Object Deconstruction Utility](#Object-Deconstruction-Utility)
-    a. [Using the Object deconstructor in rails](#Using-the-Object-deconstructor-in-rails)
-6.  [Things to do after](#Things-to-do-after)
-7.  [Limitations](#Limitations)
+3.  [Handling complex parameters and object constructors](#handling-complex-parameters-and-object-constructors)
+4.  [Capturing Exceptions](#capturing-exceptions)
+5.  [Object Deconstruction Utility](#object-deconstruction-utility)
+    a. [Using the Object deconstructor in rails](#using-the-object-deconstructor-in-rails)
+6.  [Things to do after](#things-to-do-after)
+7.  [Limitations](#limitations)
 
 
 ## Installation
