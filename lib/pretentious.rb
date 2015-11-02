@@ -18,6 +18,14 @@ module Pretentious
     @results
   end
 
+  def self.install_watcher
+    Pretentious::Generator.watch_new_instances
+  end
+
+  def self.uninstall_watcher
+    Pretentious::Generator.unwatch_new_instances
+  end
+
   def self.value_ize(value, let_variables, declared_names)
     if (value.kind_of? String)
       "#{value.dump}"
@@ -397,9 +405,9 @@ module Pretentious
             p = params[index]
             if p.size > 1
               @_variable_names[arg.object_id] = p[1].to_s
-            end
+            end unless p.nil?
             index+=1
-          end
+          end unless args.nil?
 
         end
 
@@ -412,7 +420,7 @@ module Pretentious
         end
 
         def _deconstruct_to_ruby(indentation = 0)
-          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, _variable_map, self)
+          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, _variable_map, {}, self)
         end
 
       end

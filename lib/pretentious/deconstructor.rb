@@ -154,7 +154,6 @@ class Pretentious::Deconstructor
     target_objects.each { |target_object|
       variable_map.merge!(target_object._variable_map) if target_object.methods.include?(:_variable_map) && !target_object._variable_map.nil?
     }
-
     declarations, dependencies = deconstruct *target_objects
     declarations[:declaration].each do |d|
 
