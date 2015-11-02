@@ -20,6 +20,7 @@ any object, to obtain a ruby code on how it was created.
 3.  [Handling complex parameters and object constructors](#Handling-complex-parameters-and-object-constructors)
 4.  [Capturing Exceptions](#Capturing-Exceptions)
 5.  [Object Deconstruction Utility](#Object-Deconstruction-Utility)
+    a. [Using the Object deconstructor in rails](#Using-the-Object-deconstructor-in-rails)
 6.  [Things to do after](#Things-to-do-after)
 7.  [Limitations](#Limitations)
 
@@ -348,7 +349,7 @@ var_70301267513280 = #<File:0x007fe094279f80>
 
 because the pretentious gem was not able to capture its init arguments.
 
-### How to use
+## How to use
 
 Simply call:
 
@@ -360,10 +361,11 @@ before all your objects are initalized. This will add the following methods to a
 object._deconstruct
 object._deconstruct_to_ruby
 ```
-The _deconstruct method generates a raw deconstruction data structure using by the _deconstruct_to_ruby method.
+The _deconstruct method generates a raw deconstruction data structure used by the _deconstruct_to_ruby method.
+
 Of course _deconstruct_to_ruby generates the ruby code necessary to create the object!
 
-### Using the Object deconstruct in rails
+## Using the Object deconstructor in rails
 
 In your Gemfile, add the pretentious gem.
 
