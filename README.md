@@ -20,7 +20,7 @@ any object, to obtain a ruby code on how it was created.
 3.  [Handling complex parameters and object constructors](#handling-complex-parameters-and-object-constructors)
 4.  [Capturing Exceptions](#capturing-exceptions)
 5.  [Object Deconstruction Utility](#object-deconstruction-utility)
-    a. [Using the Object deconstructor in rails](#using-the-object-deconstructor-in-rails)
+    1.  [Using the Object deconstructor in rails](#using-the-object-deconstructor-in-rails)
 6.  [Things to do after](#things-to-do-after)
 7.  [Limitations](#limitations)
 
