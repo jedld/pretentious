@@ -436,7 +436,8 @@ var_70301339518120 = User::ActiveRecord_Relation.new(klass, table)
 2.2.0 :007 >
 ```
 
-Note: There are some objects it will fails to capture and as such those would not deconstruct properly.
+Note: There are some objects it may fail to deconstruct properly because of certain [limitations](#limitations) or it
+may have failed to capture object creation early enough.
 
 
 ## Things to do after
