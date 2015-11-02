@@ -383,10 +383,10 @@ The do a bundle
 Note: It is advisable to add it only in the test or development group!
 The way it logs objects would probably prevent anything from being GC'ed.
 
-For rails, including inside config.ru is sufficient to capture most objects:
+For rails, including inside application.rb may be a good place to start:
 
 ```ruby
-#config.ru
+#application.rb
 require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
@@ -394,14 +394,14 @@ require 'rails/all'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-if Rails.env.test?
+if Rails.env.test? || Rails.env.development?
   puts "watching new instances"
   Pretentious::Generator.watch_new_instances
 end
 
 module App
   class Application < Rails::Application
-    # ..... stuf ......
+    # ..... stuff ......
 
   end
 end
