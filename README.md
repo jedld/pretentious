@@ -337,8 +337,8 @@ running deconstruct would generate:
 ```ruby
 var_70301267513280 = #<File:0x007fe094279f80>
 logger = ActiveSupport::Logger.new(var_70301267513280)
-connection_options = ["localhost", "root", "password", "jclviste_test", nil, nil, 131074]
-config = {adapter: "mysql", encoding: "utf8", reconnect: false, database: "jclviste_test", pool: 5, username: "root", password: "password", host: "localhost"}
+connection_options = ["localhost", "root", "password", "test_db", nil, nil, 131074]
+config = {adapter: "mysql", encoding: "utf8", reconnect: false, database: "test_db", pool: 5, username: "root", password: "password", host: "localhost"}
 var_70301281665660 = ActiveRecord::ConnectionAdapters::MysqlAdapter.new(connection, logger, connection_options, config)
 ```
 Note that
