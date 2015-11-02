@@ -161,7 +161,13 @@ class Pretentious::RspecGenerator
 
       info_blocks_arr.each do |block|
 
-        buffer("# #{context_prefix}#{k} when passed #{desc_params(block)} should return #{block[:result]}", 3)
+        params_desc_str =  if block[:params].size > 0
+                             "when passed #{desc_params(block)}"
+                           else
+                             ""
+                           end
+
+        buffer("# #{context_prefix}#{k} #{params_desc_str} should return #{block[:result]}", 3)
         generate_expectation(fixture, k, let_variables, declaration, block[:params], block[:block], block[:result])
 
         whitespace

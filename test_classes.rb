@@ -34,6 +34,10 @@ class TestClass1
     @message
   end
 
+  def just_returns_true
+    true
+  end
+
   def print_message
     puts @message
   end

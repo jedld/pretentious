@@ -5,13 +5,13 @@ RSpec.describe TestClass4 do
   context 'Scenario 1' do
     before do
 
-      var_2165841820 = "test"
-      var_2165763920 = Proc.new { 
+      var_2161332560 = "test"
+      var_2161220900 = Proc.new { 
             "test"
       }
 
 
-      @fixture = TestClass4.new &var_2165763920
+      @fixture = TestClass4.new &var_2161220900
 
     end
 

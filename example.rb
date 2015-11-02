@@ -47,6 +47,8 @@ Pretentious.spec_for(TestClass1, TestClass2, TestClass3, TestClass4) do
   rescue Exception=>e
   end
 
+  test_class_one.just_returns_true
+
 end
 
 Pretentious.spec_for(Digest::MD5) do

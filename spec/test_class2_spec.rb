@@ -13,10 +13,10 @@ RSpec.describe TestClass2 do
     it 'should pass current expectations' do
 
 
-      # TestClass2#print_message when passed  should return 
+      # TestClass2#print_message  should return 
       expect( @fixture.print_message ).to be_nil
 
-      # TestClass2#print_message when passed  should return 
+      # TestClass2#print_message  should return 
       expect( @fixture.print_message ).to be_nil
 
     end
