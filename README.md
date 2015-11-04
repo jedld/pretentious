@@ -365,6 +365,19 @@ The _deconstruct method generates a raw deconstruction data structure used by th
 
 Of course _deconstruct_to_ruby generates the ruby code necessary to create the object!
 
+If you just want to watch certain objects, the watch method accepts a block:
+
+```ruby
+some_other_class = SomeOtherClass.new("me")
+the_object = Pretentious.watch {
+    MyTestClass.new("some parameter", some_other_class).new
+}
+
+the_object._deconstruct_to_ruby
+```
+
+Note that the class SomeOtherClass won't get decomposed.
+
 ## Using the Object deconstructor in rails
 
 In your Gemfile, add the pretentious gem.
