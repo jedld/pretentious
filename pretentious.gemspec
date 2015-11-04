@@ -20,5 +20,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "binding_of_caller", "~> 0.7.2"
   spec.add_development_dependency "bundler", "~> 1.7"
   spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "rspec", "~> 10.0"
+  spec.add_development_dependency "rspec"
 end
