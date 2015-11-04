@@ -44,8 +44,9 @@ module Pretentious
 
   def self.watch(&block)
     Pretentious::Generator.watch_new_instances
-    block.call
+    result = block.call
     Pretentious::Generator.unwatch_new_instances
+    result
   end
 
   class RecordedProc < Proc

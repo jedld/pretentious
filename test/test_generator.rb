@@ -132,7 +132,7 @@ end
 #end
 
 results_composition = Pretentious::Generator.generate_for(TestClass1, TestClass2, TestClass3) do
-
+  unresolvable = File.new("example.rb")
   another_object = TestClass1.new("test")
   test_class_one = TestClass1.new({hello: "world", test: another_object, arr_1: [1,2,3,4,5, another_object],
                                    sub_hash: {yes: true, obj: another_object}})
@@ -149,7 +149,8 @@ results_composition = Pretentious::Generator.generate_for(TestClass1, TestClass2
   }
 
   test_class_one.call_block
-
+  test_class_one = TestClass1.new(unresolvable)
+  test_class_one.print_message
 end
 
 results_composition.each_value { |v| puts v}

@@ -18,7 +18,6 @@ Pretentious.spec_for(Fibonacci) do
 end
 
 Pretentious.spec_for(TestClass1, TestClass2, TestClass3, TestClass4) do
-
   another_object = TestClass1.new("test")
   test_class_one = TestClass1.new({hello: "world", test: another_object, arr_1: [1,2,3,4,5, another_object],
                                    sub_hash: {yes: true, obj: another_object}})
@@ -55,3 +54,9 @@ Pretentious.spec_for(Digest::MD5) do
   sample = "This is the digest"
   Digest::MD5.hexdigest(sample)
 end
+
+#Pretentious.spec_for(Pretentious::Deconstructor) do
+#  deconstructor = Pretentious::Deconstructor.new
+#  another_object = TestClass1.new("test")
+#  deconstructor.build_tree(another_object)
+#end

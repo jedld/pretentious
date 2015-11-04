@@ -1,5 +1,14 @@
 class Pretentious::Deconstructor
 
+  class UnResolved
+
+    attr_accessor :target_object
+
+    def initialize(object)
+      @target_object = object
+    end
+  end
+
   class Reference
     attr_accessor :tree
 
@@ -97,7 +106,6 @@ class Pretentious::Deconstructor
 
   #creates a tree on how the object was created
   def build_tree(target_object)
-
     tree = {class: get_test_class(target_object), id: target_object.object_id, composition: []}
     if (target_object.is_a? Array)
       tree[:composition] = deconstruct_array(target_object)
@@ -120,7 +128,13 @@ class Pretentious::Deconstructor
 
         tree[:block] = build_tree(args[:block]) unless args[:block].nil?
       else
-        tree[:composition] = target_object
+        if (self.class.is_primitive?(target_object))
+          tree[:composition] = target_object
+        elsif (target_object.class == File)
+          tree[:composition] << build_tree(target_object.path)
+        else
+          tree[:composition] = UnResolved.new(target_object)
+        end
       end
 
     else
@@ -167,7 +181,7 @@ class Pretentious::Deconstructor
 
   def self.is_primitive?(value)
     value.is_a?(String) || value.is_a?(Fixnum) || value.is_a?(TrueClass) || value.is_a?(FalseClass) ||
-        value.is_a?(NilClass) || value.is_a?(Symbol)
+        value.is_a?(NilClass) || value.is_a?(Symbol) || value.is_a?(Class)
   end
 
   def self.block_param_names(proc)
@@ -345,6 +359,8 @@ class Pretentious::Deconstructor
         output_hash(definition[:value], variable_map, declared_names)
       elsif (definition[:value].is_a? Array)
         output_array(definition[:value], variable_map, declared_names)
+      elsif (definition[:value].is_a? UnResolved)
+        'nil #parameters unresolvable. cannot decompose'
       else
         Pretentious::value_ize(definition[:value], variable_map, declared_names)
       end
