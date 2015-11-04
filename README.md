@@ -1,4 +1,4 @@
-[![Gem Version](https://badge.fury.io/rb/pretentious.svg)](https://badge.fury.io/rb/pretentious)
+[![Gem Version](https://badge.fury.io/rb/pretentious.svg)](https://badge.fury.io/rb/pretentious) [![Circle CI](https://circleci.com/gh/jedld/pretentious/tree/master.svg?style=svg)](https://circleci.com/gh/jedld/pretentious/tree/master)
 
 # Ruby::Pretentious
 
