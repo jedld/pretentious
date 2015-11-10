@@ -42,6 +42,10 @@ class TestClass1
     puts @message
   end
 
+  def invoke_class
+    @message.print_message
+  end
+
   def something_is_wrong
     raise StandardError.new
   end

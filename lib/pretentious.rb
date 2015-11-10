@@ -3,6 +3,18 @@ require "pretentious/rspec_generator"
 require 'binding_of_caller'
 require 'pretentious/deconstructor'
 
+Class.class_eval do
+
+  def _mock(*classes)
+    @classes = classes
+  end
+
+  def _get_mock_classes
+    @classes
+  end
+
+end
+
 module Pretentious
 
   def self.spec_for(*klasses, &block)
@@ -321,32 +333,50 @@ module Pretentious
       newStandInKlass
     end
 
+    def self.replace_class(klass)
+      klass_name_parts = klass.name.split('::')
+      last_part = klass_name_parts.pop
+
+      module_space = Object
+
+      if (klass_name_parts.size > 0)
+        klass_name_parts.each do |part|
+          module_space = module_space.const_get(part)
+        end
+      end
+
+      newStandInKlass = impostor_for module_space, klass
+
+      module_space.send(:remove_const,last_part.to_sym)
+      module_space.const_set("#{last_part}_ddt", klass)
+      module_space.const_set("#{last_part}", newStandInKlass)
+
+      [module_space, klass, last_part, newStandInKlass]
+    end
+
+    def self.restore_class(module_space, klass, last_part)
+      module_space.send(:remove_const,"#{last_part}Impostor".to_sym)
+      module_space.send(:remove_const,"#{last_part}".to_sym)
+      module_space.const_set(last_part, klass)
+      module_space.send(:remove_const,"#{last_part}_ddt".to_sym)
+    end
+
     def self.generate_for(*klasses_or_instances, &block)
       all_results = {}
       klasses = []
+      mock_dict = {}
 
       klasses_or_instances.each { |klass_or_instance|
         klass = klass_or_instance.class == Class ? klass_or_instance : klass_or_instance.class
+        klasses << replace_class(klass)
 
+        mock_klasses = []
 
-        klass_name_parts = klass.name.split('::')
-        last_part = klass_name_parts.pop
+        klass._get_mock_classes.each do |mock_klass|
+          mock_klasses << replace_class(mock_klass)
+        end unless klass._get_mock_classes.nil?
 
-        module_space = Object
-
-        if (klass_name_parts.size > 0)
-          klass_name_parts.each do |part|
-            module_space = module_space.const_get(part)
-          end
-        end
-
-        newStandInKlass = impostor_for module_space, klass
-
-        module_space.send(:remove_const,last_part.to_sym)
-        module_space.const_set("#{last_part}_ddt", klass)
-        module_space.const_set("#{last_part}", newStandInKlass)
-
-        klasses << [module_space, klass, last_part, newStandInKlass]
+        mock_dict[klass] = mock_klasses
       }
 
       watch_new_instances
@@ -357,16 +387,19 @@ module Pretentious
 
       klasses.each { |module_space, klass, last_part, newStandInKlass|
 
-        module_space.send(:remove_const,"#{last_part}Impostor".to_sym)
-        module_space.send(:remove_const,"#{last_part}".to_sym)
-        module_space.const_set(last_part, klass)
-        module_space.send(:remove_const,"#{last_part}_ddt".to_sym)
+        #restore the previous class
+        restore_class module_space, klass, last_part
+
+        mock_dict[klass].each do |_module_space, _klass, _last_part, _newStandInKlass|
+          restore_class _module_space, _klass, _last_part
+        end
 
         test_generator = Pretentious::RspecGenerator.new
         test_generator.begin_spec(klass)
         num = 1
 
         newStandInKlass._instances.each do |instance|
+
           test_generator.generate(instance, num)
           num+=1
         end unless newStandInKlass._instances.nil?
@@ -434,6 +467,7 @@ module Pretentious
           instance._set_init_arguments(*args, &block)
           instance
         end
+
       end
     end
 
