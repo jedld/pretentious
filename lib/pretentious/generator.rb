@@ -166,6 +166,14 @@ module Pretentious
           @_instance.is_a? something
         end
 
+        def instance_variable_get(sym)
+          @_instance.instance_variable_get(sym)
+        end
+
+        def instance_variable_set(sym, val)
+          @_instance.instance_variable_get(sym, val)
+        end
+
         class << self
 
           def replace_procs_with_recorders(args)
