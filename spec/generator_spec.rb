@@ -7,8 +7,34 @@ class TestClass
   end
 
   def method_with_assign=(params2)
-    @params2 = params2
+    @params2 = "#{params2}!"
   end
+end
+
+class DummyGenerator
+
+  def initialize
+    @data = []
+  end
+
+  def begin_spec(test_class)
+    @data << {begin: test_class}
+  end
+
+  def generate(test_instance, instance_count)
+    @data << {instance: test_instance.class.to_s,
+              instance_method_calls: test_instance.method_calls,
+              instance_count: instance_count}
+  end
+
+  def end_spec()
+    @data << :end
+  end
+
+  def output
+    @data
+  end
+
 end
 
 RSpec.describe Pretentious::Generator do
@@ -55,6 +81,35 @@ RSpec.describe Pretentious::Generator do
       instance = @new_class.new
       instance.message("hello")
       expect(instance.instance_variable_get(:@params1)).to eq "hello"
+      instance.method_with_assign="world"
+      expect(instance.instance_variable_get(:@params2)).to eq "world!"
+    end
+  end
+
+  context "Pretentious::Generator#generate_for" do
+    around(:each) do |example|
+      Pretentious::Generator.test_generator= DummyGenerator
+      example.run
+      Pretentious::Generator.test_generator= nil
+    end
+
+    it "generates call artifacts for target class" do
+      Pretentious::Generator.test_generator= DummyGenerator
+
+      call_artifacts = Pretentious::Generator.generate_for(TestClass) do
+        instance = TestClass.new
+        instance.message("hello")
+      end
+
+      expect(call_artifacts).to eq({
+                                       TestClass=>[
+                                           {:begin=>TestClass},
+                                           {:instance=>"TestClassImpostor",
+                                            :instance_method_calls=>[{:method=>:message, :params=>["hello"],
+                                                                      :block=>nil,
+                                                                      :names=>[[:req, :params1]], :result=>"hello"}],
+                                            :instance_count=>1}, :end
+                                       ]})
     end
   end
 end

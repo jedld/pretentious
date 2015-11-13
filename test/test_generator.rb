@@ -32,6 +32,10 @@ class TestClass1
     @block.call(@message)
   end
 
+  def message
+    @message
+  end
+
   def print_message
     puts @message
   end

@@ -23,12 +23,11 @@ RSpec.describe Pretentious::Generator do
     end
 
     it "handles auto mocks" do
-      result = Pretentious::Generator.generate_for(TestClass1._mock(TestClass2)) do
+      Pretentious::Generator.generate_for(TestClass1._mock(TestClass2)) do
         test_class_2 = TestClass2.new("the message")
         test_class_1 = TestClass1.new(test_class_2)
         test_class_1.invoke_class
       end
-      p result
     end
   end
 

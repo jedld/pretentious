@@ -2,6 +2,14 @@ module Pretentious
 
   class Generator
 
+    def self.test_generator=(generator)
+      @test_generator = generator
+    end
+
+    def self.test_generator
+      @test_generator || Pretentious::RspecGenerator
+    end
+
     def self.impostor_for(module_space, klass)
       newStandInKlass = Class.new()
       name = klass.name
@@ -304,24 +312,23 @@ module Pretentious
           restore_class _module_space, _klass, _last_part
         end
 
-        test_generator = Pretentious::RspecGenerator.new
-        test_generator.begin_spec(klass)
+        generator = test_generator.new
+        generator.begin_spec(klass)
         num = 1
 
         newStandInKlass._instances.each do |instance|
-
-          test_generator.generate(instance, num)
+          generator.generate(instance, num)
           num+=1
         end unless newStandInKlass._instances.nil?
 
-        test_generator.end_spec
+        generator.end_spec
 
         result = all_results[klass]
         if result.nil?
           all_results[klass] = []
         end
 
-        all_results[klass] = test_generator.output
+        all_results[klass] = generator.output
 
       } unless klasses.nil?
 
