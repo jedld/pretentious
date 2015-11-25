@@ -19,7 +19,7 @@ any object, to obtain a ruby code on how it was created.
 2.  [Usage](#usage)
 3.  [Handling complex parameters and object constructors](#handling-complex-parameters-and-object-constructors)
 4.  [Capturing Exceptions](#capturing-exceptions)
-5.  [Auto Stubbing](#Auto stubbing)
+5.  [Auto Stubbing](#auto-stubbing)
 6.  [Object Deconstruction Utility](#object-deconstruction-utility)
     1.  [Using the Object deconstructor in rails](#using-the-object-deconstructor-in-rails)
 7.  [Things to do after](#things-to-do-after)
