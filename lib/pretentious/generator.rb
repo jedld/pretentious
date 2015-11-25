@@ -154,13 +154,13 @@ module Pretentious
             end
           end
 
-          def _set_is_mock
-            @_is_mock = true
+          def _set_is_stub
+            @_is_stub = true
           end
 
-          def _is_mock?
-            @_is_mock = @_is_mock || false
-            @_is_mock
+          def _is_stub?
+            @_is_stub = @_is_stub || false
+            @_is_stub
           end
 
           def _add_instances(instance)
@@ -199,7 +199,7 @@ module Pretentious
             klass = _get_standin_class
             caller_context = binding.of_caller(2)
 
-            is_mock = _is_mock?
+            is_stub = _is_stub?
 
             target.instance_exec do
               @_method_calls = @_method_calls || []
@@ -233,7 +233,7 @@ module Pretentious
 
                 begin
 
-                  unless is_mock
+                  unless is_stub
                     current_context = { calls: [] }
                     info_block[:context] = current_context
 
@@ -246,16 +246,22 @@ module Pretentious
                     result = @_instance.send(:method_missing, method_sym, *arguments, &recordedProc)
                   end
 
-                  Thread.current._pop_context unless is_mock
+                  Thread.current._pop_context unless is_stub
 
-                  info_block[:result] = result
+                  # methods that end with = are a special case with return values
+                  if method_sym.to_s.end_with? '='
+                    info_block[:result] = arguments[0]
+                  else
+                    info_block[:result] = result
+                  end
+
                 rescue Exception=>e
                   info_block[:result] = e
                 rescue StandardError=>e
                   info_block[:result] = e
                 end
 
-                if is_mock
+                if is_stub
                   info_block[:class] = test_class
                   Thread.current._all_context.each { |mock_context|
                     mock_context[:calls] << info_block if mock_context
@@ -297,7 +303,7 @@ module Pretentious
       newStandInKlass
     end
 
-    def self.replace_class(klass, mock = false)
+    def self.replace_class(klass, stub = false)
       klass_name_parts = klass.name.split('::')
       last_part = klass_name_parts.pop
 
@@ -310,7 +316,7 @@ module Pretentious
       end
 
       newStandInKlass = impostor_for module_space, klass
-      newStandInKlass._set_is_mock if mock
+      newStandInKlass._set_is_stub if stub
 
       module_space.send(:remove_const,last_part.to_sym)
       module_space.const_set("#{last_part}_ddt", klass)

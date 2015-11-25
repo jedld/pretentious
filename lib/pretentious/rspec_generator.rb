@@ -69,8 +69,10 @@ class Pretentious::RspecGenerator
                        ''
                      end
 
+      if (dependencies.size > 0)
+        buffer(declare_dependencies(dependencies, test_instance.init_let_variables, 3 * @_indentation.length, declarations))
+      end
 
-      buffer(declare_dependencies(dependencies, test_instance.init_let_variables, 3 * @_indentation.length, declarations))
       if (args.size > 0)
         buffer("@fixture = #{test_instance.test_class.name}.new(#{params_generator(args, test_instance.init_let_variables, declarations)})#{block_source}",3)
       else
@@ -136,6 +138,7 @@ class Pretentious::RspecGenerator
     declaration = {}
     #collect all params
     params_collection = []
+    mocks_collection = {}
 
     method_calls.each_key do |k|
       info_blocks_arr = method_calls[k]
@@ -149,12 +152,30 @@ class Pretentious::RspecGenerator
           params_collection << block[:block]
         end
 
+        block[:context][:calls].each do |mock_block|
+          k = "#{mock_block[:class]}_#{mock_block[:method]}"
+
+          if mocks_collection[k].nil?
+            mocks_collection[k] = []
+          end
+
+          mocks_collection[k] << mock_block
+          params_collection << mock_block[:result]
+
+        end if block[:context]
+
+
       end
 
     end
 
+    if (params_collection.size > 0)
+      buffer(declare_dependencies(params_collection, let_variables, 3 * @_indentation.length, declaration))
+    end
 
-    buffer(declare_dependencies(params_collection, let_variables, 3 * @_indentation.length, declaration))
+    if (mocks_collection.keys.size > 0)
+      buffer(generate_rspec_stub(mocks_collection, let_variables, 3 * @_indentation.length, declaration))
+    end
 
     method_calls.each_key do |k|
       info_blocks_arr = method_calls[k]
@@ -176,6 +197,20 @@ class Pretentious::RspecGenerator
 
     end
     buffer("end",2)
+  end
+
+  def generate_rspec_stub(mocks_collection, let_variables, indentation_level , declaration)
+    indentation = ""
+
+    indentation_level.times {
+      indentation << ' '
+    }
+    str = ""
+    mocks_collection.each do |k,values|
+      vals = values.collect { |v| Pretentious::value_ize(v[:result], let_variables, declaration) }
+      str << "#{indentation}allow_any_instance_of(#{values[0][:class].to_s}).to receive(:#{values[0][:method].to_s}).and_return(#{vals.join(', ')})\n"
+    end
+    str
   end
 
   #def generate_specs(context_prefix, fixture, method_calls, let_variables)

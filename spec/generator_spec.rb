@@ -129,7 +129,7 @@ RSpec.describe Pretentious::Generator do
 
       it "generates a stub call structure" do
 
-        call_artifacts = Pretentious::Generator.generate_for(TestClass._mock(TestSubClass)) do
+        call_artifacts = Pretentious::Generator.generate_for(TestClass._stub(TestSubClass)) do
           instance = TestClass.new
           instance.method_with_usage
         end

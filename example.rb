@@ -55,6 +55,26 @@ Pretentious.spec_for(Digest::MD5) do
   Digest::MD5.hexdigest(sample)
 end
 
+Pretentious.spec_for(TestClassForMocks._stub(TestMockSubClass)) do
+  instance = TestClassForMocks.new
+  instance.method_with_assign = "test"
+  instance.method_with_usage
+  instance.method_with_usage2
+
+  instance2 = TestClassForMocks.new
+  instance2.method_with_usage3("a message")
+end
+
+Pretentious.spec_for(TestClassForAutoStub._stub(ClassUsedByTestClass)) do
+  instance = TestClassForAutoStub.new
+  instance.method_that_uses_the_class_to_stub
+end
+
+Pretentious.spec_for(TestClassForAutoStub._stub(ClassUsedByTestClass, AnotherClassUsedByTestClass)) do
+  instance = TestClassForAutoStub.new
+  instance.method_that_uses_the_class_to_stub
+end
+
 #Pretentious.spec_for(Pretentious::Deconstructor) do
 #  deconstructor = Pretentious::Deconstructor.new
 #  another_object = TestClass1.new("test")

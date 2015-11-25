@@ -7,7 +7,7 @@ require 'pretentious/deconstructor'
 
 Class.class_eval do
 
-  def _mock(*classes)
+  def _stub(*classes)
     @classes = classes
     self
   end

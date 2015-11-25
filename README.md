@@ -319,6 +319,46 @@ should generate the following in rspec
   # TestClass1#something_is_wrong when passed  should return StandardError
   expect { @fixture.something_is_wrong }.to raise_error
 ```
+
+## Auto stubbing
+
+Too lazy to generate rspec-mocks stubs? Let the pretentious Gem to it for you.
+
+Simply call the _stub method on a class and pass the classes you want to generate
+stubs for when passing calling spec_for (see below):
+
+```ruby
+Pretentious.spec_for(TestClass._stub(ClassUsedByTestClass)) do
+  instance = TestClass.new
+  instance.method_that_uses_the_class_to_stub
+end
+
+```
+
+should auto generate the stub like this:
+
+```ruby
+it 'should pass current expectations' do
+
+  var_2181613400 = ["Hello Glorious world", "HI THERE!!!!"]
+
+  allow_any_instance_of(ClassUsedByTestClass).to receive(:a_stubbed_method).and_return("Hello Glorious world")
+
+  # TestClass#method_that_uses_the_class_to_stub  should return ["Hello Glorious world", "HI THERE!!!!"]
+  expect( @fixture.method_that_uses_the_class_to_stub ).to eq(["Hello Glorious world", "HI THERE!!!!"])
+
+end
+```
+
+Yes, you can pass in multiple classes to be stubbed:
+
+```ruby
+Pretentious.spec_for(TestClass._stub(ClassUsedByTestClass, AnotherClassUsedByTestClass, ....)) do
+  instance = TestClass.new
+  instance.method_that_uses_the_class_to_stub
+end
+```
+
 ## Object Deconstruction Utility
 
 As Pretentious as the gem is, there are other uses other than generating tests specs. Tools are also available to

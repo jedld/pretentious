@@ -12,7 +12,6 @@ RSpec.describe TestClass2 do
 
     it 'should pass current expectations' do
 
-
       # TestClass2#print_message  should return 
       expect( @fixture.print_message ).to be_nil
 

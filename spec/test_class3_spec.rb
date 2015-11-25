@@ -5,8 +5,8 @@ RSpec.describe TestClass3 do
   context 'Scenario 1' do
     before do
 
-      var_2167280720 = "test"
-      another_object = TestClass1.new(var_2167280720)
+      var_2166230260 = "test"
+      another_object = TestClass1.new(var_2166230260)
       args = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
       test_class_one = TestClass1.new(args)
       args_1 = "This is message 2"
@@ -17,7 +17,6 @@ RSpec.describe TestClass3 do
     end
 
     it 'should pass current expectations' do
-
 
       # TestClass3#show_messages  should return awesome!!!
       expect( @fixture.show_messages ).to eq("awesome!!!")
@@ -28,8 +27,8 @@ RSpec.describe TestClass3 do
   context 'Scenario 2' do
     before do
 
-      var_2167280720 = "test"
-      another_object = TestClass1.new(var_2167280720)
+      var_2166230260 = "test"
+      another_object = TestClass1.new(var_2166230260)
       args = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
       test_class_one = TestClass1.new(args)
       args_1 = "This is message 2"
@@ -40,7 +39,6 @@ RSpec.describe TestClass3 do
     end
 
     it 'should pass current expectations' do
-
 
       # TestClass3#show_messages  should return awesome!!!
       expect( @fixture.show_messages ).to eq("awesome!!!")

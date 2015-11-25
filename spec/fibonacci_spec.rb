@@ -5,7 +5,6 @@ RSpec.describe Fibonacci do
   context 'Scenario 1' do
     before do
 
-
       @fixture = Fibonacci.new
 
     end
@@ -37,7 +36,6 @@ RSpec.describe Fibonacci do
   end
 
     it 'should pass current expectations' do
-
 
       # Fibonacci::say_hello  should return hello
       expect( Fibonacci.say_hello ).to eq("hello")
