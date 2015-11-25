@@ -351,6 +351,12 @@ it 'should pass current expectations' do
 end
 ```
 
+stubs that return different values every call are automatically detected an the appropriate rspec stub return
+is generated (similar to below):
+
+```ruby
+allow_any_instance_of(TestMockSubClass).to receive(:increment_val).and_return(2, 3, 4, 5)
+```
 
 Yes, you can pass in multiple classes to be stubbed:
 
