@@ -9,12 +9,34 @@ Class.class_eval do
 
   def _mock(*classes)
     @classes = classes
+    self
   end
 
   def _get_mock_classes
     @classes
   end
 
+end
+
+Thread.class_eval do
+
+  def _push_context(context)
+    @_context = @_context || []
+    @_context << context
+  end
+
+  def _current_context
+    @_context = @_context || []
+    @_context.last
+  end
+
+  def _all_context
+    @_context = @_context || []
+  end
+
+  def _pop_context
+    @_context.pop
+  end
 end
 
 module Pretentious

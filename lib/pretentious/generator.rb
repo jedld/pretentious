@@ -1,5 +1,4 @@
 module Pretentious
-
   class Generator
 
     def self.test_generator=(generator)
@@ -15,62 +14,25 @@ module Pretentious
       name = klass.name
       module_space.const_set "#{name.split('::').last}Impostor", newStandInKlass
 
-      common_snippet = "
-              @_method_calls = @_method_calls || []
-              @_method_calls_by_method = @_method_calls_by_method || {}
-              @_methods_for_test = @_methods_for_test || []
-              @_let_variables = @_let_variables || {}
-
-              caller_context = binding.of_caller(1)
-              #puts \"local_variables\"
-              v_locals = caller_context.eval('local_variables')
-
-              v_locals.each { |v|
-                variable_value = caller_context.eval(\"\#{v.to_s}\")
-                @_let_variables[variable_value.object_id] = v
-              }
-
-              #{newStandInKlass}.replace_procs_with_recorders(arguments)
-
-              info_block = {}
-              info_block[:method] = method_sym
-              info_block[:params] = arguments
-
-              recordedProc = if (block)
-                          RecordedProc.new(block, true)
-                         else
-                           nil
-                         end
-              info_block[:block] = recordedProc
-
-              info_block[:names] = @_instance.method(method_sym).parameters
-
-              begin
-                if (@_instance.methods.include? method_sym)
-                  result = @_instance.send(method_sym, *arguments, &recordedProc)
-                else
-                  result = @_instance.send(:method_missing, method_sym, *arguments, &recordedProc)
-                end
-                info_block[:result] = result
-              rescue Exception=>e
-                info_block[:result] = e
-              rescue StandardError=>e
-                info_block[:result] = e
-              end
-
-              @_method_calls << info_block
-
-              if (@_method_calls_by_method[method_sym].nil?)
-                @_method_calls_by_method[method_sym] = []
-              end
-
-              @_method_calls_by_method[method_sym] << info_block
-              raise e if (e.kind_of? Exception)
-              result"
-
       newStandInKlass.class_eval("
         def setup_instance(*args, &block)
           @_instance = #{klass.name}_ddt.new(*args, &block)
+        end
+      ")
+
+      newStandInKlass.class_eval("
+        class << self
+          def _get_standin_class
+            #{newStandInKlass}
+          end
+
+          def test_class
+            #{klass.name}
+          end
+
+          def _current_old_class
+            #{klass.name}_ddt
+          end
         end
       ")
 
@@ -192,6 +154,15 @@ module Pretentious
             end
           end
 
+          def _set_is_mock
+            @_is_mock = true
+          end
+
+          def _is_mock?
+            @_is_mock = @_is_mock || false
+            @_is_mock
+          end
+
           def _add_instances(instance)
             @_instances = @_instances || []
             @_instances << instance unless @_instances.include? instance
@@ -223,35 +194,110 @@ module Pretentious
             test_class.instance_methods + methods
           end
 
+          def _call_method(target, method_sym, *arguments, &block)
+
+            klass = _get_standin_class
+            caller_context = binding.of_caller(2)
+
+            is_mock = _is_mock?
+
+            target.instance_exec do
+              @_method_calls = @_method_calls || []
+              @_method_calls_by_method = @_method_calls_by_method || {}
+              @_methods_for_test = @_methods_for_test || []
+              @_let_variables = @_let_variables || {}
+
+
+              #puts \"local_variables\"
+              v_locals = caller_context.eval('local_variables')
+
+              v_locals.each { |v|
+                variable_value = caller_context.eval("#{v.to_s}")
+                  @_let_variables[variable_value.object_id] = v
+                }
+
+                klass.replace_procs_with_recorders(arguments)
+
+                info_block = {}
+                info_block[:method] = method_sym
+                info_block[:params] = arguments
+
+                recordedProc = if (block)
+                            RecordedProc.new(block, true)
+                           else
+                             nil
+                           end
+                info_block[:block] = recordedProc
+
+                info_block[:names] = @_instance.method(method_sym).parameters
+
+                begin
+
+                  unless is_mock
+                    current_context = { calls: [] }
+                    info_block[:context] = current_context
+
+                    Thread.current._push_context(current_context)
+                  end
+
+                  if (@_instance.methods.include? method_sym)
+                    result = @_instance.send(method_sym, *arguments, &recordedProc)
+                  else
+                    result = @_instance.send(:method_missing, method_sym, *arguments, &recordedProc)
+                  end
+
+                  Thread.current._pop_context unless is_mock
+
+                  info_block[:result] = result
+                rescue Exception=>e
+                  info_block[:result] = e
+                rescue StandardError=>e
+                  info_block[:result] = e
+                end
+
+                if is_mock
+                  info_block[:class] = test_class
+                  Thread.current._all_context.each { |mock_context|
+                    mock_context[:calls] << info_block if mock_context
+                  }
+                end
+
+                @_method_calls << info_block
+
+                if (@_method_calls_by_method[method_sym].nil?)
+                  @_method_calls_by_method[method_sym] = []
+                end
+
+                @_method_calls_by_method[method_sym] << info_block
+                raise e if (e.kind_of? Exception)
+                result
+            end
+          end
+
         end
 
       end
 
-      newStandInKlass.class_eval("
+      newStandInKlass.class_exec do
         def method_missing(method_sym, *arguments, &block)
-          #puts \"\#{method_sym} \#{arguments}\"
-                                 #{common_snippet}
+          #puts "#{method_sym} #{arguments}"
+          self.class._call_method(self, method_sym, *arguments, &block)
         end
 
         class << self
-
-            def test_class
-              #{klass.name}
-            end
-
             def method_missing(method_sym, *arguments, &block)
-              #puts \"method \#{method_sym.to_s}\"
+              #puts "method #{method_sym.to_s}"
               _add_instances(self)
-              @_instance = #{klass.name}_ddt
-              #{common_snippet}
+              @_instance = _current_old_class
+              _call_method(self, method_sym, *arguments, &block)
             end
         end
-      ")
+      end
 
       newStandInKlass
     end
 
-    def self.replace_class(klass)
+    def self.replace_class(klass, mock = false)
       klass_name_parts = klass.name.split('::')
       last_part = klass_name_parts.pop
 
@@ -264,6 +310,7 @@ module Pretentious
       end
 
       newStandInKlass = impostor_for module_space, klass
+      newStandInKlass._set_is_mock if mock
 
       module_space.send(:remove_const,last_part.to_sym)
       module_space.const_set("#{last_part}_ddt", klass)
@@ -291,7 +338,7 @@ module Pretentious
         mock_klasses = []
 
         klass._get_mock_classes.each do |mock_klass|
-          mock_klasses << replace_class(mock_klass)
+          mock_klasses << replace_class(mock_klass , true)
         end unless klass._get_mock_classes.nil?
 
         mock_dict[klass] = mock_klasses
