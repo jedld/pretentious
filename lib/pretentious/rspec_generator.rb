@@ -208,6 +208,10 @@ class Pretentious::RspecGenerator
     str = ""
     mocks_collection.each do |k,values|
       vals = values.collect { |v| Pretentious::value_ize(v[:result], let_variables, declaration) }
+
+      #check if all vals are the same and just use one
+      vals = [vals[0]] if vals.uniq.size == 1
+
       str << "#{indentation}allow_any_instance_of(#{values[0][:class].to_s}).to receive(:#{values[0][:method].to_s}).and_return(#{vals.join(', ')})\n"
     end
     str

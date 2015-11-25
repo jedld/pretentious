@@ -153,6 +153,12 @@ class TestClassForMocks
     results
   end
 
+  def method_with_usage4
+    @test_class2.test_method
+    @test_class2.test_method
+    @test_class2.test_method
+  end
+
   def method_with_usage3(message)
     @test_class2.return_hash(message)
   end

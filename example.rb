@@ -60,6 +60,7 @@ Pretentious.spec_for(TestClassForMocks._stub(TestMockSubClass)) do
   instance.method_with_assign = "test"
   instance.method_with_usage
   instance.method_with_usage2
+  instance.method_with_usage4
 
   instance2 = TestClassForMocks.new
   instance2.method_with_usage3("a message")

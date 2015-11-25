@@ -19,10 +19,11 @@ any object, to obtain a ruby code on how it was created.
 2.  [Usage](#usage)
 3.  [Handling complex parameters and object constructors](#handling-complex-parameters-and-object-constructors)
 4.  [Capturing Exceptions](#capturing-exceptions)
-5.  [Object Deconstruction Utility](#object-deconstruction-utility)
+5.  [Auto Stubbing](#Auto stubbing)
+6.  [Object Deconstruction Utility](#object-deconstruction-utility)
     1.  [Using the Object deconstructor in rails](#using-the-object-deconstructor-in-rails)
-6.  [Things to do after](#things-to-do-after)
-7.  [Limitations](#limitations)
+7.  [Things to do after](#things-to-do-after)
+8.  [Limitations](#limitations)
 
 
 ## Installation
@@ -322,7 +323,7 @@ should generate the following in rspec
 
 ## Auto stubbing
 
-Too lazy to generate rspec-mocks stubs? Let the pretentious Gem to it for you.
+Too lazy to generate rspec-mocks stubs? Let the Pretentious gem to it for you.
 
 Simply call the _stub method on a class and pass the classes you want to generate
 stubs for when passing calling spec_for (see below):
@@ -349,6 +350,7 @@ it 'should pass current expectations' do
 
 end
 ```
+
 
 Yes, you can pass in multiple classes to be stubbed:
 
