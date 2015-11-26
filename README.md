@@ -323,7 +323,7 @@ should generate the following in rspec
 
 ## Auto stubbing
 
-Too lazy to generate rspec-mocks stubs? Let the Pretentious gem to it for you.
+Too lazy to generate rspec-mocks stubs? Let the Pretentious gem do it for you.
 
 Simply call the _stub method on a class and pass the classes you want to generate
 stubs for when passing calling spec_for (see below):
