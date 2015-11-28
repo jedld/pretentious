@@ -363,7 +363,7 @@ should generate the following in rspec
 Too lazy to generate rspec-mocks stubs? Let the Pretentious gem do it for you.
 
 Simply call the _stub method on a class and pass the classes you want to generate
-stubs for when passing calling spec_for (see below):
+stubs for when passing calling spec_for or minitest_for (see below):
 
 ```ruby
 Pretentious.spec_for(TestClass._stub(ClassUsedByTestClass)) do
@@ -374,6 +374,7 @@ end
 ```
 
 should auto generate the stub like this:
+
 
 ```ruby
 it 'should pass current expectations' do
@@ -387,6 +388,30 @@ it 'should pass current expectations' do
 
 end
 ```
+
+For minitest it returns something like:
+
+```ruby
+class Scenario2 < TestTestClassForMocks
+  def setup
+    @fixture = TestClassForMocks.new
+  end
+
+  def test_current_expectation
+
+    var_2174209040 = {val: 1, str: "hello world", message: "a message"}
+
+    TestMockSubClass.stub_any_instance(:return_hash, var_2174209040) do
+      #TestClassForMocks#method_with_usage3 when passed message = "a message" should return {:val=>1, :str=>"hello world", :message=>"a message"}
+      assert_equal var_2174209040, @fixture.method_with_usage3("a message")
+
+    end
+
+  end
+end
+```
+
+Note: Stubbing on minitest requires the minitest-stub_any_instance gem.
 
 stubs that return different values every call are automatically detected an the appropriate rspec stub return
 is generated (similar to below):
@@ -403,6 +428,8 @@ Pretentious.spec_for(TestClass._stub(ClassUsedByTestClass, AnotherClassUsedByTes
   instance.method_that_uses_the_class_to_stub
 end
 ```
+
+Note: different return values are only supported on RSpec for now
 
 ## Object Deconstruction Utility
 
