@@ -17,6 +17,7 @@ any object, to obtain a ruby code on how it was created.
 
 1.  [Installation](#installation)
 2.  [Usage](#usage)
+    1.  [Minitest](#minitest)
 3.  [Handling complex parameters and object constructors](#handling-complex-parameters-and-object-constructors)
 4.  [Capturing Exceptions](#capturing-exceptions)
 5.  [Auto Stubbing](#auto-stubbing)
@@ -208,7 +209,43 @@ RSpec.describe Digest::MD5 do
 end
 ```
 
-Only RSpec is supported at this point. But other testing frameworks should be trivial to add support to.
+## Minitest
+
+The minitest test framework is also supported, simply use Pretentious.minitest_for instead
+
+```ruby
+Pretentious.minitest_for(Meme) do
+  meme = Meme.new
+  meme.i_can_has_cheezburger?
+  meme.will_it_blend?
+end
+```
+
+outputs:
+
+```ruby
+require 'test_helper'
+require "minitest/autorun"
+
+class TestMeme < Minitest::Test
+end
+
+class Scenario1 < TestMeme
+  def setup
+    @fixture = Meme.new
+  end
+
+  def test_current_expectation
+
+      # Meme#i_can_has_cheezburger?  should return OHAI!
+    assert_equal "OHAI!", @fixture.i_can_has_cheezburger?
+
+      # Meme#will_it_blend?  should return YES!
+    assert_equal "YES!", @fixture.will_it_blend?
+
+  end
+end
+```
 
 ## Handling complex parameters and object constructors
 
