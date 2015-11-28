@@ -7,16 +7,12 @@ require "readline"
 require 'json'
 require 'fileutils'
 
-$test_framework = :rspec
-$output_folder = 'spec'
-
 # ddtgen example.rb -t rspec -o rspec/
 options = OptionParser.new do |o|
   o.banner =
 "Usage: ddtgen FILENAME [options] # Generates tests using the specified example file\n"
   o.separator ""
   o.separator "options:"
-  o.on('-t','--test-type','test framework to use (default :rspec)') { |b| $test_framework = b.to_sym}
   o.on('-o','--output-dir','folder to place the files in') { |b| $output_folder = b}
   o.parse!
 end
@@ -43,7 +39,7 @@ eval(example_body, binding, filename, 1)
 
 #collect results
 
-FileUtils.mkdir_p $output_folder
+
 
 module DdtUtils
    def self.to_underscore(str)
@@ -52,21 +48,13 @@ module DdtUtils
 end
 
 Pretentious.last_results.each { |klass, result|
-
-  klass_name_parts = klass.name.split('::')
-  last_part = klass_name_parts.pop
-
-  filename = File.join($output_folder,"#{DdtUtils.to_underscore(last_part)}_spec.rb")
+  output_folder = result[:generator].location(output_folder)
+  FileUtils.mkdir_p output_folder
+  result[:generator].helper(output_folder)
+  filename = result[:generator].naming(output_folder, klass)
   File.open(filename, 'w') {
-    |f| f.write(result)
+    |f| f.write(result[:output])
   }
   puts "#{filename}"
 }
 
-filename = File.join($output_folder,"spec_helper.rb")
-unless File.exists?(filename)
-    File.open(filename, 'w') {
-        |f| f.write("#Place your requires here")
-      }
-    puts "#{filename}"
-end

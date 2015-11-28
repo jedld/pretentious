@@ -1,4 +1,4 @@
-class Pretentious::RspecGenerator
+class Pretentious::MinitestGenerator
 
   def initialize(options = {})
     @deconstructor = Pretentious::Deconstructor.new
@@ -27,14 +27,16 @@ class Pretentious::RspecGenerator
   end
 
   def begin_spec(test_class)
-    buffer("require 'spec_helper'")
+    @test_class = test_class
+    buffer("require 'test_helper'")
+    buffer('require "minitest/autorun"')
     whitespace
-    buffer("RSpec.describe #{test_class.name} do")
+    buffer("class Test#{test_class.name} < Minitest::Test")
+    buffer("end")
     whitespace
   end
 
   def end_spec
-    buffer("end")
   end
 
   def output
@@ -47,11 +49,9 @@ class Pretentious::RspecGenerator
       class_method_calls = test_instance.method_calls_by_method
       generate_specs("#{test_instance.test_class.name}::",test_instance.test_class.name, class_method_calls, test_instance.let_variables)
     else
-      buffer("context 'Scenario #{instance_count}' do",1)
+      buffer("class Scenario#{instance_count} < Test#{@test_class.name}",0)
 
-      buffer("before do",2)
-      whitespace
-
+      buffer("def setup",1)
       declarations = {}
       dependencies = []
 
@@ -64,29 +64,28 @@ class Pretentious::RspecGenerator
       end
 
       block_source = if !block.nil? && block.is_a?(Pretentious::RecordedProc)
-                       get_block_source(block, test_instance.init_let_variables, declarations, @_indentation * 3)
+                       get_block_source(block, test_instance.init_let_variables, declarations, @_indentation * 2)
                      else
                        ''
                      end
 
       if (dependencies.size > 0)
-        buffer(declare_dependencies(dependencies, test_instance.init_let_variables, 3 * @_indentation.length, declarations))
+        buffer(declare_dependencies(dependencies, test_instance.init_let_variables, 2 * @_indentation.length, declarations))
       end
 
       if (args.size > 0)
         buffer("@fixture = #{test_instance.test_class.name}.new(#{params_generator(args, test_instance.init_let_variables, declarations)})#{block_source}",3)
       else
-        buffer("@fixture = #{test_instance.test_class.name}.new#{block_source}",3)
+        buffer("@fixture = #{test_instance.test_class.name}.new#{block_source}",2)
       end
-      whitespace
-      buffer("end",2)
+      buffer("end", 1)
       whitespace
 
       method_calls = test_instance.method_calls_by_method
 
       generate_specs("#{test_instance.test_class.name}#","@fixture",method_calls, test_instance.let_variables)
 
-      buffer('end',1)
+      buffer('end',0)
       whitespace
     end
 
@@ -111,29 +110,29 @@ class Pretentious::RspecGenerator
 
   def generate_expectation(fixture, method, let_variables, declarations, params, block, result)
     block_source = if !block.nil? && block.is_a?(Pretentious::RecordedProc)
-                      get_block_source(block, let_variables, declarations, @_indentation * 3)
+                     get_block_source(block, let_variables, declarations, @_indentation * 2)
                    else
                      ''
-    end
+                   end
 
     statement = if params.size > 0
-      "#{fixture}.#{method.to_s}(#{params_generator(params, let_variables, declarations)})#{block_source}"
-    else
-      stmt = []
-      stmt << "#{fixture}.#{method.to_s}"
-      stmt << "#{block_source}" unless block_source.empty?
-      stmt.join(' ')
-    end
+                  "#{fixture}.#{method.to_s}(#{params_generator(params, let_variables, declarations)})#{block_source}"
+                else
+                  stmt = []
+                  stmt << "#{fixture}.#{method.to_s}"
+                  stmt << "#{block_source}" unless block_source.empty?
+                  stmt.join(' ')
+                end
 
     if (result.kind_of? Exception)
-      buffer("expect { #{statement} }.to #{pick_matcher(result)}",3)
+      buffer(pick_matcher(statement, result), 2)
     else
-      buffer("expect( #{statement} ).to #{pick_matcher(result)}",3)
+      buffer(pick_matcher(statement, result), 2)
     end
   end
 
   def generate_specs(context_prefix, fixture, method_calls, let_variables)
-    buffer("it 'should pass current expectations' do",2)
+    buffer("def test_current_expectation",1)
     whitespace
     declaration = {}
     #collect all params
@@ -196,7 +195,7 @@ class Pretentious::RspecGenerator
 
 
     end
-    buffer("end",2)
+    buffer("end", 1)
   end
 
   def generate_rspec_stub(mocks_collection, let_variables, indentation_level , declaration)
@@ -243,17 +242,17 @@ class Pretentious::RspecGenerator
   #  end
   #end
 
-  def pick_matcher(result)
+  def pick_matcher(statement, result)
     if result.is_a? TrueClass
-     'be true'
+      "assert #{statement}"
     elsif result.is_a? FalseClass
-      'be false'
+      "refute #{statement}"
     elsif result.nil?
-      'be_nil'
+      "assert_nil #{Pretentious::value_ize(result, nil, nil)}"
     elsif result.kind_of? Exception
-      'raise_error'
+      "assert_raises(#{result.class.to_s}) { #{statement} }"
     else
-      "eq(#{Pretentious::value_ize(result, nil, nil)})"
+      "assert_equal #{Pretentious::value_ize(result, nil, nil)}, #{statement}"
     end
   end
 
@@ -306,17 +305,17 @@ class Pretentious::RspecGenerator
   end
 
   def self.location(output_folder)
-    output_folder.nil? ? "spec" : File.join(output_folder, "spec" )
+    output_folder.nil? ? "test" : File.join(output_folder, "test")
   end
 
   def self.naming(output_folder, klass)
     klass_name_parts = klass.name.split('::')
     last_part = klass_name_parts.pop
-    File.join(output_folder, "#{DdtUtils.to_underscore(last_part)}_spec.rb")
+    File.join(output_folder, "test_#{DdtUtils.to_underscore(last_part)}.rb")
   end
 
   def self.helper(output_folder)
-    filename = File.join(output_folder,"spec_helper.rb")
+    filename = File.join(output_folder,"test_helper.rb")
     unless File.exists?(filename)
       File.open(filename, 'w') {
           |f| f.write("#Place your requires here")

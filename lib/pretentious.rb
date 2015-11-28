@@ -1,5 +1,6 @@
 require "pretentious/version"
 require "pretentious/rspec_generator"
+require "pretentious/minitest_generator"
 require "pretentious/recorded_proc"
 require "pretentious/generator"
 require 'binding_of_caller'
@@ -21,17 +22,17 @@ end
 Thread.class_eval do
 
   def _push_context(context)
-    @_context = @_context || []
+    @_context ||= []
     @_context << context
   end
 
   def _current_context
-    @_context = @_context || []
+    @_context ||= []
     @_context.last
   end
 
   def _all_context
-    @_context = @_context || []
+    @_context ||= []
   end
 
   def _pop_context
@@ -42,7 +43,14 @@ end
 module Pretentious
 
   def self.spec_for(*klasses, &block)
-    @results = @results || {}
+    @results ||= {}
+    Pretentious::Generator.test_generator = Pretentious::RspecGenerator
+    @results.merge!(Pretentious::Generator.generate_for(*klasses, &block))
+  end
+
+  def self.minitest_for(*klasses, &block)
+    @results ||= {}
+    Pretentious::Generator.test_generator = Pretentious::MinitestGenerator
     @results.merge!(Pretentious::Generator.generate_for(*klasses, &block))
   end
 

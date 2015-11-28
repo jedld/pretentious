@@ -381,7 +381,7 @@ module Pretentious
           all_results[klass] = []
         end
 
-        all_results[klass] = generator.output
+        all_results[klass] = {output: generator.output, generator: generator.class }
 
       } unless klasses.nil?
 

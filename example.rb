@@ -76,8 +76,8 @@ Pretentious.spec_for(TestClassForAutoStub._stub(ClassUsedByTestClass, AnotherCla
   instance.method_that_uses_the_class_to_stub
 end
 
-#Pretentious.spec_for(Pretentious::Deconstructor) do
-#  deconstructor = Pretentious::Deconstructor.new
-#  another_object = TestClass1.new("test")
-#  deconstructor.build_tree(another_object)
-#end
+Pretentious.minitest_for(Meme) do
+  meme = Meme.new
+  meme.i_can_has_cheezburger?
+  meme.will_it_blend?
+end

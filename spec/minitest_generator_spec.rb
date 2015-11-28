@@ -6,7 +6,7 @@ RSpec.describe Pretentious::Generator do
 
     before do
       @fixture = Pretentious::Generator.new
-      Pretentious::Generator.test_generator = Pretentious::RspecGenerator
+      Pretentious::Generator.test_generator = Pretentious::MinitestGenerator
     end
 
     it "classes should have a stub class section" do
@@ -18,9 +18,8 @@ RSpec.describe Pretentious::Generator do
       result = Pretentious::Generator.generate_for(Fibonacci) do
         Fibonacci.say_hello
       end
-      expect(result).to eq({
-        Fibonacci =>{output: "require 'spec_helper'\n\nRSpec.describe Fibonacci do\n\n    it 'should pass current expectations' do\n\n      # Fibonacci::say_hello  should return hello\n      expect( Fibonacci.say_hello ).to eq(\"hello\")\n\n    end\nend\n",
-                     generator: Pretentious::RspecGenerator}})
+      expect(result).to eq({Fibonacci =>{output: "require 'test_helper'\nrequire \"minitest/autorun\"\n\nclass TestFibonacci < Minitest::Test\nend\n\n  def test_current_expectation\n\n      # Fibonacci::say_hello  should return hello\n    assert_equal \"hello\", Fibonacci.say_hello\n\n  end\n",
+        generator: Pretentious::MinitestGenerator }})
     end
 
   end

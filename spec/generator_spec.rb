@@ -113,7 +113,7 @@ RSpec.describe Pretentious::Generator do
         instance.message("hello")
       end
 
-      expect(call_artifacts).to eq({TestClass=>
+      expect(call_artifacts).to eq({TestClass=>{output:
                                         [{:begin=>TestClass},
                                          {:instance=>"TestClassImpostor",
                                           :instance_method_calls=>
@@ -122,7 +122,7 @@ RSpec.describe Pretentious::Generator do
                                                 :block=>nil,
                                                 :names=>[[:req, :params1]],
                                                 :context=>{:calls=>[]}, :result=>"hello"}],
-                                          :instance_count=>1}, :end]})
+                                          :instance_count=>1}, :end], generator: DummyGenerator}})
     end
 
     context "auto mocks generator" do
@@ -134,14 +134,14 @@ RSpec.describe Pretentious::Generator do
           instance.method_with_usage
         end
 
-        expect(call_artifacts).to eq({ TestClass => [{:begin=>TestClass},
+        expect(call_artifacts).to eq({ TestClass => {output: [{:begin=>TestClass},
                                                      {:instance=>"TestClassImpostor",
                                                       :instance_method_calls=>[{:method=>:method_with_usage,
                                                       :params=>[], :block=>nil, :names=>[],
                                                       :context=>{:calls=>[{:method=>:test_method, :params=>[],
                                                       :block=>nil, :names=>[], :result=>"a return string",
                                                       :class=>TestSubClass}]}, :result=>"a return string"}],
-                                                      :instance_count=>1}, :end]})
+                                                      :instance_count=>1}, :end], generator: DummyGenerator}})
       end
     end
   end

@@ -5,8 +5,8 @@ RSpec.describe TestClass3 do
   context 'Scenario 1' do
     before do
 
-      var_2158495560 = "test"
-      another_object = TestClass1.new(var_2158495560)
+      var_2157436060 = "test"
+      another_object = TestClass1.new(var_2157436060)
       args = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
       test_class_one = TestClass1.new(args)
       args_1 = "This is message 2"
@@ -27,8 +27,8 @@ RSpec.describe TestClass3 do
   context 'Scenario 2' do
     before do
 
-      var_2158495560 = "test"
-      another_object = TestClass1.new(var_2158495560)
+      var_2157436060 = "test"
+      another_object = TestClass1.new(var_2157436060)
       args = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
       test_class_one = TestClass1.new(args)
       args_1 = "This is message 2"
