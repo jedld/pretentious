@@ -43,23 +43,24 @@ end
 module Pretentious
 
   def self.spec_for(*klasses, &block)
-    @results ||= {}
+    @spec_results ||= {}
     Pretentious::Generator.test_generator = Pretentious::RspecGenerator
-    @results.merge!(Pretentious::Generator.generate_for(*klasses, &block))
+    @spec_results.merge!(Pretentious::Generator.generate_for(*klasses, &block))
   end
 
   def self.minitest_for(*klasses, &block)
-    @results ||= {}
+    @minitest_results ||= {}
     Pretentious::Generator.test_generator = Pretentious::MinitestGenerator
-    @results.merge!(Pretentious::Generator.generate_for(*klasses, &block))
+    @minitest_results.merge!(Pretentious::Generator.generate_for(*klasses, &block))
   end
 
   def self.clear_results
-    @results = {}
+    @spec_results = {}
+    @minitest_results = {}
   end
 
   def self.last_results
-    @results
+    {spec: @spec_results,  minitest: @minitest_results}
   end
 
   def self.install_watcher

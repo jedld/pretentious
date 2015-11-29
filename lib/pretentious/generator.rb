@@ -420,11 +420,11 @@ module Pretentious
         end
 
         def _deconstruct
-          Pretentious::Deconstructor.new().deconstruct(self)
+          Pretentious::Deconstructor.new().deconstruct([], self)
         end
 
         def _deconstruct_to_ruby(indentation = 0)
-          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, _variable_map, {}, self)
+          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, _variable_map, {}, [], self)
         end
 
       end

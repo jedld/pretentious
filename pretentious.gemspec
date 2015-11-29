@@ -23,4 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "minitest", "~> 5.7"
   spec.add_development_dependency "minitest-stub_any_instance", "~> 1.0"
+  spec.add_development_dependency "awesome_print"
 end

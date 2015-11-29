@@ -57,7 +57,7 @@ class Pretentious::Deconstructor
   def dfs(tree)
     if !tree.is_a? Hash
       value = tree
-      definition = {id: value.object_id, class: tree.class, value: value}
+      definition = {id: value.object_id, class: tree.class, value: value, used_by: []}
       unless (@dependencies.include? value.object_id)
         @dependencies[value.object_id] = definition
         @declaration_order << definition
@@ -66,7 +66,7 @@ class Pretentious::Deconstructor
     else
       ref = []
 
-      definition = {id: tree[:id], class: tree[:class]}
+      definition = {id: tree[:id], class: tree[:class], used_by: []}
 
       if tree[:class] == Hash
         definition[:value] = dfs_hash(tree[:composition], ref)
@@ -99,9 +99,39 @@ class Pretentious::Deconstructor
       unless (@dependencies.include? tree[:id])
         @declaration_order << definition
         @dependencies[tree[:id]] = definition
+
+        ref.each { |r|
+          @dependencies[r][:used_by] ||= []
+          @dependencies[r][:used_by] << definition
+        }
       end
+
       tree[:id]
     end
+  end
+
+  def update_ref_counts(params_arr, method_call)
+    params_arr.each do |p|
+      if (@dependencies.include? p.object_id)
+        @dependencies[p.object_id][:used_by] << method_call
+      end
+    end
+  end
+
+  def inline
+    @dependencies.each { |id, definition|
+      if (definition[:used_by].size == 1)
+        if (self.class.is_primitive?(definition[:value]))
+          ref = definition[:used_by][0]
+          definition[:used_by] = nil
+          references = ref[:ref]
+          if (references)
+            new_ref = references.collect { |c| c == id ? definition : c}
+            ref[:ref] = new_ref
+          end
+        end
+      end
+    }
   end
 
   #creates a tree on how the object was created
@@ -144,7 +174,7 @@ class Pretentious::Deconstructor
   end
 
 
-  def deconstruct(*target_objects)
+  def deconstruct(method_call_collection, *target_objects)
 
     @declaration_order = []
     @dependencies = {}
@@ -154,10 +184,16 @@ class Pretentious::Deconstructor
       dfs(tree)
     }
 
+    method_call_collection.each do |m|
+      update_ref_counts(m[:params], m)
+    end
+
+    inline
+
     {declaration: @declaration_order, dependency: @dependencies}
   end
 
-  def deconstruct_to_ruby(indentation_level = 0, variable_map = {}, declared_names = {}, *target_objects)
+  def deconstruct_to_ruby(indentation_level = 0, variable_map = {}, declared_names = {}, method_call_collection = [], *target_objects)
     output_buffer = ""
     indentation = ""
 
@@ -168,12 +204,13 @@ class Pretentious::Deconstructor
     target_objects.each { |target_object|
       variable_map.merge!(target_object._variable_map) if target_object.methods.include?(:_variable_map) && !target_object._variable_map.nil?
     }
-    declarations, dependencies = deconstruct *target_objects
+    declarations, dependencies = deconstruct method_call_collection, *target_objects
+
     declarations[:declaration].each do |d|
-
-      var_name = Pretentious::Deconstructor.pick_name(variable_map, d[:id], declared_names)
-      output_buffer << "#{indentation}#{var_name} = #{construct(d, variable_map, declared_names, indentation)}\n"
-
+      unless d[:used_by].nil?
+        var_name = Pretentious::Deconstructor.pick_name(variable_map, d[:id], declared_names)
+        output_buffer << "#{indentation}#{var_name} = #{construct(d, variable_map, declared_names, indentation)}\n"
+      end
     end
 
     output_buffer
@@ -272,7 +309,7 @@ class Pretentious::Deconstructor
     object_id_to_declared_names = {}
 
     declared_names.each { |k,v|
-      object_id_to_declared_names[v[:object_id]] = k
+      object_id_to_declared_names[v[:object_id]] = k if v
     } if declared_names
 
     #return immediately if already mapped
@@ -281,7 +318,9 @@ class Pretentious::Deconstructor
     if (!variable_map.nil? && variable_map.include?(object_id))
 
       candidate_name = variable_map[object_id].to_s
-
+      puts ">>>>>>>>>>>>>>>"
+      p declared_names
+      p candidate_name
       if !declared_names.include?(candidate_name)
         var_name = candidate_name
         declared_names[candidate_name] = {count: 1, object_id: object_id}
@@ -370,7 +409,12 @@ class Pretentious::Deconstructor
       params = []
       if (definition[:ref] && definition[:ref].size > 0)
         definition[:ref].each do |v|
-          params << Pretentious::Deconstructor.pick_name(variable_map, v, declared_names)
+          #to inline?
+          if (v.is_a? Hash)
+            params << Pretentious::value_ize(v[:value], variable_map, declared_names)
+          else
+            params << Pretentious::Deconstructor.pick_name(variable_map, v, declared_names)
+          end
         end
         "#{definition[:class]}.new(#{params.join(', ')})"
       else

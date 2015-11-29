@@ -12,7 +12,7 @@ RSpec.describe TestClassForAutoStub do
 
     it 'should pass current expectations' do
 
-      var_2173901020 = ["Hello Glorious world", "HI THERE!!!!"]
+      var_2165870920 = ["Hello Glorious world", "HI THERE!!!!"]
 
       allow_any_instance_of(ClassUsedByTestClass).to receive(:stubbed_method).and_return("Hello Glorious world")
       allow_any_instance_of(AnotherClassUsedByTestClass).to receive(:get_message).and_return("HI THERE!!!!")

@@ -2,13 +2,13 @@ require 'spec_helper'
 
 RSpec.describe Pretentious::Deconstructor do
 
-  context 'Pretentious::Deconstructor#build_tree' do
+  before do
+    @fixture = Pretentious::Deconstructor.new
+  end
 
-    before do
-      @fixture = Pretentious::Deconstructor.new
-    end
+  describe "#build_tree" do
 
-    it 'should decompose an object' do
+    it "should decompose an object" do
 
       message = "test"
       another_object = Pretentious.watch {
@@ -20,6 +20,26 @@ RSpec.describe Pretentious::Deconstructor do
                                                            composition: [{:class=>String, :id=>message.object_id, :composition=>"test"}]})
 
     end
+  end
+
+  describe "#deconstruct" do
+
+    it "should build list of variables to declare" do
+      message = "test"
+      another_object = Pretentious.watch {
+        TestClass1.new(message)
+      }
+
+      decons = @fixture.deconstruct([], another_object)
+      expect( decons ).to eq({declaration: [
+          { id: message.object_id, class: String, :value=>"test"},
+          { id: another_object.object_id, class: TestClass1, :ref=>[message.object_id]}],
+          dependency: {message.object_id=>{id: message.object_id, class: String, value: "test"},
+                       another_object.object_id=>{id: another_object.object_id, class: TestClass1,
+                      ref: [message.object_id]}}
+                             })
+    end
+
   end
 
 end

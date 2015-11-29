@@ -7,13 +7,12 @@ end
 
 class Scenario1 < TestTestClass4
   def setup
-    var_2175164340 = "test"
-    var_2175076740 = Proc.new { 
+    var_2161261920 = Proc.new { 
         "test"
     }
 
 
-    @fixture = TestClass4.new &var_2175076740
+    @fixture = TestClass4.new &var_2161261920
   end
 
   def test_current_expectation

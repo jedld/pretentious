@@ -84,6 +84,10 @@ class TestClass3
     "awesome!!!"
   end
 
+  def change_message(message)
+    "#{message}!"
+  end
+
   def swap_hash(j, &block)
     h = []
     j.each do |k,v|

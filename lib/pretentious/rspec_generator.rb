@@ -71,7 +71,8 @@ class Pretentious::RspecGenerator
                      end
 
       if (dependencies.size > 0)
-        buffer(declare_dependencies(dependencies, test_instance.init_let_variables, 3 * @_indentation.length, declarations))
+        buffer(declare_dependencies(dependencies, test_instance.init_let_variables, 3 * @_indentation.length,
+                                   declarations, []))
       end
 
       if (args.size > 0)
@@ -140,10 +141,12 @@ class Pretentious::RspecGenerator
     #collect all params
     params_collection = []
     mocks_collection = {}
+    method_call_collection = []
 
     method_calls.each_key do |k|
       info_blocks_arr = method_calls[k]
       info_blocks_arr.each do |block|
+        method_call_collection << block
         params_collection = params_collection | block[:params]
         if (!Pretentious::Deconstructor.is_primitive?(block[:result]) && !block[:result].kind_of?(Exception))
           params_collection << block[:result]
@@ -171,7 +174,7 @@ class Pretentious::RspecGenerator
     end
 
     if (params_collection.size > 0)
-      buffer(declare_dependencies(params_collection, let_variables, 3 * @_indentation.length, declaration))
+      buffer(declare_dependencies(params_collection, let_variables, 3 * @_indentation.length, declaration, []))
     end
 
     if (mocks_collection.keys.size > 0)
@@ -282,11 +285,11 @@ class Pretentious::RspecGenerator
     params.join(" ,")
   end
 
-  def declare_dependencies(args, variable_map, level, declarations)
+  def declare_dependencies(args, variable_map, level, declarations, method_call_collection)
     deconstructor = Pretentious::Deconstructor.new
 
     args = remove_primitives(args, variable_map)
-    deconstructor.deconstruct_to_ruby(level, variable_map, declarations, *args)
+    deconstructor.deconstruct_to_ruby(level, variable_map, declarations, method_call_collection, *args)
   end
 
   def remove_primitives(args, let_lookup)

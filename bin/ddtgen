@@ -47,14 +47,18 @@ module DdtUtils
    end
 end
 
-Pretentious.last_results.each { |klass, result|
-  output_folder = result[:generator].location(output_folder)
-  FileUtils.mkdir_p output_folder
-  result[:generator].helper(output_folder)
-  filename = result[:generator].naming(output_folder, klass)
-  File.open(filename, 'w') {
-    |f| f.write(result[:output])
+
+Pretentious.last_results.each { |g, result_per_generator|
+  puts "#{g}:"
+  result_per_generator.each { |klass, result|
+    output_folder = result[:generator].location(output_folder)
+    FileUtils.mkdir_p output_folder
+    result[:generator].helper(output_folder)
+    filename = result[:generator].naming(output_folder, klass)
+    File.open(filename, 'w') {
+        |f| f.write(result[:output])
+    }
+    puts "#{filename}"
   }
-  puts "#{filename}"
 }
 

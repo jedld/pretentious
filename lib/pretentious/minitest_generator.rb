@@ -310,7 +310,7 @@ class Pretentious::MinitestGenerator
     deconstructor = Pretentious::Deconstructor.new
 
     args = remove_primitives(args, variable_map)
-    deconstructor.deconstruct_to_ruby(level * @_indentation.length, variable_map, declarations, *args)
+    deconstructor.deconstruct_to_ruby(level * @_indentation.length, variable_map, declarations, [], *args)
   end
 
   def remove_primitives(args, let_lookup)
