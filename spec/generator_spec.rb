@@ -211,8 +211,6 @@ RSpec.describe Pretentious::Generator do
         class_to_test.show_messages
         class_to_test.change_message(message)
       end
-
-      ap call_artifacts
     end
 
   end
