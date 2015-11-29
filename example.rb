@@ -22,7 +22,7 @@ end
     another_object = TestClass1.new("test")
     test_class_one = TestClass1.new({hello: "world", test: another_object, arr_1: [1,2,3,4,5, another_object],
                                      sub_hash: {yes: true, obj: another_object}})
-    test_class_two = TestClass2.new("This is message 2")
+    test_class_two = TestClass2.new("This is message 2", nil)
 
     class_to_test = TestClass3.new(test_class_one, test_class_two)
     class_to_test.show_messages
@@ -41,6 +41,12 @@ end
     test_class_one.call_block {
       class_to_test4.message
     }
+
+    message3 = "This is message 3"
+    t = TestClass2.new(message3, nil)
+    test_class_two = TestClass2.new(t, message3)
+    test_class_two.test(message3)
+
 
     begin
       test_class_one.something_is_wrong

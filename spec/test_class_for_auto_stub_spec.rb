@@ -5,14 +5,11 @@ RSpec.describe TestClassForAutoStub do
 
   context 'Scenario 1' do
     before do
-
       @fixture = TestClassForAutoStub.new
-
     end
 
     it 'should pass current expectations' do
-
-      var_2165870920 = ["Hello Glorious world", "HI THERE!!!!"]
+      var_2173998860 = ["Hello Glorious world", "HI THERE!!!!"]
 
       allow_any_instance_of(ClassUsedByTestClass).to receive(:stubbed_method).and_return("Hello Glorious world")
       allow_any_instance_of(AnotherClassUsedByTestClass).to receive(:get_message).and_return("HI THERE!!!!")

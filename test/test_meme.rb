@@ -5,13 +5,12 @@ require "minitest/autorun"
 class TestMeme < Minitest::Test
 end
 
-class Scenario1 < TestMeme
+class MemeScenario1 < TestMeme
   def setup
     @fixture = Meme.new
   end
 
   def test_current_expectation
-
     #Meme#i_can_has_cheezburger?  should return OHAI!
     assert_equal "OHAI!", @fixture.i_can_has_cheezburger?
 

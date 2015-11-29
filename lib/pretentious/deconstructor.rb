@@ -66,7 +66,7 @@ class Pretentious::Deconstructor
     else
       ref = []
 
-      definition = {id: tree[:id], class: tree[:class], used_by: []}
+      definition = {id: tree[:id], class: tree[:class], params_types: tree[:params_types], used_by: []}
 
       if tree[:class] == Hash
         definition[:value] = dfs_hash(tree[:composition], ref)
@@ -101,7 +101,6 @@ class Pretentious::Deconstructor
         @dependencies[tree[:id]] = definition
 
         ref.each { |r|
-          @dependencies[r][:used_by] ||= []
           @dependencies[r][:used_by] << definition
         }
       end
@@ -121,15 +120,16 @@ class Pretentious::Deconstructor
   def inline
     @dependencies.each { |id, definition|
       if (definition[:used_by].size == 1)
-        if (self.class.is_primitive?(definition[:value]))
+        if (definition.include?(:value) && self.class.is_primitive?(definition[:value]))
           ref = definition[:used_by][0]
-          definition[:used_by] = nil
+          definition[:used_by] = :inline
           references = ref[:ref]
           if (references)
             new_ref = references.collect { |c| c == id ? definition : c}
             ref[:ref] = new_ref
           end
         end
+
       end
     }
   end
@@ -149,15 +149,15 @@ class Pretentious::Deconstructor
       tree[:block_params] = self.class.block_param_names(target_object)
     elsif target_object.methods.include? :_get_init_arguments
       args = target_object._get_init_arguments
-
       unless args.nil?
-
+        tree[:params_types] = args[:params_types]
         args[:params].each { |p|
           tree[:composition] << build_tree(p)
         }
 
         tree[:block] = build_tree(args[:block]) unless args[:block].nil?
       else
+
         if (self.class.is_primitive?(target_object))
           tree[:composition] = target_object
         elsif (target_object.class == File)
@@ -207,7 +207,7 @@ class Pretentious::Deconstructor
     declarations, dependencies = deconstruct method_call_collection, *target_objects
 
     declarations[:declaration].each do |d|
-      unless d[:used_by].nil?
+      unless d[:used_by] == :inline
         var_name = Pretentious::Deconstructor.pick_name(variable_map, d[:id], declared_names)
         output_buffer << "#{indentation}#{var_name} = #{construct(d, variable_map, declared_names, indentation)}\n"
       end
@@ -318,9 +318,6 @@ class Pretentious::Deconstructor
     if (!variable_map.nil? && variable_map.include?(object_id))
 
       candidate_name = variable_map[object_id].to_s
-      puts ">>>>>>>>>>>>>>>"
-      p declared_names
-      p candidate_name
       if !declared_names.include?(candidate_name)
         var_name = candidate_name
         declared_names[candidate_name] = {count: 1, object_id: object_id}
@@ -408,12 +405,26 @@ class Pretentious::Deconstructor
     else
       params = []
       if (definition[:ref] && definition[:ref].size > 0)
-        definition[:ref].each do |v|
+
+        i = 0
+        params_types = definition[:params_types]
+        definition[:ref].each_with_index do |v, index|
+
+          type = :param
+          if (params_types)
+            type = params_types[index][0]
+            i+=1
+          end
+
           #to inline?
           if (v.is_a? Hash)
             params << Pretentious::value_ize(v[:value], variable_map, declared_names)
           else
-            params << Pretentious::Deconstructor.pick_name(variable_map, v, declared_names)
+            if (type == :block)
+              params << "&#{Pretentious::Deconstructor.pick_name(variable_map, v, declared_names)}"
+            else
+              params << Pretentious::Deconstructor.pick_name(variable_map, v, declared_names)
+            end
           end
         end
         "#{definition[:class]}.new(#{params.join(', ')})"

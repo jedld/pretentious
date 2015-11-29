@@ -47,7 +47,7 @@ end
 
 
 class TestClass2
-  def initialize(message)
+  def initialize(message, message2)
     @message = {message: message}
   end
 

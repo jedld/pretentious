@@ -5,18 +5,44 @@ require "minitest/autorun"
 class TestTestClass2 < Minitest::Test
 end
 
-class Scenario1 < TestTestClass2
+class TestClass2Scenario1 < TestTestClass2
   def setup
-    @fixture = TestClass2.new("This is message 2")
+    @fixture = TestClass2.new("This is message 2", nil)
+  end
+
+  def test_current_expectation
+    #TestClass2#print_message  should return 
+    assert_nil @fixture.print_message
+
+    #TestClass2#print_message  should return 
+    assert_nil @fixture.print_message
+
+
+  end
+end
+
+class TestClass2Scenario2 < TestTestClass2
+  def setup
+    @fixture = TestClass2.new("This is message 3", nil)
   end
 
   def test_current_expectation
 
-    #TestClass2#print_message  should return 
-    assert_nil @fixture.print_message
+  end
+end
 
-    #TestClass2#print_message  should return 
-    assert_nil @fixture.print_message
+class TestClass2Scenario3 < TestTestClass2
+  def setup
+    message2 = "This is message 3"
+    message = TestClass2.new(message2, nil)
+    @fixture = TestClass2.new(message, message2)
+  end
+
+  def test_current_expectation
+    message3 = "This is message 3"
+
+    #TestClass2#test when passed object = "This is message 3" should return This is message 3
+    assert_equal "This is message 3", @fixture.test(message3)
 
 
   end

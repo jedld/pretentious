@@ -73,8 +73,10 @@ class DummyGenerator2
     end
 
     deconstruct =  deconstructor.deconstruct(test_instance.method_calls, *deconstruct_targets)
+    deconstruct[:declaration].each do |d|
+      @data << d
+    end
 
-    @data << {deconstruct: deconstruct}
     test_instance.method_calls.each do |method_calls|
       @data << method_calls
     end
@@ -203,16 +205,14 @@ RSpec.describe Pretentious::Generator do
         another_object = TestClass1.new(message)
         test_class_one = TestClass1.new({hello: "world", test: another_object, arr_1: [1,2,3,4,5, another_object],
                                          sub_hash: {yes: true, obj: another_object}})
-        test_class_two = TestClass2.new("This is message 2")
+        test_class_two = TestClass2.new("This is message 2", message)
 
         class_to_test = TestClass3.new(test_class_one, test_class_two)
         class_to_test.show_messages
         class_to_test.change_message(message)
       end
 
-      puts ">>>>>>>>>>>>>>>>>>>>"
       ap call_artifacts
-      puts ">>>>>>>>>>>>>>>>>>>>"
     end
 
   end

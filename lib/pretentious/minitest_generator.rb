@@ -1,4 +1,4 @@
-class Pretentious::MinitestGenerator
+class Pretentious::MinitestGenerator < Pretentious::GeneratorBase
 
   def initialize(options = {})
     @deconstructor = Pretentious::Deconstructor.new
@@ -16,10 +16,6 @@ class Pretentious::MinitestGenerator
       buffer << @_indentation
     end
     buffer
-  end
-
-  def buffer(line, level = 0)
-    @output_buffer << "#{indentation(level)}#{line}\n" if !line.nil? && line.strip != ''
   end
 
   def whitespace(level = 0)
@@ -50,35 +46,10 @@ class Pretentious::MinitestGenerator
       class_method_calls = test_instance.method_calls_by_method
       generate_specs("#{test_instance.test_class.name}::",test_instance.test_class.name, class_method_calls, test_instance.let_variables)
     else
-      buffer("class Scenario#{instance_count} < Test#{@test_class.name}",0)
+      buffer("class #{test_instance.test_class.name}Scenario#{instance_count} < Test#{@test_class.name}",0)
 
       buffer("def setup",1)
-      declarations = {}
-      dependencies = []
-
-      args = test_instance._init_arguments[:params]
-      block = test_instance._init_arguments[:block]
-      dependencies = dependencies | args
-
-      unless block.nil?
-        dependencies << block
-      end
-
-      block_source = if !block.nil? && block.is_a?(Pretentious::RecordedProc)
-                       get_block_source(block, test_instance.init_let_variables, declarations, @_indentation.length * 2)
-                     else
-                       ''
-                     end
-
-      if (dependencies.size > 0)
-        buffer(declare_dependencies(dependencies, test_instance.init_let_variables, 2, declarations))
-      end
-
-      if (args.size > 0)
-        buffer("@fixture = #{test_instance.test_class.name}.new(#{params_generator(args, test_instance.init_let_variables, declarations)})#{block_source}",2)
-      else
-        buffer("@fixture = #{test_instance.test_class.name}.new#{block_source}",2)
-      end
+      buffer_inline(test_instance._deconstruct_to_ruby('@fixture', 2 * @_indentation.length))
       buffer("end", 1)
       whitespace
 
@@ -137,7 +108,6 @@ class Pretentious::MinitestGenerator
 
   def generate_specs(context_prefix, fixture, method_calls, let_variables)
     buffer("def test_current_expectation",1)
-    whitespace
     declaration = {}
     #collect all params
     params_collection = []

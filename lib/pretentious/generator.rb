@@ -40,11 +40,12 @@ module Pretentious
 
         def initialize(*args, &block)
 
-          @_instance_init = {params: [], block: nil}
+          @_instance_init = {object_id: self.object_id, params: [], block: nil}
 
           self.class.replace_procs_with_recorders(args)
 
           @_instance_init[:params] = args
+
 
           recordedProc = if (block)
                            RecordedProc.new(block, true)
@@ -55,7 +56,9 @@ module Pretentious
           @_instance_init[:block] = recordedProc
 
           setup_instance(*args, &recordedProc)
-
+          param_types = @_instance.method(:initialize).parameters
+          puts "#{@_instance.class.name} params -> #{param_types.inspect}"
+          @_instance_init[:params_types] = param_types
 
           @_method_calls = []
           @_method_calls_by_method = {}
@@ -71,6 +74,10 @@ module Pretentious
           v_locals.each { |v|
             variable_value = caller_context.eval("#{v.to_s}")
             @_init_let_variables[variable_value.object_id] = v
+          }
+
+          args.each_with_index { |a, index|
+            @_init_let_variables[a.object_id] = param_types[index][1].to_s if param_types.size == 2
           }
 
           self.class._add_instances(self)
@@ -207,8 +214,6 @@ module Pretentious
               @_methods_for_test = @_methods_for_test || []
               @_let_variables = @_let_variables || {}
 
-
-              #puts \"local_variables\"
               v_locals = caller_context.eval('local_variables')
 
               v_locals.each { |v|
@@ -402,15 +407,18 @@ module Pretentious
           end
           @_variable_names= {}
 
-          index = 0
-          params = method(:initialize).parameters
+          params = if (self.respond_to? :test_class )
+                      test_class.instance_method(:initialize).parameters
+                    else
+                      method(:initialize).parameters
+                   end
+          @_init_arguments[:params_types] = params
 
-          args.each do |arg|
+          args.each_with_index do |arg, index|
             p = params[index]
             if p.size > 1
               @_variable_names[arg.object_id] = p[1].to_s
             end unless p.nil?
-            index+=1
           end unless args.nil?
 
         end
@@ -423,8 +431,8 @@ module Pretentious
           Pretentious::Deconstructor.new().deconstruct([], self)
         end
 
-        def _deconstruct_to_ruby(indentation = 0)
-          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, _variable_map, {}, [], self)
+        def _deconstruct_to_ruby(var_name = nil, indentation = 0)
+          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, _variable_map.merge({self.object_id => var_name}), {}, [], self)
         end
 
       end

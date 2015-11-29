@@ -62,12 +62,16 @@ end
 
 
 class TestClass2
-  def initialize(message)
+  def initialize(message, message2)
     @message = {message: message}
   end
 
   def print_message
     puts @message[:message]
+  end
+
+  def test(object)
+    object
   end
 end
 

@@ -1,4 +1,5 @@
 require "pretentious/version"
+require "pretentious/generator_base"
 require "pretentious/rspec_generator"
 require "pretentious/minitest_generator"
 require "pretentious/recorded_proc"

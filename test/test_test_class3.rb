@@ -5,18 +5,16 @@ require "minitest/autorun"
 class TestTestClass3 < Minitest::Test
 end
 
-class Scenario1 < TestTestClass3
+class TestClass3Scenario1 < TestTestClass3
   def setup
-    another_object = TestClass1.new("test")
-    args = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
-    test_class_one = TestClass1.new(args)
-    test_class_two = TestClass2.new("This is message 2")
-
-    @fixture = TestClass3.new(test_class_one, test_class_two)
+    var_2167808880 = TestClass1.new("test")
+    var_2167802520 = {hello: "world", test: var_2167808880, arr_1: [1, 2, 3, 4, 5, var_2167808880], sub_hash: {yes: true, obj: var_2167808880}}
+    testclass1 = TestClass1.new(var_2167802520)
+    testclass2 = TestClass2.new("This is message 2", nil)
+    @fixture = TestClass3.new(testclass1, testclass2)
   end
 
   def test_current_expectation
-
     #TestClass3#show_messages  should return awesome!!!
     assert_equal "awesome!!!", @fixture.show_messages
 
@@ -24,18 +22,16 @@ class Scenario1 < TestTestClass3
   end
 end
 
-class Scenario2 < TestTestClass3
+class TestClass3Scenario2 < TestTestClass3
   def setup
-    another_object = TestClass1.new("test")
-    args = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
-    test_class_one = TestClass1.new(args)
-    test_class_two = TestClass2.new("This is message 2")
-
-    @fixture = TestClass3.new(test_class_one, test_class_two)
+    var_2167808880 = TestClass1.new("test")
+    var_2167802520 = {hello: "world", test: var_2167808880, arr_1: [1, 2, 3, 4, 5, var_2167808880], sub_hash: {yes: true, obj: var_2167808880}}
+    testclass1 = TestClass1.new(var_2167802520)
+    testclass2 = TestClass2.new("This is message 2", nil)
+    @fixture = TestClass3.new(testclass1, testclass2)
   end
 
   def test_current_expectation
-
     #TestClass3#show_messages  should return awesome!!!
     assert_equal "awesome!!!", @fixture.show_messages
 

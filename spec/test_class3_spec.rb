@@ -5,18 +5,14 @@ RSpec.describe TestClass3 do
 
   context 'Scenario 1' do
     before do
-
-      another_object = TestClass1.new("test")
-      args = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
-      test_class_one = TestClass1.new(args)
-      test_class_two = TestClass2.new("This is message 2")
-
-      @fixture = TestClass3.new(test_class_one, test_class_two)
-
+      var_2168149380 = TestClass1.new("test")
+      var_2168135220 = {hello: "world", test: var_2168149380, arr_1: [1, 2, 3, 4, 5, var_2168149380], sub_hash: {yes: true, obj: var_2168149380}}
+      testclass1 = TestClass1.new(var_2168135220)
+      testclass2 = TestClass2.new("This is message 2", nil)
+      @fixture = TestClass3.new(testclass1, testclass2)
     end
 
     it 'should pass current expectations' do
-
       # TestClass3#show_messages  should return awesome!!!
       expect( @fixture.show_messages ).to eq("awesome!!!")
 
@@ -25,18 +21,14 @@ RSpec.describe TestClass3 do
 
   context 'Scenario 2' do
     before do
-
-      another_object = TestClass1.new("test")
-      args = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
-      test_class_one = TestClass1.new(args)
-      test_class_two = TestClass2.new("This is message 2")
-
-      @fixture = TestClass3.new(test_class_one, test_class_two)
-
+      var_2168149380 = TestClass1.new("test")
+      var_2168135220 = {hello: "world", test: var_2168149380, arr_1: [1, 2, 3, 4, 5, var_2168149380], sub_hash: {yes: true, obj: var_2168149380}}
+      testclass1 = TestClass1.new(var_2168135220)
+      testclass2 = TestClass2.new("This is message 2", nil)
+      @fixture = TestClass3.new(testclass1, testclass2)
     end
 
     it 'should pass current expectations' do
-
       # TestClass3#show_messages  should return awesome!!!
       expect( @fixture.show_messages ).to eq("awesome!!!")
 
