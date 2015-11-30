@@ -11,7 +11,7 @@ class TestClassForMocksScenario1 < TestTestClassForMocks
   end
 
   def test_current_expectation
-    var_2165696380 = [2, 3, 4, 5]
+    var_2185430880 = [2, 3, 4, 5]
 
     TestMockSubClass.stub_any_instance(:test_method, "a return string") do
       TestMockSubClass.stub_any_instance(:increment_val, 2) do
@@ -39,11 +39,11 @@ class TestClassForMocksScenario2 < TestTestClassForMocks
   end
 
   def test_current_expectation
-    var_2165567200 = {val: 1, str: "hello world", message: "a message"}
+    var_2185285940 = {val: 1, str: "hello world", message: "a message"}
 
-    TestMockSubClass.stub_any_instance(:return_hash, var_2165567200) do
+    TestMockSubClass.stub_any_instance(:return_hash, var_2185285940) do
       #TestClassForMocks#method_with_usage3 when passed message = "a message" should return {:val=>1, :str=>"hello world", :message=>"a message"}
-      assert_equal var_2165567200, @fixture.method_with_usage3("a message")
+      assert_equal var_2185285940, @fixture.method_with_usage3("a message")
 
     end
 

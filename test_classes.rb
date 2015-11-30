@@ -122,6 +122,14 @@ class TestClass4
 
 end
 
+class TestClass5
+
+  def test_method
+    fibonacci = Fibonacci.new
+    fibonacci.fib(5)
+  end
+end
+
 class TestMockSubClass
 
   def initialize

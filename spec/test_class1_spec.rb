@@ -17,20 +17,20 @@ RSpec.describe TestClass1 do
 
   context 'Scenario 2' do
     before do
-      var_2167261360 = TestClass1.new("test")
-      message = {hello: "world", test: var_2167261360, arr_1: [1, 2, 3, 4, 5, var_2167261360], sub_hash: {yes: true, obj: var_2167261360}}
+      var_2187209700 = TestClass1.new("test")
+      message = {hello: "world", test: var_2187209700, arr_1: [1, 2, 3, 4, 5, var_2187209700], sub_hash: {yes: true, obj: var_2187209700}}
       @fixture = TestClass1.new(message)
     end
 
     it 'should pass current expectations' do
       another_object = TestClass1.new("test")
-      var_2167245200 = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
-      var_2167127140 = Proc.new { |message|
-            var_2167245200
+      var_2187229000 = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
+      var_2186921900 = Proc.new { |message|
+            var_2187229000
       }
 
       e = nil
-      var_2167121820 = Proc.new { 
+      var_2187203460 = Proc.new { 
             # Variable return values ... can't figure out what goes in here...
       }
 
@@ -41,11 +41,11 @@ RSpec.describe TestClass1 do
       # TestClass1#print_message  should return 
       expect( @fixture.print_message ).to be_nil
 
-      # TestClass1#set_block  should return #<Pretentious::RecordedProc:0x00000102575140@example.rb:73>
-      expect( @fixture.set_block  &var_2167127140 ).to eq(var_2167127140)
+      # TestClass1#set_block  should return #<Pretentious::RecordedProc:0x00000104bc2910@example.rb:73>
+      expect( @fixture.set_block  &var_2186921900 ).to eq(var_2186921900)
 
-      # TestClass1#call_block  should return {:hello=>"world", :test=>#<TestClass1:0x000001025b3f30 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2167261020=>"message"}>, :arr_1=>[1, 2, 3, 4, 5, #<TestClass1:0x000001025b3f30 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2167261020=>"message"}>], :sub_hash=>{:yes=>true, :obj=>#<TestClass1:0x000001025b3f30 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2167261020=>"message"}>}}
-      expect( @fixture.call_block  &var_2167121820 ).to eq(var_2167245200)
+      # TestClass1#call_block  should return {:hello=>"world", :test=>#<TestClass1:0x00000104bc56b0 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2187209740=>"message"}>, :arr_1=>[1, 2, 3, 4, 5, #<TestClass1:0x00000104bc56b0 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2187209740=>"message"}>], :sub_hash=>{:yes=>true, :obj=>#<TestClass1:0x00000104bc56b0 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2187209740=>"message"}>}}
+      expect( @fixture.call_block  &var_2187203460 ).to eq(var_2187229000)
 
       # TestClass1#something_is_wrong  should return StandardError
       expect { @fixture.something_is_wrong }.to raise_error

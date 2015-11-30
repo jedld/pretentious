@@ -6,6 +6,7 @@ require "pretentious/recorded_proc"
 require "pretentious/generator"
 require 'binding_of_caller'
 require 'pretentious/deconstructor'
+require 'pretentious/trigger'
 
 Class.class_eval do
 
@@ -42,6 +43,13 @@ Thread.class_eval do
 end
 
 module Pretentious
+
+  module DdtUtils
+    def self.to_underscore(str)
+      str.gsub(/(.)([A-Z])/,'\1_\2').downcase
+    end
+  end
+
 
   def self.spec_for(*klasses, &block)
     @spec_results ||= {}
@@ -95,5 +103,7 @@ module Pretentious
     result
   end
 
-
+  def self.on(target_class)
+    Pretentious::Trigger.new(target_class)
+  end
 end

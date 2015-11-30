@@ -12,6 +12,10 @@ module Pretentious
     def self.impostor_for(module_space, klass)
       newStandInKlass = Class.new()
       name = klass.name
+
+      #return if already an impostor
+      return klass if (klass.respond_to?(:test_class))
+
       module_space.const_set "#{name.split('::').last}Impostor", newStandInKlass
 
       newStandInKlass.class_eval("
@@ -449,29 +453,33 @@ module Pretentious
 
       end
 
-      Class.class_eval do
-        alias_method :_ddt_old_new, :new
+      #make sure it is set only once
+      if (!Class.instance_methods.include?(:_ddt_old_new))
+        Class.class_eval do
+          alias_method :_ddt_old_new, :new
 
-        def new(*args, &block)
-          instance = _ddt_old_new(*args, &block)
-          instance._set_init_arguments(*args, &block)
-          instance
+          def new(*args, &block)
+            instance = _ddt_old_new(*args, &block)
+            instance._set_init_arguments(*args, &block)
+            instance
+          end
+
         end
-
       end
+
     end
 
     def self.clean_watches
-      Class.class_eval do
-        remove_method :new
-        alias_method :new, :_ddt_old_new
-      end
+      unwatch_new_instances
     end
 
     def self.unwatch_new_instances
-      Class.class_eval do
-        remove_method :new
-        alias_method :new, :_ddt_old_new
+      if (Class.respond_to?(:_ddt_old_new))
+        Class.class_eval do
+          remove_method :new
+          alias_method :new, :_ddt_old_new
+          remove_method :_ddt_old_new
+        end
       end
     end
 

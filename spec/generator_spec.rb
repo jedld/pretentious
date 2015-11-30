@@ -198,19 +198,48 @@ RSpec.describe Pretentious::Generator do
       Pretentious::Generator.test_generator= nil
     end
 
-    it "removes unused variables" do
-
-      call_artifacts = Pretentious::Generator.generate_for(TestClass3) do
+    it "inlines strings when possible" do
+      message = nil
+      object = nil
+      call_artifacts = Pretentious::Generator.generate_for(TestClass1) do
         message = "test"
-        another_object = TestClass1.new(message)
-        test_class_one = TestClass1.new({hello: "world", test: another_object, arr_1: [1,2,3,4,5, another_object],
-                                         sub_hash: {yes: true, obj: another_object}})
-        test_class_two = TestClass2.new("This is message 2", message)
-
-        class_to_test = TestClass3.new(test_class_one, test_class_two)
-        class_to_test.show_messages
-        class_to_test.change_message(message)
+        object = TestClass1.new(message)
+        object.message
       end
+
+      expect(call_artifacts[TestClass1]).to eq({output: [
+                                       {begin: TestClass1},
+                                       {
+                                         :generate => "TestClass1Impostor",
+                                         :instance_count => 1
+                                       },
+                                       {
+                                         :id => message.object_id,
+                                         :class => String,
+                                         :value => "test",
+                                         :used_by => :inline
+                                       },
+                                      {
+                                               :id => object.object_id,
+                                               :class => TestClass1,
+                                               :params_types => [[:req, :message]],
+                                               :used_by => [],
+                                               :ref => [ {id: message.object_id, class: String, value: "test", used_by: :inline}]
+
+                                       },
+                                      {
+                                              :method => :message,
+                                              :params => [],
+                                              :block => nil,
+                                              :names => [],
+                                              :context => {
+                                                  :calls => []
+                                              },
+                                              :result => "test"
+                                      },
+                                     :generate_end, :end],
+                                     generator: DummyGenerator2})
+
     end
 
   end

@@ -40,14 +40,6 @@ eval(example_body, binding, filename, 1)
 #collect results
 
 
-
-module DdtUtils
-   def self.to_underscore(str)
-     str.gsub(/(.)([A-Z])/,'\1_\2').downcase
-   end
-end
-
-
 Pretentious.last_results.each { |g, result_per_generator|
   puts "#{g}:"
   result_per_generator.each { |klass, result|

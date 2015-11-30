@@ -307,7 +307,7 @@ class Pretentious::MinitestGenerator < Pretentious::GeneratorBase
   def self.naming(output_folder, klass)
     klass_name_parts = klass.name.split('::')
     last_part = klass_name_parts.pop
-    File.join(output_folder, "test_#{DdtUtils.to_underscore(last_part)}.rb")
+    File.join(output_folder, "test_#{Pretentious::DdtUtils.to_underscore(last_part)}.rb")
   end
 
   def self.helper(output_folder)
