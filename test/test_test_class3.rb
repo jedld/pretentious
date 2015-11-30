@@ -7,9 +7,9 @@ end
 
 class TestClass3Scenario1 < TestTestClass3
   def setup
-    var_2167808880 = TestClass1.new("test")
-    var_2167802520 = {hello: "world", test: var_2167808880, arr_1: [1, 2, 3, 4, 5, var_2167808880], sub_hash: {yes: true, obj: var_2167808880}}
-    testclass1 = TestClass1.new(var_2167802520)
+    var_2173943420 = TestClass1.new("test")
+    var_2172900980 = {hello: "world", test: var_2173943420, arr_1: [1, 2, 3, 4, 5, var_2173943420], sub_hash: {yes: true, obj: var_2173943420}}
+    testclass1 = TestClass1.new(var_2172900980)
     testclass2 = TestClass2.new("This is message 2", nil)
     @fixture = TestClass3.new(testclass1, testclass2)
   end
@@ -24,9 +24,9 @@ end
 
 class TestClass3Scenario2 < TestTestClass3
   def setup
-    var_2167808880 = TestClass1.new("test")
-    var_2167802520 = {hello: "world", test: var_2167808880, arr_1: [1, 2, 3, 4, 5, var_2167808880], sub_hash: {yes: true, obj: var_2167808880}}
-    testclass1 = TestClass1.new(var_2167802520)
+    var_2173943420 = TestClass1.new("test")
+    var_2172900980 = {hello: "world", test: var_2173943420, arr_1: [1, 2, 3, 4, 5, var_2173943420], sub_hash: {yes: true, obj: var_2173943420}}
+    testclass1 = TestClass1.new(var_2172900980)
     testclass2 = TestClass2.new("This is message 2", nil)
     @fixture = TestClass3.new(testclass1, testclass2)
   end

@@ -423,7 +423,7 @@ module Pretentious
         end
 
         def _variable_map
-          @_variable_names||={}
+          @_variable_names || {}
         end
 
         def _deconstruct
