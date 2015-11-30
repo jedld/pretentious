@@ -57,7 +57,6 @@ module Pretentious
 
           setup_instance(*args, &recordedProc)
           param_types = @_instance.method(:initialize).parameters
-          puts "#{@_instance.class.name} params -> #{param_types.inspect}"
           @_instance_init[:params_types] = param_types
 
           @_method_calls = []
@@ -405,7 +404,7 @@ module Pretentious
           unless (block.nil?)
             @_init_arguments[:block] = RecordedProc.new(block) {}
           end
-          @_variable_names= {}
+          @_variable_names = {}
 
           params = if (self.respond_to? :test_class )
                       test_class.instance_method(:initialize).parameters
@@ -424,7 +423,7 @@ module Pretentious
         end
 
         def _variable_map
-          @_variable_names
+          @_variable_names||={}
         end
 
         def _deconstruct
@@ -432,7 +431,20 @@ module Pretentious
         end
 
         def _deconstruct_to_ruby(var_name = nil, indentation = 0)
-          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, _variable_map.merge({self.object_id => var_name}), {}, [], self)
+          variable_names = {}
+
+          caller_context = binding.of_caller(1)
+          v_locals = caller_context.eval('local_variables')
+
+          v_locals.each { |v|
+            variable_value = caller_context.eval("#{v.to_s}")
+            if self.object_id == variable_value.object_id
+              variable_names[variable_value.object_id] = v
+            end
+          }
+
+          variable_names = _variable_map.merge({self.object_id => var_name}) unless var_name.nil?
+          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, variable_names, {}, [], self)
         end
 
       end

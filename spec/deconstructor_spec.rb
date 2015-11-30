@@ -22,6 +22,27 @@ RSpec.describe Pretentious::Deconstructor do
                                                            :params_types=>[[:req, :message]]})
 
     end
+
+  end
+
+  describe "Object#_deconstruct_to_ruby" do
+    it "generates the ruby code to create an object" do
+      output = Pretentious.watch {
+        a = "Some type of string"
+        a._deconstruct_to_ruby
+      }
+      expect(output).to eq("a = \"Some type of string\"\n")
+    end
+
+    it "deconstruct multiple objects" do
+      output = Pretentious.watch {
+        a = "Some type of string"
+        b = TestClass1.new("Hello world")
+        test_class = TestClass3.new(a, b)
+        test_class._deconstruct_to_ruby
+      }
+      expect(output).to eq("testclass2 = TestClass1.new(\"Hello world\")\ntest_class = TestClass3.new(\"Some type of string\", testclass2)\n")
+    end
   end
 
   describe "#deconstruct" do
