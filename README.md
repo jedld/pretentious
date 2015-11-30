@@ -209,6 +209,45 @@ RSpec.describe Digest::MD5 do
 end
 ```
 
+## Declarative/Unobstrusive generation
+
+Instead of using Pretentious.spec_for and wrapping the target code around a block, you may declaratively define
+when test generation should occur beforehand. This allows you to generate tests around code blocks without
+modifying source codes. This is useful for testing code embedded inside frameworks like rails where your
+"example" is already embedded inside existing code.
+
+For example lets say you want to generate tests for UserAuthenticaion that is used inside the
+login method inside the UsersController inside a rails app. You'd simply define like below:
+
+
+```ruby
+# initializers/pretentious.rb
+
+Pretentious.on(UsersController).method_called(:login).spec_for(UserAuthentication) #RSPEC
+Pretentious.on(UsersController).method_called(:login, :logout, ...).minitest_for(UserAuthentication) #minitest
+
+# spec files will be written to the project root
+```
+
+The above code is equivalent to adding a spec_for inside the target method.
+
+Note that you must include the setup code in a place that you know runs before the target code block is run. For
+example, if you want to test a class that is used inside a controller in rails, it is best to put it in an initializer.
+It is also recommended to call Pretentious.install_watcher early on to be able to generate better fixtures.
+
+You can pass a block for manually handling for example
+
+```ruby
+# initializers/pretentious.rb
+
+Pretentious.on(UsersController).method_called(:login).spec_for(UserAuthentication) do |results|
+  puts results[UserAuthentication][:output]
+end
+
+# spec files will be written to the project root
+```
+
+
 ## Minitest
 
 The minitest test framework is also supported, simply use Pretentious.minitest_for instead
