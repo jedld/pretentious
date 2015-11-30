@@ -57,5 +57,30 @@ RSpec.describe Pretentious::Generator do
       result = class_that_uses_fib.test_method
       expect(result).to eq(5)
     end
+
+    it "works on class methods" do
+      Pretentious.on(TestClass5).class_method_called(:class_test_method).spec_for(Fibonacci)
+
+      expect(Pretentious::Trigger).to receive(:output_file)
+      expect(Pretentious::Generator).to receive(:generate_for).with(Fibonacci).and_call_original
+      result = TestClass5.class_test_method
+
+      expect(result).to eq(8)
+    end
+
+    it "works on multiple methods" do
+      Pretentious.on(TestClass5).method_called(:test_method, :test_method2).spec_for(Fibonacci)
+
+      expect(Pretentious::Trigger).to receive(:output_file).twice
+      expect(Pretentious::Generator).to receive(:generate_for).twice.with(Fibonacci).and_call_original
+
+      class_that_uses_fib = TestClass5.new
+      result1 = class_that_uses_fib.test_method
+      result2 = class_that_uses_fib.test_method2
+
+      expect(result1).to eq(5)
+      expect(result2).to eq(34)
+
+    end
   end
 end

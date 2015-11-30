@@ -6,10 +6,17 @@ module Pretentious
 
     def initialize(target_class)
       @target_class = target_class
+      @target_class_methods = []
+      @target_methods = []
     end
 
     def method_called(*target_methods)
       @target_methods = target_methods
+      self
+    end
+
+    def class_method_called(*target_methods)
+      @target_class_methods = target_methods
       self
     end
 
@@ -39,6 +46,20 @@ module Pretentious
 
     private
 
+    def attach_generator(generator, target, method, spec_classes, results_block, options)
+      target.send(:define_method, method.to_sym) do |*args, &block|
+          result = nil
+          Pretentious::Generator.test_generator = generator
+          generator_result = Pretentious::Generator.generate_for(*spec_classes) do
+            result = send(:"_pretentious_orig_#{method}", *args, &block)
+          end
+
+          results_block.call(generator_result, options) if results_block
+
+          result
+        end
+    end
+
     def install_trigger
       @options = Pretentious::Trigger::Options.new
 
@@ -55,26 +76,26 @@ module Pretentious
       @results_block = default_callback unless @results_block
 
       @target_methods.each { |method|
-          @target_class.class_exec(@target_class, method, @spec_classes, @results_block, @generator, @options) do |klass, m, spec_classes,
-              results_block, generator, options|
+          @target_class.class_exec(@target_class, method) do |klass, m|
 
             if !klass.instance_methods.include? :"_pretentious_orig_#{m}"
               alias_method :"_pretentious_orig_#{m}", :"#{m}"
             end
 
-            define_method(m.to_sym) do |*args, &block|
-              result = nil
-              Pretentious::Generator.test_generator = generator
-              generator_result = Pretentious::Generator.generate_for(*spec_classes) do
-                result = send(:"_pretentious_orig_#{m}", *args, &block)
-              end
+          end
 
-              results_block.call(generator_result, options) if results_block
-
-              result
-            end
-        end
+          attach_generator(@generator, @target_class, method, @spec_classes, @results_block, @options)
       }
+
+      @target_class_methods.each { |method|
+        @target_class.singleton_class.class_exec(@target_class, method) do |klass, m|
+          if !klass.methods.include? :"_pretentious_orig_#{m}"
+            alias_method :"_pretentious_orig_#{m}", :"#{m}"
+          end
+        end
+        attach_generator(@generator, @target_class.singleton_class, method, @spec_classes, @results_block, @options)
+      }
+
       @options
     end
   end

@@ -128,6 +128,16 @@ class TestClass5
     fibonacci = Fibonacci.new
     fibonacci.fib(5)
   end
+
+  def test_method2
+    fibonacci = Fibonacci.new
+    fibonacci.fib(9)
+  end
+
+  def self.class_test_method
+    fibonacci = Fibonacci.new
+    fibonacci.fib(6)
+  end
 end
 
 class TestMockSubClass
