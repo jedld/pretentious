@@ -6,3 +6,8 @@ RSpec::Core::RakeTask.new('spec')
 # If you want to make this the default task
 task :default => :spec
 task :test => :spec
+
+task :minitest do
+  $: << './test'
+  Dir.glob('./test/test_*.rb').each { |file| require file}
+end

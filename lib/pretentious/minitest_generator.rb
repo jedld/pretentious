@@ -99,9 +99,9 @@ class Pretentious::MinitestGenerator < Pretentious::GeneratorBase
                 end
 
     if (result.kind_of? Exception)
-      str << pick_matcher(statement, result)
+      str << pick_matcher(statement, result, let_variables, declarations)
     else
-      str << pick_matcher(statement, result)
+      str << pick_matcher(statement, result, let_variables, declarations)
     end
     str
   end
@@ -238,7 +238,7 @@ class Pretentious::MinitestGenerator < Pretentious::GeneratorBase
   #  end
   #end
 
-  def pick_matcher(statement, result)
+  def pick_matcher(statement, result, let_variables, declarations)
     if result.is_a? TrueClass
       "assert #{statement}"
     elsif result.is_a? FalseClass
@@ -247,6 +247,8 @@ class Pretentious::MinitestGenerator < Pretentious::GeneratorBase
       "assert_nil #{statement}"
     elsif result.kind_of? Exception
       "assert_raises(#{result.class.to_s}) { #{statement} }"
+    elsif let_variables && let_variables[result.object_id]
+      "assert_equal #{Pretentious::value_ize(result, let_variables, declarations)}, #{statement}"
     else
       "assert_equal #{Pretentious::value_ize(result, nil, nil)}, #{statement}"
     end

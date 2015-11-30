@@ -206,7 +206,21 @@ module Pretentious
 
           def _call_method(target, method_sym, *arguments, &block)
 
-            klass = _get_standin_class
+            klass = nil
+            begin
+              klass = _get_standin_class
+            rescue NameError=>e
+              result = nil
+              target.instance_exec do
+                result = if (@_instance.methods.include? method_sym)
+                  @_instance.send(method_sym, *arguments, &block)
+                else
+                  @_instance.send(:method_missing, method_sym, *arguments, &block)
+                end
+              end
+              return result
+            end
+
             caller_context = binding.of_caller(2)
 
             is_stub = _is_stub?
@@ -413,7 +427,7 @@ module Pretentious
           params = if (self.respond_to? :test_class )
                       test_class.instance_method(:initialize).parameters
                     else
-                      method(:initialize).parameters
+                      self.class.instance_method(:initialize).parameters
                    end
           @_init_arguments[:params_types] = params
 
@@ -460,7 +474,19 @@ module Pretentious
 
           def new(*args, &block)
             instance = _ddt_old_new(*args, &block)
-            instance._set_init_arguments(*args, &block)
+
+            #rescues for handling native objects that don't have standard methoods
+            begin
+              if (instance.respond_to?(:_set_init_arguments))
+                instance._set_init_arguments(*args, &block)
+              end
+            rescue NoMethodError=>e
+              begin
+                instance._set_init_arguments(*args, &block)
+              rescue NoMethodError=>e2
+              end
+            end
+
             instance
           end
 

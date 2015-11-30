@@ -97,9 +97,9 @@ class Pretentious::RspecGenerator < Pretentious::GeneratorBase
     end
 
     if (result.kind_of? Exception)
-      buffer("expect { #{statement} }.to #{pick_matcher(result)}",3)
+      buffer("expect { #{statement} }.to #{pick_matcher(result, let_variables, declarations)}",3)
     else
-      buffer("expect( #{statement} ).to #{pick_matcher(result)}",3)
+      buffer("expect( #{statement} ).to #{pick_matcher(result, let_variables, declarations)}",3)
     end
   end
 
@@ -215,7 +215,7 @@ class Pretentious::RspecGenerator < Pretentious::GeneratorBase
   #  end
   #end
 
-  def pick_matcher(result)
+  def pick_matcher(result, let_variables, declared_names)
     if result.is_a? TrueClass
      'be true'
     elsif result.is_a? FalseClass
@@ -224,6 +224,8 @@ class Pretentious::RspecGenerator < Pretentious::GeneratorBase
       'be_nil'
     elsif result.kind_of? Exception
       'raise_error'
+    elsif let_variables && let_variables[result.object_id]
+      "eq(#{Pretentious::value_ize(result, let_variables, declared_names)})"
     else
       "eq(#{Pretentious::value_ize(result, nil, nil)})"
     end

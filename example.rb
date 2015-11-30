@@ -54,6 +54,9 @@ end
     end
 
     test_class_one.just_returns_true
+
+    test_class_object_return = TestClass1.new("Hello")
+    test_class_object_return.return_self(another_object)
   end
 end
 

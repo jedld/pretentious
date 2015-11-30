@@ -58,6 +58,10 @@ class TestClass1
   def something_is_wrong
     raise StandardError.new
   end
+
+  def return_self(message)
+    message
+  end
 end
 
 
