@@ -274,7 +274,7 @@ Note that you must include the setup code in a place that you know runs before t
 example, if you want to test a class that is used inside a controller in rails, it is best to put it in an initializer.
 It is also recommended to call Pretentious.install_watcher early on to be able to generate better fixtures.
 
-You can pass a block for manually handling for example
+You can pass a block for manually handling the output, for example
 
 ```ruby
 # initializers/pretentious.rb
