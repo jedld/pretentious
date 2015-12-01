@@ -193,7 +193,14 @@ class Pretentious::Deconstructor
     {declaration: @declaration_order, dependency: @dependencies}
   end
 
-  def deconstruct_to_ruby(indentation_level = 0, variable_map = {}, declared_names = {}, method_call_collection = [], *target_objects)
+  def generate_declarations(variable_map = {}, previous_declarations = {}, method_call_collection = [], *target_objects)
+    target_objects.each { |target_object|
+      variable_map.merge!(target_object._variable_map) if target_object.methods.include?(:_variable_map) && !target_object._variable_map.nil?
+    }
+    deconstruct method_call_collection, *target_objects
+  end
+
+  def build_output(indentation_level, variable_map, declarations, declared_names, previous_declarations)
     output_buffer = ""
     indentation = ""
 
@@ -201,19 +208,20 @@ class Pretentious::Deconstructor
       indentation << ' '
     }
 
-    target_objects.each { |target_object|
-      variable_map.merge!(target_object._variable_map) if target_object.methods.include?(:_variable_map) && !target_object._variable_map.nil?
-    }
-    declarations, dependencies = deconstruct method_call_collection, *target_objects
-
     declarations[:declaration].each do |d|
-      unless d[:used_by] == :inline
+      if (d[:used_by] != :inline) && !previous_declarations.has_key?(d[:id])
         var_name = Pretentious::Deconstructor.pick_name(variable_map, d[:id], declared_names)
         output_buffer << "#{indentation}#{var_name} = #{construct(d, variable_map, declared_names, indentation)}\n"
+      elsif (d[:used_by]!=:inline) && previous_declarations[d[:id]]
+        variable_map[d[:id]] = "@#{previous_declarations[d[:id]]}" if previous_declarations[d[:id]][0]!='@'
       end
     end
-
     output_buffer
+  end
+
+  def deconstruct_to_ruby(indentation_level = 0, variable_map = {}, declared_names = {}, previous_declarations = {}, method_call_collection = [], *target_objects)
+    declarations, dependencies = generate_declarations variable_map, previous_declarations, method_call_collection, *target_objects
+    build_output(indentation_level, variable_map, declarations, declared_names, previous_declarations)
   end
 
   def self.is_primitive?(value)

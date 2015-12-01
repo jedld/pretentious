@@ -41,21 +41,28 @@ class Pretentious::MinitestGenerator < Pretentious::GeneratorBase
   end
 
   def generate(test_instance, instance_count)
+    global_variable_declaration = {}
     if (test_instance.is_a? Class)
       #class methods
       class_method_calls = test_instance.method_calls_by_method
-      generate_specs("#{test_instance.test_class.name}::",test_instance.test_class.name, class_method_calls, test_instance.let_variables)
+      buffer(generate_specs("#{test_instance.test_class.name}::",test_instance.test_class.name, class_method_calls, test_instance.let_variables,
+                     global_variable_declaration, {}))
     else
       buffer("class #{test_instance.test_class.name}Scenario#{instance_count} < Test#{@test_class.name}",0)
 
       buffer("def setup",1)
-      buffer_inline(test_instance._deconstruct_to_ruby('@fixture', 2 * @_indentation.length))
+
+
+      top_declarations, declarations, variable_map, global_declared_names = setup_fixture(test_instance)
+
+      method_calls = test_instance.method_calls_by_method
+      specs_buffer = generate_specs("#{test_instance.test_class.name}#", "@fixture", method_calls, variable_map,
+                                    global_variable_declaration, top_declarations)
+      buffer_inline(@deconstructor.build_output(3 * @_indentation.length, variable_map, declarations, global_variable_declaration, {}))
       buffer("end", 1)
       whitespace
 
-      method_calls = test_instance.method_calls_by_method
-
-      generate_specs("#{test_instance.test_class.name}#","@fixture",method_calls, test_instance.let_variables)
+      buffer_inline(specs_buffer)
 
       buffer('end',0)
       whitespace
@@ -106,9 +113,9 @@ class Pretentious::MinitestGenerator < Pretentious::GeneratorBase
     str
   end
 
-  def generate_specs(context_prefix, fixture, method_calls, let_variables)
-    buffer("def test_current_expectation",1)
-    declaration = {}
+  def generate_specs(context_prefix, fixture, method_calls, let_variables, declaration, previous_declaration)
+    output = ""
+    buffer_to_string(output, "def test_current_expectation", 1)
     #collect all params
     params_collection = []
     mocks_collection = {}
@@ -143,18 +150,20 @@ class Pretentious::MinitestGenerator < Pretentious::GeneratorBase
     end
 
     if (params_collection.size > 0)
-      buffer(declare_dependencies(params_collection, let_variables, 2, declaration))
+      deps = declare_dependencies(params_collection, let_variables, 2, declaration, previous_declaration)
+      buffer_to_string(output, deps) if deps.strip!=''
     end
 
     if (mocks_collection.keys.size > 0)
-      buffer(generate_minitest_stub(mocks_collection, let_variables, 2, declaration) { |indentation|
+      buffer_to_string(output, generate_minitest_stub(mocks_collection, let_variables, 2, declaration) { |indentation|
         generate_test_scenarios(fixture, method_calls, context_prefix, let_variables, declaration, indentation)
-      },0)
+      }, 0)
     else
-      buffer(generate_test_scenarios(fixture, method_calls, context_prefix, let_variables, declaration, 2), 0)
+      buffer_to_string(output, generate_test_scenarios(fixture, method_calls, context_prefix, let_variables, declaration, 2), 0)
     end
 
-    buffer("end", 1)
+    buffer_to_string(output, "end", 1)
+    output
   end
 
   def generate_test_scenarios(fixture, method_calls, context_prefix, let_variables, declaration, indentation_level)
@@ -278,11 +287,11 @@ class Pretentious::MinitestGenerator < Pretentious::GeneratorBase
     params.join(" ,")
   end
 
-  def declare_dependencies(args, variable_map, level, declarations)
+  def declare_dependencies(args, variable_map, level, declarations, previous_declaration)
     deconstructor = Pretentious::Deconstructor.new
 
     args = remove_primitives(args, variable_map)
-    deconstructor.deconstruct_to_ruby(level * @_indentation.length, variable_map, declarations, [], *args)
+    deconstructor.deconstruct_to_ruby(level * @_indentation.length, variable_map, declarations, previous_declaration, [], *args)
   end
 
   def remove_primitives(args, let_lookup)

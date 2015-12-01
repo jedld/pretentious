@@ -103,7 +103,7 @@ module Pretentious
         end
 
         def init_let_variables
-          @_init_let_variables
+          @_init_let_variables.dup
         end
 
         def method_calls_by_method
@@ -179,7 +179,7 @@ module Pretentious
           end
 
           def let_variables
-            @_let_variables
+            @_let_variables.dup
           end
 
           def method_calls_by_method
@@ -441,7 +441,7 @@ module Pretentious
         end
 
         def _variable_map
-          @_variable_names || {}
+          (@_variable_names || {}).dup
         end
 
         def _deconstruct
@@ -462,7 +462,7 @@ module Pretentious
           }
 
           variable_names = _variable_map.merge({self.object_id => var_name}) unless var_name.nil?
-          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, variable_names, {}, [], self)
+          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, variable_names, {}, {}, [], self)
         end
 
       end

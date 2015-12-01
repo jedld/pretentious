@@ -57,6 +57,9 @@ end
 
     test_class_object_return = TestClass1.new("Hello")
     test_class_object_return.return_self(another_object)
+
+    test_class1 = TestClass1.new(another_object)
+    test_class1.message
   end
 end
 

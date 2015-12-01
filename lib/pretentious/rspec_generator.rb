@@ -40,23 +40,25 @@ class Pretentious::RspecGenerator < Pretentious::GeneratorBase
   end
 
   def generate(test_instance, instance_count)
+    global_variable_declaration = {}
     if (test_instance.is_a? Class)
       #class methods
       class_method_calls = test_instance.method_calls_by_method
-      generate_specs("#{test_instance.test_class.name}::", test_instance.test_class.name,
-                     class_method_calls, test_instance.let_variables)
+      buffer(generate_specs("#{test_instance.test_class.name}::", test_instance.test_class.name,
+                     class_method_calls, test_instance.let_variables, global_variable_declaration, {}))
     else
       buffer("context 'Scenario #{instance_count}' do",1)
 
       buffer("before do",2)
-      buffer_inline(test_instance._deconstruct_to_ruby('@fixture', 3 * @_indentation.length))
+
+      top_declarations, declarations, variable_map, global_declared_names = setup_fixture(test_instance)
+      method_calls = test_instance.method_calls_by_method
+      specs_buffer = generate_specs("#{test_instance.test_class.name}#", "@fixture", method_calls, variable_map,
+                                    global_variable_declaration, top_declarations)
+      buffer_inline(@deconstructor.build_output(3 * @_indentation.length, variable_map, declarations, global_variable_declaration, {}))
       buffer("end",2)
       whitespace
-
-      method_calls = test_instance.method_calls_by_method
-
-      generate_specs("#{test_instance.test_class.name}#","@fixture",method_calls, test_instance.let_variables)
-
+      buffer(specs_buffer)
       buffer('end',1)
       whitespace
     end
@@ -81,6 +83,7 @@ class Pretentious::RspecGenerator < Pretentious::GeneratorBase
   end
 
   def generate_expectation(fixture, method, let_variables, declarations, params, block, result)
+    output = ""
     block_source = if !block.nil? && block.is_a?(Pretentious::RecordedProc)
                       get_block_source(block, let_variables, declarations, @_indentation * 3)
                    else
@@ -97,15 +100,16 @@ class Pretentious::RspecGenerator < Pretentious::GeneratorBase
     end
 
     if (result.kind_of? Exception)
-      buffer("expect { #{statement} }.to #{pick_matcher(result, let_variables, declarations)}",3)
+      buffer_to_string(output, "expect { #{statement} }.to #{pick_matcher(result, let_variables, declarations)}",3)
     else
-      buffer("expect( #{statement} ).to #{pick_matcher(result, let_variables, declarations)}",3)
+      buffer_to_string(output, "expect( #{statement} ).to #{pick_matcher(result, let_variables, declarations)}",3)
     end
+    output
   end
 
-  def generate_specs(context_prefix, fixture, method_calls, let_variables)
-    buffer("it 'should pass current expectations' do",2)
-    declaration = {}
+  def generate_specs(context_prefix, fixture, method_calls, let_variables, declaration, previous_declaration)
+    output = ""
+    buffer_to_string(output, "it 'should pass current expectations' do\n", 2)
     #collect all params
     params_collection = []
     mocks_collection = {}
@@ -142,11 +146,13 @@ class Pretentious::RspecGenerator < Pretentious::GeneratorBase
     end
 
     if (params_collection.size > 0)
-      buffer(declare_dependencies(params_collection, let_variables, 3 * @_indentation.length, declaration, []))
+      deps = declare_dependencies(params_collection, let_variables, 3 * @_indentation.length, declaration,
+                           [], previous_declaration)
+      buffer_to_string(output, deps) if deps!=''
     end
 
     if (mocks_collection.keys.size > 0)
-      buffer(generate_rspec_stub(mocks_collection, let_variables, 3 * @_indentation.length, declaration))
+      buffer_to_string(output, generate_rspec_stub(mocks_collection, let_variables, 3 * @_indentation.length, declaration))
     end
 
     method_calls.each_key do |k|
@@ -160,15 +166,14 @@ class Pretentious::RspecGenerator < Pretentious::GeneratorBase
                              ""
                            end
 
-        buffer("# #{context_prefix}#{k} #{params_desc_str} should return #{block[:result]}", 3)
-        generate_expectation(fixture, k, let_variables, declaration, block[:params], block[:block], block[:result])
+        buffer_to_string(output, "# #{context_prefix}#{k} #{params_desc_str} should return #{block[:result]}", 3)
 
-        whitespace
+        buffer_to_string(output, generate_expectation(fixture, k, let_variables, declaration, block[:params], block[:block], block[:result]))
       end
-
-
     end
-    buffer("end",2)
+
+    buffer_to_string(output, "end", 2)
+    output
   end
 
   def generate_rspec_stub(mocks_collection, let_variables, indentation_level , declaration)
@@ -255,11 +260,11 @@ class Pretentious::RspecGenerator < Pretentious::GeneratorBase
     params.join(" ,")
   end
 
-  def declare_dependencies(args, variable_map, level, declarations, method_call_collection)
+  def declare_dependencies(args, variable_map, level, declarations, method_call_collection, top_level_declaration = {})
     deconstructor = Pretentious::Deconstructor.new
 
     args = remove_primitives(args, variable_map)
-    deconstructor.deconstruct_to_ruby(level, variable_map, declarations, method_call_collection, *args)
+    deconstructor.deconstruct_to_ruby(level, variable_map, declarations, top_level_declaration, method_call_collection, *args)
   end
 
   def remove_primitives(args, let_lookup)

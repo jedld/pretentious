@@ -9,6 +9,7 @@ RSpec.describe Fibonacci do
     end
 
     it 'should pass current expectations' do
+
       n = 1
       n_1 = 2
       n_2 = 3
@@ -31,11 +32,14 @@ RSpec.describe Fibonacci do
       expect( @fixture.fib(n_4) ).to eq(5)
 
     end
+
   end
 
     it 'should pass current expectations' do
+
       # Fibonacci::say_hello  should return hello
       expect( Fibonacci.say_hello ).to eq("hello")
 
     end
+
 end

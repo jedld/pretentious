@@ -7,6 +7,7 @@ RSpec::Core::RakeTask.new('spec')
 task :default => :spec
 task :test => :spec
 
+desc "Runs the minitest suite"
 task :minitest do
   $: << './test'
   Dir.glob('./test/test_*.rb').each { |file| require file}

@@ -7,7 +7,7 @@ end
 
 class MemeScenario1 < TestMeme
   def setup
-    @fixture = Meme.new
+      @fixture = Meme.new
   end
 
   def test_current_expectation
