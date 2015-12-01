@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Pretentious::VERSION
   spec.authors       = ["Joseph Emmanuel Dayo"]
   spec.email         = ["joseph.dayo@gmail.com"]
-  spec.summary       = %q{Generate tests from existing code as well as a way to deal with pretentious TDD/BDD developers}
-  spec.description   = %q{Do you have a pretentious boss or dev lead that pushes you to embrace tdd but for reasons hate it or them? here is a gem to deal with that.}
+  spec.summary       = %q{Characterization Tests generator for Ruby - Generate tests from existing/legacy code as well as a way to deal with pretentious TDD/BDD developers}
+  spec.description   = %q{Characterization Tests for Ruby - Do you have a pretentious boss or dev lead that pushes you to embrace tdd but for reasons hate it or them? here is a gem to deal with that.}
   spec.homepage      = "https://github.com/jedld/pretentious"
   spec.license       = "MIT"
 
