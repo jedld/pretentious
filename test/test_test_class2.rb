@@ -2,10 +2,10 @@
 require 'minitest_helper'
 require "minitest/autorun"
 
-class TestTestClass2 < Minitest::Test
+class TestClass2Test < Minitest::Test
 end
 
-class TestClass2Scenario1 < TestTestClass2
+class TestClass2Scenario1 < TestClass2Test
   def setup
       @fixture = TestClass2.new("This is message 2", nil)
   end
@@ -21,7 +21,7 @@ class TestClass2Scenario1 < TestTestClass2
   end
 end
 
-class TestClass2Scenario2 < TestTestClass2
+class TestClass2Scenario2 < TestClass2Test
   def setup
       @fixture = TestClass2.new("This is message 3", nil)
   end
@@ -31,7 +31,7 @@ class TestClass2Scenario2 < TestTestClass2
   end
 end
 
-class TestClass2Scenario3 < TestTestClass2
+class TestClass2Scenario3 < TestClass2Test
   def setup
       @message2 = "This is message 3"
       message = TestClass2.new(@message2, nil)

@@ -2,16 +2,16 @@
 require 'minitest_helper'
 require "minitest/autorun"
 
-class TestTestClassForMocks < Minitest::Test
+class TestClassForMocksTest < Minitest::Test
 end
 
-class TestClassForMocksScenario1 < TestTestClassForMocks
+class TestClassForMocksScenario1 < TestClassForMocksTest
   def setup
       @fixture = TestClassForMocks.new
   end
 
   def test_current_expectation
-    var_2166301840 = [2, 3, 4, 5]
+    var_2169291380 = [2, 3, 4, 5]
 
     TestMockSubClass.stub_any_instance(:test_method, "a return string") do
       TestMockSubClass.stub_any_instance(:increment_val, 2) do
@@ -33,17 +33,17 @@ class TestClassForMocksScenario1 < TestTestClassForMocks
   end
 end
 
-class TestClassForMocksScenario2 < TestTestClassForMocks
+class TestClassForMocksScenario2 < TestClassForMocksTest
   def setup
       @fixture = TestClassForMocks.new
   end
 
   def test_current_expectation
-    var_2166224460 = {val: 1, str: "hello world", message: "a message"}
+    var_2169019300 = {val: 1, str: "hello world", message: "a message"}
 
-    TestMockSubClass.stub_any_instance(:return_hash, var_2166224460) do
+    TestMockSubClass.stub_any_instance(:return_hash, var_2169019300) do
       #TestClassForMocks#method_with_usage3 when passed message = "a message" should return {:val=>1, :str=>"hello world", :message=>"a message"}
-      assert_equal var_2166224460, @fixture.method_with_usage3("a message")
+      assert_equal var_2169019300, @fixture.method_with_usage3("a message")
 
     end
 

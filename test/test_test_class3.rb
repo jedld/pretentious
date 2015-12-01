@@ -2,14 +2,14 @@
 require 'minitest_helper'
 require "minitest/autorun"
 
-class TestTestClass3 < Minitest::Test
+class TestClass3Test < Minitest::Test
 end
 
-class TestClass3Scenario1 < TestTestClass3
+class TestClass3Scenario1 < TestClass3Test
   def setup
       another_object = TestClass1.new("test")
-      var_2166831300 = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
-      testclass1 = TestClass1.new(var_2166831300)
+      var_2165630660 = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
+      testclass1 = TestClass1.new(var_2165630660)
       testclass2 = TestClass2.new("This is message 2", nil)
       @fixture = TestClass3.new(testclass1, testclass2)
   end
@@ -22,11 +22,11 @@ class TestClass3Scenario1 < TestTestClass3
   end
 end
 
-class TestClass3Scenario2 < TestTestClass3
+class TestClass3Scenario2 < TestClass3Test
   def setup
       another_object = TestClass1.new("test")
-      var_2166831300 = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
-      testclass1 = TestClass1.new(var_2166831300)
+      var_2165630660 = {hello: "world", test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: {yes: true, obj: another_object}}
+      testclass1 = TestClass1.new(var_2165630660)
       testclass2 = TestClass2.new("This is message 2", nil)
       @fixture = TestClass3.new(testclass1, testclass2)
   end

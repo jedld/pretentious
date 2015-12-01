@@ -2,10 +2,10 @@
 require 'minitest_helper'
 require "minitest/autorun"
 
-class TestMeme < Minitest::Test
+class MemeTest < Minitest::Test
 end
 
-class MemeScenario1 < TestMeme
+class MemeScenario1 < MemeTest
   def setup
       @fixture = Meme.new
   end

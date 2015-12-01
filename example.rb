@@ -3,18 +3,18 @@ $LOAD_PATH << '.'
 require 'digest/md5'
 require_relative './test_classes.rb'
 
+[:spec_for, :minitest_for].each do |method|
+  Pretentious.send(method, Fibonacci) do
 
-Pretentious.spec_for(Fibonacci) do
+    instance = Fibonacci.new
 
+    (1..5).each do |n|
+      instance.fib(n)
+    end
 
-  instance = Fibonacci.new
+    Fibonacci.say_hello
 
-  (1..5).each do |n|
-    instance.fib(n)
   end
-
-  Fibonacci.say_hello
-
 end
 
 [:spec_for, :minitest_for].each do |method|
@@ -63,9 +63,11 @@ end
   end
 end
 
-Pretentious.spec_for(Digest::MD5) do
-  sample = "This is the digest"
-  Digest::MD5.hexdigest(sample)
+[:spec_for, :minitest_for].each do |method|
+  Pretentious.send(method, Digest::MD5) do
+    sample = "This is the digest"
+    Digest::MD5.hexdigest(sample)
+  end
 end
 
 [:spec_for, :minitest_for].each do |m|

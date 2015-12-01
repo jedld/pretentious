@@ -6,11 +6,11 @@ RSpec.describe TestClass4 do
   context 'Scenario 1' do
     before do
       var_8 = nil
-      var_2157339500 = Proc.new { 
+      var_2162919380 = Proc.new { 
             # Variable return values ... can't figure out what goes in here...
       }
 
-      @fixture = TestClass4.new(&var_2157339500)
+      @fixture = TestClass4.new(&var_2162919380)
     end
 
     it 'should pass current expectations' do

@@ -28,7 +28,7 @@ class Pretentious::MinitestGenerator < Pretentious::GeneratorBase
     buffer("require 'minitest_helper'")
     buffer('require "minitest/autorun"')
     whitespace
-    buffer("class Test#{test_class.name} < Minitest::Test")
+    buffer("class #{test_class.name}Test < Minitest::Test")
     buffer("end")
     whitespace
   end
@@ -43,12 +43,16 @@ class Pretentious::MinitestGenerator < Pretentious::GeneratorBase
   def generate(test_instance, instance_count)
     global_variable_declaration = {}
     if (test_instance.is_a? Class)
+      buffer("class #{test_instance.test_class.name}Scenario#{instance_count} < #{@test_class.name}Test",0)
+
       #class methods
       class_method_calls = test_instance.method_calls_by_method
       buffer(generate_specs("#{test_instance.test_class.name}::",test_instance.test_class.name, class_method_calls, test_instance.let_variables,
                      global_variable_declaration, {}))
+
+      buffer('end',0)
     else
-      buffer("class #{test_instance.test_class.name}Scenario#{instance_count} < Test#{@test_class.name}",0)
+      buffer("class #{test_instance.test_class.name}Scenario#{instance_count} < #{@test_class.name}Test",0)
 
       buffer("def setup",1)
 
