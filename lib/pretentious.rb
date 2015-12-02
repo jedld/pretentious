@@ -93,7 +93,7 @@ module Pretentious
                                            declared_names)
     elsif value.nil?
       'nil'
-    elsif Pretentious::Deconstructor.is_primitive?(value)
+    elsif Pretentious::Deconstructor.primitive?(value)
       "#{value}"
     elsif let_variables && let_variables[value.object_id]
       Pretentious::Deconstructor.pick_name(let_variables, value.object_id,

@@ -18,7 +18,7 @@ module Pretentious
       top_declarations = {}
       global_declared_names = {}
 
-      declarations, dependencies = @deconstructor.generate_declarations(variable_map, {}, [], fixture)
+      declarations, dependencies = @deconstructor.generate_declarations(variable_map, [], fixture)
 
       declarations[:declaration].each do |d|
         if (d[:used_by] != :inline)

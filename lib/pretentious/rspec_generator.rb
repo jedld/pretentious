@@ -120,7 +120,7 @@ class Pretentious::RspecGenerator < Pretentious::GeneratorBase
       info_blocks_arr.each do |block|
         method_call_collection << block
         params_collection = params_collection | block[:params]
-        if (!Pretentious::Deconstructor.is_primitive?(block[:result]) && !block[:result].kind_of?(Exception))
+        if (!Pretentious::Deconstructor.primitive?(block[:result]) && !block[:result].kind_of?(Exception))
           params_collection << block[:result]
         end
 
@@ -268,7 +268,7 @@ class Pretentious::RspecGenerator < Pretentious::GeneratorBase
   end
 
   def remove_primitives(args, let_lookup)
-    args.select { |a| let_lookup.include?(a.object_id) || !Pretentious::Deconstructor.is_primitive?(a) }
+    args.select { |a| let_lookup.include?(a.object_id) || !Pretentious::Deconstructor.primitive?(a) }
   end
 
   def params_generator(args, let_variables, declared_names)
