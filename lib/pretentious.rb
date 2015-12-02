@@ -1,15 +1,14 @@
-require "pretentious/version"
-require "pretentious/generator_base"
-require "pretentious/rspec_generator"
-require "pretentious/minitest_generator"
-require "pretentious/recorded_proc"
-require "pretentious/generator"
+require 'pretentious/version'
+require 'pretentious/generator_base'
+require 'pretentious/rspec_generator'
+require 'pretentious/minitest_generator'
+require 'pretentious/recorded_proc'
+require 'pretentious/generator'
 require 'binding_of_caller'
 require 'pretentious/deconstructor'
 require 'pretentious/trigger'
 
 Class.class_eval do
-
   def _stub(*classes)
     @classes = classes
     self
@@ -18,11 +17,9 @@ Class.class_eval do
   def _get_mock_classes
     @classes
   end
-
 end
 
 Thread.class_eval do
-
   def _push_context(context)
     @_context ||= []
     @_context << context
@@ -42,25 +39,27 @@ Thread.class_eval do
   end
 end
 
+# The main class to use for pretentious testing
 module Pretentious
-
+  # misc convenience tools
   module DdtUtils
     def self.to_underscore(str)
-      str.gsub(/(.)([A-Z])/,'\1_\2').downcase
+      str.gsub(/(.)([A-Z])/, '\1_\2').downcase
     end
   end
-
 
   def self.spec_for(*klasses, &block)
     @spec_results ||= {}
     Pretentious::Generator.test_generator = Pretentious::RspecGenerator
-    @spec_results.merge!(Pretentious::Generator.generate_for(*klasses, &block))
+    @spec_results.merge!(Pretentious::Generator
+                         .generate_for(*klasses, &block))
   end
 
   def self.minitest_for(*klasses, &block)
     @minitest_results ||= {}
     Pretentious::Generator.test_generator = Pretentious::MinitestGenerator
-    @minitest_results.merge!(Pretentious::Generator.generate_for(*klasses, &block))
+    @minitest_results.merge!(Pretentious::Generator
+                             .generate_for(*klasses, &block))
   end
 
   def self.clear_results
@@ -69,7 +68,7 @@ module Pretentious
   end
 
   def self.last_results
-    {spec: @spec_results,  minitest: @minitest_results}
+    { spec: @spec_results, minitest: @minitest_results }
   end
 
   def self.install_watcher
@@ -81,16 +80,16 @@ module Pretentious
   end
 
   def self.value_ize(value, let_variables, declared_names)
-    if (value.kind_of? String)
+    if value.is_a? String
       "#{value.dump}"
-    elsif (value.is_a? Symbol)
-      ":#{value.to_s}"
-    elsif (value.is_a? Hash)
+    elsif value.is_a? Symbol
+      ":#{value}"
+    elsif value.is_a? Hash
       Pretentious::Deconstructor.pick_name(let_variables, value.object_id, declared_names)
-    elsif (value.is_a? Pretentious::RecordedProc)
+    elsif value.is_a? Pretentious::RecordedProc
       Pretentious::Deconstructor.pick_name(let_variables, value.target_proc.object_id, declared_names)
-    elsif (value == nil)
-      "nil"
+    elsif value.nil?
+      'nil'
     elsif Pretentious::Deconstructor.is_primitive?(value)
       "#{value.to_s}"
     elsif let_variables && let_variables[value.object_id]
