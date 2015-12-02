@@ -1,6 +1,6 @@
 module Pretentious
+  # base class for spec generators
   class GeneratorBase
-
     def buffer(line, level = 0)
       @output_buffer << "#{indentation(level)}#{line}\n"
     end
@@ -14,11 +14,11 @@ module Pretentious
     end
 
     def setup_fixture(fixture)
-      variable_map = fixture.let_variables.merge({ fixture.object_id => '@fixture'})
+      variable_map = fixture.let_variables.merge(fixture.object_id => '@fixture')
       top_declarations = {}
       global_declared_names = {}
 
-      declarations, dependencies = @deconstructor.generate_declarations(variable_map, [], fixture)
+      declarations, _dependencies = @deconstructor.generate_declarations(variable_map, [], fixture)
 
       declarations[:declaration].each do |d|
         if (d[:used_by] != :inline)
@@ -28,6 +28,5 @@ module Pretentious
 
       [top_declarations, declarations, variable_map, global_declared_names]
     end
-
   end
 end

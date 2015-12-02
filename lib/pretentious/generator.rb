@@ -41,25 +41,17 @@ module Pretentious
       ")
 
       newStandInKlass.class_exec do
-
         def initialize(*args, &block)
-
-          @_instance_init = {object_id: self.object_id, params: [], block: nil}
+          @_instance_init = { object_id: object_id, params: [], block: nil }
 
           self.class.replace_procs_with_recorders(args)
 
           @_instance_init[:params] = args
+          recorded_proc = block ? RecordedProc.new(block, true) : nil
 
+          @_instance_init[:block] = recorded_proc
 
-          recordedProc = if (block)
-                           RecordedProc.new(block, true)
-                         else
-                           nil
-                         end
-
-          @_instance_init[:block] = recordedProc
-
-          setup_instance(*args, &recordedProc)
+          setup_instance(*args, &recorded_proc)
           param_types = @_instance.method(:initialize).parameters
           @_instance_init[:params_types] = param_types
 
@@ -68,20 +60,19 @@ module Pretentious
           @_methods_for_test = []
           @_let_variables = {}
 
-
           @_init_let_variables = {}
 
           caller_context = binding.of_caller(2)
           v_locals = caller_context.eval('local_variables')
 
-          v_locals.each { |v|
+          v_locals.each do |v|
             variable_value = caller_context.eval("#{v.to_s}")
             @_init_let_variables[variable_value.object_id] = v
-          }
+          end
 
-          args.each_with_index { |a, index|
+          args.each_with_index do |a, index|
             @_init_let_variables[a.object_id] = param_types[index][1].to_s if param_types.size == 2
-          }
+          end
 
           self.class._add_instances(self)
         end
@@ -95,7 +86,7 @@ module Pretentious
         end
 
         def include_for_tests(method_list = [])
-          @_methods_for_test = @_methods_for_test + method_list
+          @_methods_for_test += method_list
         end
 
         def let_variables
@@ -119,11 +110,11 @@ module Pretentious
         end
 
         def ==(other)
-          @_instance==other
+          @_instance == other
         end
 
         def kind_of?(klass)
-          @_instance.kind_of? klass
+          @_instance.is_a? klass
         end
 
         def methods
@@ -158,7 +149,7 @@ module Pretentious
 
           def replace_procs_with_recorders(args)
             (0..args.size).each do |index|
-              if (args[index].kind_of? Proc)
+              if args[index].kind_of? Proc
                 args[index] = Pretentious::RecordedProc.new(args[index]) {}
               end
             end
@@ -169,12 +160,12 @@ module Pretentious
           end
 
           def _is_stub?
-            @_is_stub = @_is_stub || false
+            @_is_stub ||= false
             @_is_stub
           end
 
           def _add_instances(instance)
-            @_instances = @_instances || []
+            @_instances ||= []
             @_instances << instance unless @_instances.include? instance
           end
 
@@ -191,7 +182,7 @@ module Pretentious
           end
 
           def _add_instances(instance)
-            @_instances = @_instances || []
+            @_instances ||= []
             @_instances << instance unless @_instances.include? instance
           end
 
@@ -205,14 +196,13 @@ module Pretentious
           end
 
           def _call_method(target, method_sym, *arguments, &block)
-
             klass = nil
             begin
               klass = _get_standin_class
             rescue NameError=>e
               result = nil
               target.instance_exec do
-                result = if (@_instance.methods.include? method_sym)
+                result = if @_instance.methods.include? method_sym
                   @_instance.send(method_sym, *arguments, &block)
                 else
                   @_instance.send(:method_missing, method_sym, *arguments, &block)
@@ -226,84 +216,76 @@ module Pretentious
             is_stub = _is_stub?
 
             target.instance_exec do
-              @_method_calls = @_method_calls || []
-              @_method_calls_by_method = @_method_calls_by_method || {}
-              @_methods_for_test = @_methods_for_test || []
-              @_let_variables = @_let_variables || {}
+              @_method_calls ||= []
+              @_method_calls_by_method ||= {}
+              @_methods_for_test ||= []
+              @_let_variables ||= {}
 
               v_locals = caller_context.eval('local_variables')
 
-              v_locals.each { |v|
-                variable_value = caller_context.eval("#{v.to_s}")
-                  @_let_variables[variable_value.object_id] = v
+              v_locals.each do |v|
+                variable_value = caller_context.eval("#{v}")
+                @_let_variables[variable_value.object_id] = v
+              end
+
+              klass.replace_procs_with_recorders(arguments)
+
+              info_block = {}
+              info_block[:method] = method_sym
+              info_block[:params] = arguments
+
+              recorded_proc = block ? RecordedProc.new(block, true) : nil
+
+              info_block[:block] = recorded_proc
+
+              info_block[:names] = @_instance.method(method_sym).parameters
+
+              begin
+
+                unless is_stub
+                  current_context = { calls: [] }
+                  info_block[:context] = current_context
+
+                  Thread.current._push_context(current_context)
+                end
+
+                if @_instance.methods.include? method_sym
+                  result = @_instance.send(method_sym, *arguments, &recorded_proc)
+                else
+                  result = @_instance.send(:method_missing, method_sym, *arguments, &recorded_proc)
+                end
+
+                Thread.current._pop_context unless is_stub
+
+                # methods that end with = are a special case with return values
+                if method_sym.to_s.end_with? '='
+                  info_block[:result] = arguments[0]
+                else
+                  info_block[:result] = result
+                end
+              rescue StandardError => e
+                info_block[:result] = e
+              end
+
+              if is_stub
+                info_block[:class] = test_class
+                Thread.current._all_context.each { |mock_context|
+                  mock_context[:calls] << info_block if mock_context
                 }
+              end
 
-                klass.replace_procs_with_recorders(arguments)
+              @_method_calls << info_block
 
-                info_block = {}
-                info_block[:method] = method_sym
-                info_block[:params] = arguments
+              if @_method_calls_by_method[method_sym].nil?
+                @_method_calls_by_method[method_sym] = []
+              end
 
-                recordedProc = if (block)
-                            RecordedProc.new(block, true)
-                           else
-                             nil
-                           end
-                info_block[:block] = recordedProc
-
-                info_block[:names] = @_instance.method(method_sym).parameters
-
-                begin
-
-                  unless is_stub
-                    current_context = { calls: [] }
-                    info_block[:context] = current_context
-
-                    Thread.current._push_context(current_context)
-                  end
-
-                  if (@_instance.methods.include? method_sym)
-                    result = @_instance.send(method_sym, *arguments, &recordedProc)
-                  else
-                    result = @_instance.send(:method_missing, method_sym, *arguments, &recordedProc)
-                  end
-
-                  Thread.current._pop_context unless is_stub
-
-                  # methods that end with = are a special case with return values
-                  if method_sym.to_s.end_with? '='
-                    info_block[:result] = arguments[0]
-                  else
-                    info_block[:result] = result
-                  end
-
-                rescue Exception=>e
-                  info_block[:result] = e
-                rescue StandardError=>e
-                  info_block[:result] = e
-                end
-
-                if is_stub
-                  info_block[:class] = test_class
-                  Thread.current._all_context.each { |mock_context|
-                    mock_context[:calls] << info_block if mock_context
-                  }
-                end
-
-                @_method_calls << info_block
-
-                if (@_method_calls_by_method[method_sym].nil?)
-                  @_method_calls_by_method[method_sym] = []
-                end
-
-                @_method_calls_by_method[method_sym] << info_block
-                raise e if (e.kind_of? Exception)
-                result
+              @_method_calls_by_method[method_sym] << info_block
+              fail e if e.is_a? Exception
+              result
             end
           end
-
         end
-
       end
 
       newStandInKlass.class_exec do
