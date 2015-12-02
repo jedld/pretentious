@@ -259,14 +259,16 @@ modifying source codes. This is useful for testing code embedded inside framewor
 "example" is already embedded inside existing code.
 
 For example lets say you want to generate tests for UserAuthenticaion that is used inside the
-login method inside the UsersController inside a rails app. You'd simply define like below:
+login method inside the UsersController inside a Rails app. You'd simply define like below:
 
 
 ```ruby
 # initializers/pretentious.rb
 
-Pretentious.on(UsersController).method_called(:login).spec_for(UserAuthentication) #RSPEC
-Pretentious.on(UsersController).method_called(:login, :logout, ...).minitest_for(UserAuthentication) #minitest
+if Rails.env.test? #IMPORTANT don't run this when you don't need it!
+  Pretentious.on(UsersController).method_called(:login).spec_for(UserAuthentication) #RSPEC
+  Pretentious.on(UsersController).method_called(:login, :logout, ...).minitest_for(UserAuthentication) #minitest
+end
 
 # spec files will be written to the project root
 ```
