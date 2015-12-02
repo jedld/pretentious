@@ -210,6 +210,9 @@ RSpec.describe Digest::MD5 do
 end
 ```
 
+Note: If your test subject is already part of a larger application and would like to capture behavior in the manner that
+the application uses it, please look at [Declarative Generation](#declarative-generation-without-using-example-files).
+
 ## Minitest
 
 The minitest test framework is also supported, simply use Pretentious.minitest_for instead
@@ -279,13 +282,17 @@ You can pass a block for manually handling the output, for example
 ```ruby
 # initializers/pretentious.rb
 
-Pretentious.on(UsersController).method_called(:login).spec_for(UserAuthentication) do |results|
-  puts results[UserAuthentication][:output]
+if Rails.env.test? #IMPORTANT don't run this when you don't need it!
+    Pretentious.on(UsersController).method_called(:login).spec_for(UserAuthentication) do |results|
+      puts results[UserAuthentication][:output]
+    end
 end
 
 # spec files will be written to the project root
 ```
 
+IMPORTANT: If using rails or if it is part of a larger app, make sure to enable this only when you intend to generate specs!
+delete the initializer or comment the code out when it is not needed.
 
 ## Handling complex parameters and object constructors
 
