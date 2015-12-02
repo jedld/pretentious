@@ -85,17 +85,21 @@ module Pretentious
     elsif value.is_a? Symbol
       ":#{value}"
     elsif value.is_a? Hash
-      Pretentious::Deconstructor.pick_name(let_variables, value.object_id, declared_names)
+      Pretentious::Deconstructor.pick_name(let_variables, value.object_id,
+                                           declared_names)
     elsif value.is_a? Pretentious::RecordedProc
-      Pretentious::Deconstructor.pick_name(let_variables, value.target_proc.object_id, declared_names)
+      Pretentious::Deconstructor.pick_name(let_variables,
+                                           value.target_proc.object_id,
+                                           declared_names)
     elsif value.nil?
       'nil'
     elsif Pretentious::Deconstructor.is_primitive?(value)
-      "#{value.to_s}"
+      "#{value}"
     elsif let_variables && let_variables[value.object_id]
-      Pretentious::Deconstructor.pick_name(let_variables, value.object_id, declared_names)
+      Pretentious::Deconstructor.pick_name(let_variables, value.object_id,
+                                           declared_names)
     else
-      "#{value.to_s}"
+      "#{value}"
     end
   end
 
