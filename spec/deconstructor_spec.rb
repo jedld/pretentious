@@ -32,6 +32,25 @@ RSpec.describe Pretentious::Deconstructor do
       expect(output).to eq("a = \"Some type of string\"\n")
     end
 
+    it "deconstructs arrays types" do
+      output = Pretentious.watch do
+        hash = { message: "hello" }
+        arr = [1, 2, 3, "hello", hash, ['subarray', 2, :symbol]]
+        test_class = TestClass1.new(arr)
+        test_class._deconstruct_to_ruby
+      end
+      expect(output).to eq("message = [1, 2, 3, \"hello\", { message: \"hello\" }, [\"subarray\", 2, :symbol]]\ntest_class = TestClass1.new(message)\n")
+    end
+
+    it "deconstructs hash types" do
+      output = Pretentious.watch do
+        hash = { message: "hello", arr: [1, 2, 3], hash: { message2: "msg" } }
+        test_class = TestClass1.new(hash)
+        test_class._deconstruct_to_ruby
+      end
+      expect(output).to eq("message = { message: \"hello\", arr: [1, 2, 3], hash: { message2: \"msg\" } }\ntest_class = TestClass1.new(message)\n")
+    end
+
     it "deconstruct multiple objects" do
       output = Pretentious.watch do
         a = "Some type of string"

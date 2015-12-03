@@ -1,5 +1,5 @@
-require 'pretentious'
+require 'simplecov'
 require 'awesome_print'
 require_relative '../test_classes'
-require 'simplecov'
 SimpleCov.start
+require 'pretentious'
