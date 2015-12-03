@@ -26,4 +26,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "awesome_print"
   spec.add_development_dependency "rubocop", "~> 0.35"
   spec.add_development_dependency "rspec_junit_formatter", '0.2.2'
+  spec.add_development_dependency "simplecov"
 end
