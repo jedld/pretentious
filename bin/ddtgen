@@ -3,54 +3,48 @@
 require 'pretentious'
 require 'optparse'
 require 'ripper'
-require "readline"
+require 'readline'
 require 'json'
 require 'fileutils'
 
 # ddtgen example.rb -t rspec -o rspec/
 options = OptionParser.new do |o|
   o.banner =
-"Usage: ddtgen FILENAME [options] # Generates tests using the specified example file\n"
-  o.separator ""
+    "Usage: ddtgen FILENAME [options] # Generates tests using the specified example file\n"
+  o.separator ''
   o.separator "options:"
-  o.on('-o','--output-dir','folder to place the files in') { |b| $output_folder = b}
+  o.on('-o', '--output-dir', 'folder to place the files in') { |b| $output_folder = b}
   o.parse!
 end
-
 
 filename = ARGV[0]
 
 if filename.nil?
-  puts "an example file is required."
+  puts 'an example file is required.'
   puts options
   exit(1)
 end
 
-example_body = ""
+example_body = ''
 
 index = 0
 File.open(filename, "r") do |f|
   f.each_line do |line|
-     example_body << "#{line}\n"
+    example_body << "#{line}\n"
   end
 end
 
 eval(example_body, binding, filename, 1)
 
-#collect results
-
-
-Pretentious.last_results.each { |g, result_per_generator|
+# collect results
+Pretentious.last_results.each do |g, result_per_generator|
   puts "#{g}:"
-  result_per_generator.each { |klass, result|
+  result_per_generator.each do |klass, result|
     output_folder = result[:generator].location(output_folder)
     FileUtils.mkdir_p output_folder
     result[:generator].helper(output_folder)
     filename = result[:generator].naming(output_folder, klass)
-    File.open(filename, 'w') {
-        |f| f.write(result[:output])
-    }
+    File.open(filename, 'w') { |f| f.write(result[:output]) }
     puts "#{filename}"
-  }
-}
-
+  end
+end

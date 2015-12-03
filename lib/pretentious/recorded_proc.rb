@@ -1,6 +1,7 @@
 module Pretentious
-
+  # Sublass of Proc that records whatever was passed to it and whatever it returns
   class RecordedProc < Proc
+    attr_reader :target_proc, :return_value
 
     def initialize(target_proc, is_given_block = false)
       @target_proc = target_proc
@@ -14,14 +15,6 @@ module Pretentious
       @given_block
     end
 
-    def target_proc
-      @target_proc
-    end
-
-    def return_value
-      @return_value
-    end
-
     def is_called?
       @called
     end
@@ -31,13 +24,8 @@ module Pretentious
       @args << args
       return_value = @target_proc.call(*args, &block)
 
-      unless @return_value.include? return_value
-        @return_value << return_value
-      end
-
+      @return_value << return_value unless @return_value.include? return_value
       return_value
     end
-
   end
-
 end

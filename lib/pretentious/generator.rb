@@ -10,24 +10,24 @@ module Pretentious
     end
 
     def self.impostor_for(module_space, klass)
-      newStandInKlass = Class.new()
+      new_standin_klass = Class.new()
       name = klass.name
 
       #return if already an impostor
       return klass if (klass.respond_to?(:test_class))
 
-      module_space.const_set "#{name.split('::').last}Impostor", newStandInKlass
+      module_space.const_set "#{name.split('::').last}Impostor", new_standin_klass
 
-      newStandInKlass.class_eval("
+      new_standin_klass.class_eval("
         def setup_instance(*args, &block)
           @_instance = #{klass.name}_ddt.new(*args, &block)
         end
       ")
 
-      newStandInKlass.class_eval("
+      new_standin_klass.class_eval("
         class << self
           def _get_standin_class
-            #{newStandInKlass}
+            #{new_standin_klass}
           end
 
           def test_class
@@ -40,7 +40,7 @@ module Pretentious
         end
       ")
 
-      newStandInKlass.class_exec do
+      new_standin_klass.class_exec do
         def initialize(*args, &block)
           @_instance_init = { object_id: object_id, params: [], block: nil }
 
@@ -288,15 +288,13 @@ module Pretentious
         end
       end
 
-      newStandInKlass.class_exec do
+      new_standin_klass.class_exec do
         def method_missing(method_sym, *arguments, &block)
-          #puts "#{method_sym} #{arguments}"
           self.class._call_method(self, method_sym, *arguments, &block)
         end
 
         class << self
             def method_missing(method_sym, *arguments, &block)
-              #puts "method #{method_sym.to_s}"
               _add_instances(self)
               @_instance = _current_old_class
               _call_method(self, method_sym, *arguments, &block)
@@ -304,7 +302,7 @@ module Pretentious
         end
       end
 
-      newStandInKlass
+      new_standin_klass
     end
 
     def self.replace_class(klass, stub = false)
@@ -313,27 +311,27 @@ module Pretentious
 
       module_space = Object
 
-      if (klass_name_parts.size > 0)
+      if klass_name_parts.size > 0
         klass_name_parts.each do |part|
           module_space = module_space.const_get(part)
         end
       end
 
-      newStandInKlass = impostor_for module_space, klass
-      newStandInKlass._set_is_stub if stub
+      new_standin_klass = impostor_for module_space, klass
+      new_standin_klass._set_is_stub if stub
 
-      module_space.send(:remove_const,last_part.to_sym)
+      module_space.send(:remove_const, last_part.to_sym)
       module_space.const_set("#{last_part}_ddt", klass)
-      module_space.const_set("#{last_part}", newStandInKlass)
+      module_space.const_set("#{last_part}", new_standin_klass)
 
-      [module_space, klass, last_part, newStandInKlass]
+      [module_space, klass, last_part, new_standin_klass]
     end
 
     def self.restore_class(module_space, klass, last_part)
-      module_space.send(:remove_const,"#{last_part}Impostor".to_sym)
-      module_space.send(:remove_const,"#{last_part}".to_sym)
+      module_space.send(:remove_const, "#{last_part}Impostor".to_sym)
+      module_space.send(:remove_const, "#{last_part}".to_sym)
       module_space.const_set(last_part, klass)
-      module_space.send(:remove_const,"#{last_part}_ddt".to_sym)
+      module_space.send(:remove_const, "#{last_part}_ddt".to_sym)
     end
 
     def self.generate_for(*klasses_or_instances, &block)
@@ -341,18 +339,18 @@ module Pretentious
       klasses = []
       mock_dict = {}
 
-      klasses_or_instances.each { |klass_or_instance|
+      klasses_or_instances.each do |klass_or_instance|
         klass = klass_or_instance.class == Class ? klass_or_instance : klass_or_instance.class
         klasses << replace_class(klass)
 
         mock_klasses = []
 
         klass._get_mock_classes.each do |mock_klass|
-          mock_klasses << replace_class(mock_klass , true)
+          mock_klasses << replace_class(mock_klass, true)
         end unless klass._get_mock_classes.nil?
 
         mock_dict[klass] = mock_klasses
-      }
+      end
 
       watch_new_instances
 
@@ -360,34 +358,30 @@ module Pretentious
 
       unwatch_new_instances
 
-      klasses.each { |module_space, klass, last_part, newStandInKlass|
-
-        #restore the previous class
+      klasses.each do |module_space, klass, last_part, new_standin_klass|
+        # restore the previous class
         restore_class module_space, klass, last_part
 
-        mock_dict[klass].each do |_module_space, _klass, _last_part, _newStandInKlass|
-          restore_class _module_space, _klass, _last_part
+        mock_dict[klass].each do |mock_module_space, mock_klass, mock_last_part, mock_new_standin_klass|
+          restore_class mock_module_space, mock_klass, mock_last_part
         end
 
         generator = test_generator.new
         generator.begin_spec(klass)
         num = 1
 
-        newStandInKlass._instances.each do |instance|
+        new_standin_klass._instances.each do |instance|
           generator.generate(instance, num)
-          num+=1
-        end unless newStandInKlass._instances.nil?
+          num += 1
+        end unless new_standin_klass._instances.nil?
 
         generator.end_spec
 
         result = all_results[klass]
-        if result.nil?
-          all_results[klass] = []
-        end
+        all_results[klass] = [] if result.nil?
 
-        all_results[klass] = {output: generator.output, generator: generator.class }
-
-      } unless klasses.nil?
+        all_results[klass] = { output: generator.output, generator: generator.class }
+      end unless klasses.nil?
 
       all_results
     end
@@ -406,18 +400,16 @@ module Pretentious
           end
           @_variable_names = {}
 
-          params = if (self.respond_to? :test_class )
-                      test_class.instance_method(:initialize).parameters
-                    else
-                      self.class.instance_method(:initialize).parameters
+          params = if self.respond_to? :test_class
+                     test_class.instance_method(:initialize).parameters
+                   else
+                     self.class.instance_method(:initialize).parameters
                    end
           @_init_arguments[:params_types] = params
 
           args.each_with_index do |arg, index|
             p = params[index]
-            if p.size > 1
-              @_variable_names[arg.object_id] = p[1].to_s
-            end unless p.nil?
+            @_variable_names[arg.object_id] = p[1].to_s if p && p.size > 1
           end unless args.nil?
 
         end
@@ -427,7 +419,7 @@ module Pretentious
         end
 
         def _deconstruct
-          Pretentious::Deconstructor.new().deconstruct([], self)
+          Pretentious::Deconstructor.new.deconstruct([], self)
         end
 
         def _deconstruct_to_ruby(var_name = nil, indentation = 0)
@@ -436,45 +428,43 @@ module Pretentious
           caller_context = binding.of_caller(1)
           v_locals = caller_context.eval('local_variables')
 
-          v_locals.each { |v|
-            variable_value = caller_context.eval("#{v.to_s}")
-            if self.object_id == variable_value.object_id
+          v_locals.each do |v|
+            variable_value = caller_context.eval("#{v}")
+            if object_id == variable_value.object_id
               variable_names[variable_value.object_id] = v
             end
-          }
+          end
 
-          variable_names = _variable_map.merge({self.object_id => var_name}) unless var_name.nil?
-          Pretentious::Deconstructor.new().deconstruct_to_ruby(indentation, variable_names, {}, {}, [], self)
+          variable_names = _variable_map.merge(object_id => var_name) unless var_name.nil?
+          Pretentious::Deconstructor.new.deconstruct_to_ruby(indentation, variable_names, {}, {}, [], self)
         end
 
       end
 
-      #make sure it is set only once
-      if (!Class.instance_methods.include?(:_ddt_old_new))
+      # make sure it is set only once
+      unless Class.instance_methods.include?(:_ddt_old_new)
         Class.class_eval do
           alias_method :_ddt_old_new, :new
 
           def new(*args, &block)
             instance = _ddt_old_new(*args, &block)
 
-            #rescues for handling native objects that don't have standard methoods
+            # rescues for handling native objects that don't have standard methods
             begin
-              if (instance.respond_to?(:_set_init_arguments))
+              if instance.respond_to?(:_set_init_arguments)
                 instance._set_init_arguments(*args, &block)
               end
-            rescue NoMethodError=>e
+            rescue NoMethodError
               begin
                 instance._set_init_arguments(*args, &block)
-              rescue NoMethodError=>e2
+              rescue NoMethodError
               end
             end
 
             instance
           end
-
         end
       end
-
     end
 
     def self.clean_watches
@@ -482,7 +472,7 @@ module Pretentious
     end
 
     def self.unwatch_new_instances
-      if (Class.respond_to?(:_ddt_old_new))
+      if Class.respond_to?(:_ddt_old_new)
         Class.class_eval do
           remove_method :new
           alias_method :new, :_ddt_old_new
@@ -490,7 +480,5 @@ module Pretentious
         end
       end
     end
-
   end
-
 end

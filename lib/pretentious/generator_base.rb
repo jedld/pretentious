@@ -1,6 +1,16 @@
 module Pretentious
   # base class for spec generators
   class GeneratorBase
+    def initialize(options = {})
+      @deconstructor = Pretentious::Deconstructor.new
+      indentation_count = options[:indentation] || 2
+      @output_buffer = ''
+      @_indentation = ''
+      indentation_count.times do
+        @_indentation << ' '
+      end
+    end
+
     def buffer(line, level = 0)
       @output_buffer << "#{indentation(level)}#{line}\n"
     end
@@ -27,6 +37,20 @@ module Pretentious
       end
 
       [top_declarations, declarations, variable_map, global_declared_names]
+    end
+
+    protected
+
+    def indentation(level)
+      buffer = ''
+      level.times do
+        buffer << @_indentation
+      end
+      buffer
+    end
+
+    def whitespace(level = 0)
+      @output_buffer << "#{indentation(level)}\n"
     end
   end
 end
