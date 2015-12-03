@@ -33,7 +33,7 @@ module Pretentious
 
         buffer('end', 0)
       else
-        buffer("class #{test_instance.test_class.name}Scenario#{instance_count} < #{@test_class.name}Test",0)
+        buffer("class #{test_instance.test_class.name}Scenario#{instance_count} < #{@test_class.name}Test", 0)
 
         buffer('def setup', 1)
 
@@ -44,7 +44,7 @@ module Pretentious
                                       '@fixture', method_calls, variable_map,
                                       global_variable_declaration,
                                       top_declarations)
-        buffer_inline(@deconstructor.build_output(3 * @_indentation.length,
+        buffer_inline(@deconstructor.build_output(2 * @_indentation.length,
                                                   variable_map,
                                                   declarations,
                                                   global_variable_declaration, {}))
@@ -136,7 +136,7 @@ module Pretentious
         end
         buffer_to_string(output, minitest_stub, 0)
       else
-        buffer_to_string(output, generate_test_scenarios(fixture, method_calls, context_prefix, let_variables, declaration, 2), 0)
+        buffer_inline_to_string(output, generate_test_scenarios(fixture, method_calls, context_prefix, let_variables, declaration, 2), 0)
       end
 
       buffer_to_string(output, 'end', 1)
@@ -157,7 +157,7 @@ module Pretentious
                                ''
                              end
 
-          str << "#{indentation}##{context_prefix}#{k} #{params_desc_str} should return #{block[:result]}\n"
+          str << "#{indentation}# #{context_prefix}#{k} #{params_desc_str} should return #{block[:result]}\n"
           str << "#{indentation}#{generate_expectation(fixture, k, let_variables, declaration, block[:params], block[:block], block[:result])}\n\n"
         end
       end

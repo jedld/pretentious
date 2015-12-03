@@ -9,24 +9,19 @@ RSpec.describe TestClassForMocks do
     end
 
     it 'should pass current expectations' do
-
-      var_2170170000 = [2, 3, 4, 5]
+      var_2174823280 = [2, 3, 4, 5]
 
       allow_any_instance_of(TestMockSubClass).to receive(:test_method).and_return("a return string")
       allow_any_instance_of(TestMockSubClass).to receive(:increment_val).and_return(2, 3, 4, 5)
 
       # TestClassForMocks#method_with_assign= when passed params2 = "test" should return test
-      expect( @fixture.method_with_assign=("test") ).to eq("test")
-
+      expect(@fixture.method_with_assign=("test")).to eq("test")
       # TestClassForMocks#method_with_usage  should return a return string
-      expect( @fixture.method_with_usage ).to eq("a return string")
-
+      expect(@fixture.method_with_usage).to eq("a return string")
       # TestClassForMocks#method_with_usage2  should return [2, 3, 4, 5]
-      expect( @fixture.method_with_usage2 ).to eq([2, 3, 4, 5])
-
+      expect(@fixture.method_with_usage2).to eq([2, 3, 4, 5])
       # TestClassForMocks#method_with_usage4  should return a return string
-      expect( @fixture.method_with_usage4 ).to eq("a return string")
-
+      expect(@fixture.method_with_usage4).to eq("a return string")
     end
 
   end
@@ -37,14 +32,12 @@ RSpec.describe TestClassForMocks do
     end
 
     it 'should pass current expectations' do
+      var_2158079260 = { val: 1, str: "hello world", message: "a message" }
 
-      var_2158341220 = {val: 1, str: "hello world", message: "a message"}
-
-      allow_any_instance_of(TestMockSubClass).to receive(:return_hash).and_return(var_2158341220)
+      allow_any_instance_of(TestMockSubClass).to receive(:return_hash).and_return(var_2158079260)
 
       # TestClassForMocks#method_with_usage3 when passed message = "a message" should return {:val=>1, :str=>"hello world", :message=>"a message"}
-      expect( @fixture.method_with_usage3("a message") ).to eq(var_2158341220)
-
+      expect(@fixture.method_with_usage3("a message")).to eq(var_2158079260)
     end
 
   end

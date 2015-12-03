@@ -54,7 +54,7 @@ module Pretentious
     def generate_expectation(fixture, method, let_variables, declarations, params, block, result)
       output = ''
       block_source = if !block.nil? && block.is_a?(Pretentious::RecordedProc)
-                        get_block_source(block, let_variables, declarations, @_indentation * 3)
+                      get_block_source(block, let_variables, declarations, @_indentation * 3)
                      else
                        ''
       end
@@ -71,14 +71,14 @@ module Pretentious
       if result.is_a? Exception
         buffer_to_string(output, "expect { #{statement} }.to #{pick_matcher(result, let_variables, declarations)}",3)
       else
-        buffer_to_string(output, "expect( #{statement} ).to #{pick_matcher(result, let_variables, declarations)}",3)
+        buffer_to_string(output, "expect(#{statement}).to #{pick_matcher(result, let_variables, declarations)}",3)
       end
       output
     end
 
     def generate_specs(context_prefix, fixture, method_calls, let_variables, declaration, previous_declaration)
       output = ''
-      buffer_to_string(output, "it 'should pass current expectations' do\n", 2)
+      buffer_to_string(output, "it 'should pass current expectations' do", 2)
       # collect all params
       params_collection = []
       mocks_collection = {}
@@ -133,7 +133,7 @@ module Pretentious
 
           buffer_to_string(output, "# #{context_prefix}#{k} #{params_desc_str} should return #{block[:result]}", 3)
 
-          buffer_to_string(output, generate_expectation(fixture, k, let_variables, declaration, block[:params], block[:block], block[:result]))
+          buffer_inline_to_string(output, generate_expectation(fixture, k, let_variables, declaration, block[:params], block[:block], block[:result]))
         end
       end
 
@@ -199,7 +199,9 @@ module Pretentious
       deconstructor = Pretentious::Deconstructor.new
 
       args = remove_primitives(args, variable_map)
-      deconstructor.deconstruct_to_ruby(level, variable_map, declarations, top_level_declaration, method_call_collection, *args)
+      deconstructor.deconstruct_to_ruby(level, variable_map, declarations,
+                                        top_level_declaration,
+                                        method_call_collection, *args)
     end
 
     def remove_primitives(args, let_lookup)
@@ -214,7 +216,6 @@ module Pretentious
         else
           params << Pretentious.value_ize(arg, let_variables, declared_names)
         end
-
       end
       params.join(', ')
     end

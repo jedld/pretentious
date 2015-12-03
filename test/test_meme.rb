@@ -7,16 +7,15 @@ end
 
 class MemeScenario1 < MemeTest
   def setup
-      @fixture = Meme.new
+    @fixture = Meme.new
   end
 
   def test_current_expectation
-    #Meme#i_can_has_cheezburger?  should return OHAI!
+    # Meme#i_can_has_cheezburger?  should return OHAI!
     assert_equal "OHAI!", @fixture.i_can_has_cheezburger?
 
-    #Meme#will_it_blend?  should return YES!
+    # Meme#will_it_blend?  should return YES!
     assert_equal "YES!", @fixture.will_it_blend?
-
 
   end
 end

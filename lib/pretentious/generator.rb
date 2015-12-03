@@ -1,4 +1,5 @@
 module Pretentious
+  # A class that generates specs by analyzing how an object is used
   class Generator
 
     def self.test_generator=(generator)
@@ -10,11 +11,11 @@ module Pretentious
     end
 
     def self.impostor_for(module_space, klass)
-      new_standin_klass = Class.new()
+      new_standin_klass = Class.new
       name = klass.name
 
-      #return if already an impostor
-      return klass if (klass.respond_to?(:test_class))
+      # return if already an impostor
+      return klass if klass.respond_to?(:test_class)
 
       module_space.const_set "#{name.split('::').last}Impostor", new_standin_klass
 
@@ -203,10 +204,11 @@ module Pretentious
               result = nil
               target.instance_exec do
                 result = if @_instance.methods.include? method_sym
-                  @_instance.send(method_sym, *arguments, &block)
-                else
-                  @_instance.send(:method_missing, method_sym, *arguments, &block)
-                end
+                           @_instance.send(method_sym, *arguments, &block)
+                         else
+                           @_instance.send(:method_missing, method_sym,
+                                           *arguments, &block)
+                         end
               end
               return result
             end
@@ -269,9 +271,9 @@ module Pretentious
 
               if is_stub
                 info_block[:class] = test_class
-                Thread.current._all_context.each { |mock_context|
+                Thread.current._all_context.each do |mock_context|
                   mock_context[:calls] << info_block if mock_context
-                }
+                end
               end
 
               @_method_calls << info_block

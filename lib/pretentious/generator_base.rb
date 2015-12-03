@@ -19,6 +19,10 @@ module Pretentious
       buffer << "#{indentation(level)}#{line}\n"
     end
 
+    def buffer_inline_to_string(buffer, line, level = 0)
+      buffer << "#{indentation(level)}#{line}"
+    end
+
     def buffer_inline(line, level = 0)
       @output_buffer << "#{indentation(level)}#{line}"
     end

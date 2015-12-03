@@ -21,7 +21,7 @@ module Pretentious
 
     def dfs_array(arr, refs)
       value = []
-      arr.each { |v|
+      arr.each do |v|
         if Pretentious::Deconstructor.primitive?(v)
           value << v
         elsif v.is_a? Hash
@@ -33,7 +33,7 @@ module Pretentious
           value << Reference.new(dfs(v.tree))
         elsif value << v
         end
-      }
+      end
       value
     end
 
@@ -59,7 +59,10 @@ module Pretentious
     def dfs(tree)
       if !tree.is_a? Hash
         value = tree
-        definition = { id: value.object_id, class: tree.class, value: value, used_by: [] }
+        definition = { id: value.object_id,
+                       class: tree.class,
+                       value: value,
+                       used_by: [] }
         unless @dependencies.include? value.object_id
           @dependencies[value.object_id] = definition
           @declaration_order << definition
@@ -245,9 +248,9 @@ module Pretentious
 
     def self.proc_body(proc, let_variables, declared, indentation = '')
       if proc.return_value.size == 1
-        "#{indentation * 2}#{Pretentious.value_ize(proc.return_value[0], let_variables, declared)}\n"
+        "#{indentation}  #{Pretentious.value_ize(proc.return_value[0], let_variables, declared)}\n"
       else
-        "#{indentation * 2}\# Variable return values ... can't figure out what goes in here...\n"
+        "#{indentation}  \# Variable return values ... can't figure out what goes in here...\n"
       end
     end
 
@@ -354,7 +357,7 @@ module Pretentious
     end
 
     def output_hash(hash, variable_map, declared_names)
-      output_buffer = '{'
+      output_buffer = '{ '
       hash_elements = []
       hash.each { |k, v|
         value = Pretentious.value_ize(v, variable_map, declared_names)
@@ -373,7 +376,7 @@ module Pretentious
         end
       }
       output_buffer << hash_elements.join(', ')
-      output_buffer << '}'
+      output_buffer << ' }'
       output_buffer
     end
 
