@@ -8,11 +8,11 @@ end
 class TestClass4Scenario1 < TestClass4Test
   def setup
     var_8 = nil
-    var_2168677940 = Proc.new { 
+    var_13645460 = proc { 
       # Variable return values ... can't figure out what goes in here...
     }
 
-    @fixture = TestClass4.new(&var_2168677940)
+    @fixture = TestClass4.new(&var_13645460)
   end
 
   def test_current_expectation

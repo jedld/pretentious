@@ -29,21 +29,55 @@ module Pretentious
 
     def setup_fixture(fixture)
       variable_map = fixture.let_variables.merge(fixture.object_id => '@fixture')
-      top_declarations = {}
-      global_declared_names = {}
+      context = Pretentious::Context.new(variable_map)
+      declarations, _dependencies = @deconstructor.generate_declarations(context, [], fixture)
 
-      declarations, _dependencies = @deconstructor.generate_declarations(variable_map, [], fixture)
-
-      declarations[:declaration].each do |d|
-        if (d[:used_by] != :inline)
-          top_declarations[d[:id]] = Pretentious::Deconstructor.pick_name(variable_map, d[:id], global_declared_names)
-        end
-      end
-
-      [top_declarations, declarations, variable_map, global_declared_names]
+      [context, declarations]
     end
 
     protected
+
+    def declare_dependencies(context, args, level)
+      deconstructor = Pretentious::Deconstructor.new
+
+      args = remove_primitives(args, context.variable_map)
+      deconstructor.deconstruct_to_ruby(context, level * @_indentation.length, *args)
+    end
+
+    def remove_primitives(args, let_lookup)
+      args.select { |a| let_lookup.include?(a.object_id) || !Pretentious::Deconstructor.primitive?(a) }
+    end
+
+    def params_generator(context, args)
+      params = []
+      args.each do |arg|
+        if context.variable_map[arg.object_id]
+          params << context.pick_name(arg.object_id)
+        else
+          params << context.value_of(arg)
+        end
+      end
+      params.join(', ')
+    end
+
+    def desc_params(block)
+      params = []
+      args = block[:params]
+      names = block[:names]
+      # puts args.inspect
+      return '' if args.nil?
+
+      args.each_with_index do |arg, index|
+        param_name = names[index][1].to_s
+        arg_value = (arg.is_a? String) ? "#{arg.dump}" : "#{arg}"
+        if param_name.empty?
+          params << "#{arg_value}"
+        else
+          params << "#{param_name} = #{arg_value}"
+        end
+      end
+      params.join(' ,')
+    end
 
     def indentation(level)
       buffer = ''

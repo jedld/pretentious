@@ -8,7 +8,7 @@ end
 
 class TestClass
 
-  def initialize
+  def initialize(dep = nil)
     @test_class2 = TestSubClass.new
   end
 

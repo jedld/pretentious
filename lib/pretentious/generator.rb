@@ -437,10 +437,11 @@ module Pretentious
             end
           end
 
-          variable_names = _variable_map.merge(object_id => var_name) unless var_name.nil?
-          Pretentious::Deconstructor.new.deconstruct_to_ruby(indentation, variable_names, {}, {}, [], self)
-        end
+          context = Pretentious::Context.new(_variable_map.merge!(variable_names))
+          context.register(object_id, var_name) if var_name
 
+          Pretentious::Deconstructor.new.deconstruct_to_ruby(context, indentation, self)
+        end
       end
 
       # make sure it is set only once

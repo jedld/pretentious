@@ -20,16 +20,14 @@ module Pretentious
     end
 
     def generate(test_instance, instance_count)
-      global_variable_declaration = {}
       if test_instance.is_a? Class
         buffer("class #{test_instance.test_class.name}Scenario#{instance_count} < #{@test_class.name}Test", 0)
 
         # class methods
         class_method_calls = test_instance.method_calls_by_method
-        buffer(generate_specs("#{test_instance.test_class.name}::",
-                              test_instance.test_class.name, class_method_calls,
-                              test_instance.let_variables,
-                              global_variable_declaration, {}))
+        context = Pretentious::Context.new(test_instance.let_variables)
+        buffer(generate_specs(context, "#{test_instance.test_class.name}::",
+                              test_instance.test_class.name, class_method_calls))
 
         buffer('end', 0)
       else
@@ -37,17 +35,13 @@ module Pretentious
 
         buffer('def setup', 1)
 
-        top_declarations, declarations, variable_map, _global_declared_names = setup_fixture(test_instance)
+        context, declarations = setup_fixture(test_instance)
 
         method_calls = test_instance.method_calls_by_method
-        specs_buffer = generate_specs("#{test_instance.test_class.name}#",
-                                      '@fixture', method_calls, variable_map,
-                                      global_variable_declaration,
-                                      top_declarations)
-        buffer_inline(@deconstructor.build_output(2 * @_indentation.length,
-                                                  variable_map,
-                                                  declarations,
-                                                  global_variable_declaration, {}))
+        specs_buffer = generate_specs(context.subcontext(declarations[:declaration]), "#{test_instance.test_class.name}#",
+                                      '@fixture', method_calls)
+        context.declared_names = {}
+        buffer_inline(@deconstructor.build_output(context, 2 * @_indentation.length, declarations))
         buffer('end', 1)
         whitespace
 
@@ -64,21 +58,20 @@ module Pretentious
       "func_#{method}(#{Pretentious::Deconstructor.block_params_generator(block)})"
     end
 
-    def get_block_source(block, let_variables, declared, _indentation)
-      " &#{Pretentious::Deconstructor.pick_name(let_variables,
-                                                block.target_proc.object_id, declared)}"
+    def get_block_source(context, block)
+      " &#{context.pick_name(block.target_proc.object_id)}"
     end
 
-    def generate_expectation(fixture, method, let_variables, declarations, params, block, result)
+    def generate_expectation(context, fixture, method, params, block, result)
       str = ''
       block_source = if !block.nil? && block.is_a?(Pretentious::RecordedProc)
-                       get_block_source(block, let_variables, declarations, @_indentation * 2)
+                       get_block_source(context, block)
                      else
                        ''
                      end
 
       statement = if params.size > 0
-                    "#{fixture}.#{method}(#{params_generator(params, let_variables, declarations)})#{block_source}"
+                    "#{fixture}.#{method}(#{params_generator(context, params)})#{block_source}"
                   else
                     stmt = []
                     m_stmt = "#{fixture}.#{method}"
@@ -88,14 +81,14 @@ module Pretentious
                   end
 
       if result.is_a? Exception
-        str << pick_matcher(statement, result, let_variables, declarations)
+        str << pick_matcher(context, statement, result)
       else
-        str << pick_matcher(statement, result, let_variables, declarations)
+        str << pick_matcher(context, statement, result)
       end
       str
     end
 
-    def generate_specs(context_prefix, fixture, method_calls, let_variables, declaration, previous_declaration)
+    def generate_specs(context, context_prefix, fixture, method_calls)
       output = ''
       buffer_to_string(output, 'def test_current_expectation', 1)
       # collect all params
@@ -124,30 +117,29 @@ module Pretentious
       end
 
       if params_collection.size > 0
-        deps = declare_dependencies(params_collection, let_variables, 2, declaration, previous_declaration)
+        deps = declare_dependencies(context, params_collection, 2)
         buffer_to_string(output, deps) if deps.strip != ''
       end
 
       if mocks_collection.keys.size > 0
-        minitest_stub = generate_minitest_stub(mocks_collection,
-                                               let_variables, 2, declaration) do |indentation|
-          generate_test_scenarios(fixture, method_calls, context_prefix,
-                                  let_variables, declaration, indentation)
+        minitest_stub = generate_minitest_stub(context, mocks_collection, 2) do |indentation|
+          generate_test_scenarios(context, fixture, method_calls, context_prefix, indentation)
         end
         buffer_to_string(output, minitest_stub, 0)
       else
-        buffer_inline_to_string(output, generate_test_scenarios(fixture, method_calls, context_prefix, let_variables, declaration, 2), 0)
+        buffer_inline_to_string(output, generate_test_scenarios(context, fixture, method_calls, context_prefix, 2), 0)
       end
 
       buffer_to_string(output, 'end', 1)
       output
     end
 
-    def generate_test_scenarios(fixture, method_calls, context_prefix, let_variables, declaration, indentation_level)
-      str = ''
+    def generate_test_scenarios(context, fixture, method_calls, context_prefix, indentation_level)
+      expectations = []
       indentation = ''
       indentation_level.times { indentation << @_indentation }
       method_calls.each_key do |k|
+        str = ''
         info_blocks_arr = method_calls[k]
 
         info_blocks_arr.each do |block|
@@ -158,20 +150,21 @@ module Pretentious
                              end
 
           str << "#{indentation}# #{context_prefix}#{k} #{params_desc_str} should return #{block[:result]}\n"
-          str << "#{indentation}#{generate_expectation(fixture, k, let_variables, declaration, block[:params], block[:block], block[:result])}\n\n"
+          str << "#{indentation}#{generate_expectation(context, fixture, k, block[:params], block[:block], block[:result])}\n\n"
+          expectations << str
         end
       end
-      str
+      expectations.join("\n")
     end
 
-    def generate_minitest_stub(mocks_collection, let_variables, indentation_level, declaration, &block)
+    def generate_minitest_stub(context, mocks_collection, indentation_level, &block)
       str = ''
       current_indentation = indentation_level
 
       mocks_collection.each do |_k, values|
         indentation = ''
         current_indentation.times { indentation << @_indentation }
-        vals = values.collect { |v| Pretentious.value_ize(v[:result], let_variables, declaration) }
+        vals = values.collect { |v| context.value_of(v[:result]) }
         str << "#{indentation}#{values[0][:class]}.stub_any_instance(:#{values[0][:method]}, #{vals[0]}) do\n"
         current_indentation += 1
       end
@@ -189,7 +182,7 @@ module Pretentious
       str
     end
 
-    def pick_matcher(statement, result, let_variables, declarations)
+    def pick_matcher(context, statement, result)
       if result.is_a? TrueClass
         "assert #{statement}"
       elsif result.is_a? FalseClass
@@ -198,56 +191,11 @@ module Pretentious
         "assert_nil #{statement}"
       elsif result.is_a? Exception
         "assert_raises(#{result.class}) { #{statement} }"
-      elsif let_variables && let_variables[result.object_id]
-        "assert_equal #{Pretentious.value_ize(result, let_variables, declarations)}, #{statement}"
+      elsif context.variable_map[result.object_id]
+        "assert_equal #{context.value_of(result)}, #{statement}"
       else
-        "assert_equal #{Pretentious.value_ize(result, nil, nil)}, #{statement}"
+        "assert_equal #{Pretentious.value_ize(Pretentious::Context.new, result)}, #{statement}"
       end
-    end
-
-    def desc_params(block)
-      params = []
-      args = block[:params]
-      names = block[:names]
-      n = 0
-      # puts args.inspect
-      return '' if args.nil?
-
-      args.each do |arg|
-        param_name = names[n][1].to_s
-        arg_value = (arg.is_a? String) ? "#{arg.dump}" : "#{arg}"
-        if param_name.empty?
-          params << "#{arg_value}"
-        else
-          params << "#{param_name} = #{arg_value}"
-        end
-
-        n += 1
-      end
-      params.join(' ,')
-    end
-
-    def declare_dependencies(args, variable_map, level, declarations, previous_declaration)
-      deconstructor = Pretentious::Deconstructor.new
-
-      args = remove_primitives(args, variable_map)
-      deconstructor.deconstruct_to_ruby(level * @_indentation.length, variable_map, declarations, previous_declaration, [], *args)
-    end
-
-    def remove_primitives(args, let_lookup)
-      args.select { |a| let_lookup.include?(a.object_id) || !Pretentious::Deconstructor.primitive?(a) }
-    end
-
-    def params_generator(args, let_variables, declared_names)
-      params = []
-      args.each do |arg|
-        if !let_variables.nil? && let_variables[arg.object_id]
-          params << Pretentious::Deconstructor.pick_name(let_variables, arg.object_id, declared_names)
-        else
-          params << Pretentious.value_ize(arg, let_variables, declared_names)
-        end
-      end
-      params.join(', ')
     end
 
     def self.location(output_folder)

@@ -7,30 +7,30 @@ end
 
 class TestClass1Scenario1 < TestClass1Test
   def setup
-    @fixture = TestClass1.new("test")
+    @fixture = TestClass1.new('test')
   end
 
   def test_current_expectation
     # TestClass1#message  should return test
-    assert_equal "test", @fixture.message
+    assert_equal 'test', @fixture.message
 
   end
 end
 
 class TestClass1Scenario2 < TestClass1Test
   def setup
-    @another_object = TestClass1.new("test")
-    @message = { hello: "world", test: @another_object, arr_1: [1, 2, 3, 4, 5, @another_object], sub_hash: { yes: true, obj: @another_object } }
+    @another_object = TestClass1.new('test')
+    @message = { hello: 'world', test: @another_object, arr_1: [1, 2, 3, 4, 5, @another_object], sub_hash: { yes: true, obj: @another_object } }
     @fixture = TestClass1.new(@message)
   end
 
   def test_current_expectation
-    var_2156870820 = Proc.new { |message|
+    var_13631520 = proc { |message|
       @message
     }
 
     test_class1 = nil
-    var_2156709000 = Proc.new { 
+    var_13617120 = proc { 
       # Variable return values ... can't figure out what goes in here...
     }
 
@@ -41,14 +41,25 @@ class TestClass1Scenario2 < TestClass1Test
     # TestClass1#print_message  should return 
     assert_nil @fixture.print_message
 
-    # TestClass1#set_block  should return #<Pretentious::RecordedProc:0x00000101199630@example.rb:73>
-    assert_equal var_2156870820, @fixture.set_block( &var_2156870820)
 
-    # TestClass1#call_block  should return {:hello=>"world", :test=>#<TestClass1:0x000001031107c0 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2173208300=>"message"}>, :arr_1=>[1, 2, 3, 4, 5, #<TestClass1:0x000001031107c0 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2173208300=>"message"}>], :sub_hash=>{:yes=>true, :obj=>#<TestClass1:0x000001031107c0 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2173208300=>"message"}>}}
-    assert_equal @message, @fixture.call_block( &var_2156709000)
+    # TestClass1#print_message  should return 
+    assert_nil @fixture.print_message
+
+    # TestClass1#print_message  should return 
+    assert_nil @fixture.print_message
+
+
+    # TestClass1#set_block  should return #<Pretentious::RecordedProc:0x000000019f91f0@example.rb:73>
+    assert_equal var_13631520, @fixture.set_block( &var_13631520)
+
+
+    # TestClass1#call_block  should return {:hello=>"world", :test=>#<TestClass1:0x00000001a71d30 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={13864900=>"message"}>, :arr_1=>[1, 2, 3, 4, 5, #<TestClass1:0x00000001a71d30 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={13864900=>"message"}>], :sub_hash=>{:yes=>true, :obj=>#<TestClass1:0x00000001a71d30 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={13864900=>"message"}>}}
+    assert_equal @message, @fixture.call_block( &var_13617120)
+
 
     # TestClass1#something_is_wrong  should return StandardError
     assert_raises(StandardError) { @fixture.something_is_wrong }
+
 
     # TestClass1#just_returns_true  should return true
     assert @fixture.just_returns_true
@@ -58,13 +69,13 @@ end
 
 class TestClass1Scenario3 < TestClass1Test
   def setup
-    @fixture = TestClass1.new("Hello")
+    @fixture = TestClass1.new('Hello')
   end
 
   def test_current_expectation
-    another_object = TestClass1.new("test")
+    another_object = TestClass1.new('test')
 
-    # TestClass1#return_self when passed message = #<TestClass1:0x000001031107c0> should return #<TestClass1:0x000001031107c0>
+    # TestClass1#return_self when passed message = #<TestClass1:0x00000001a71d30> should return #<TestClass1:0x00000001a71d30>
     assert_equal another_object, @fixture.return_self(another_object)
 
   end
@@ -72,12 +83,12 @@ end
 
 class TestClass1Scenario4 < TestClass1Test
   def setup
-    @message = TestClass1.new("test")
+    @message = TestClass1.new('test')
     @fixture = TestClass1.new(@message)
   end
 
   def test_current_expectation
-    # TestClass1#message  should return #<TestClass1:0x000001031107c0>
+    # TestClass1#message  should return #<TestClass1:0x00000001a71d30>
     assert_equal @message, @fixture.message
 
   end

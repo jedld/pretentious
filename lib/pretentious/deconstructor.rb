@@ -187,38 +187,36 @@ module Pretentious
       { declaration: @declaration_order, dependency: @dependencies }
     end
 
-    def generate_declarations(variable_map = {}, method_call_collection = [], *target_objects)
+    def generate_declarations(context, method_call_collection, *target_objects)
       target_objects.each do |target_object|
-        variable_map.merge!(target_object._variable_map) if target_object.methods.include?(:_variable_map) && !target_object._variable_map.nil?
+        context.merge_variable_map(target_object)
       end
       deconstruct method_call_collection, *target_objects
     end
 
-    def build_output(indentation_level, variable_map, declarations, declared_names, previous_declarations)
+    def build_output(context, indentation_level, declarations)
       output_buffer = ''
       indentation = ''
-
       indentation_level.times { indentation << ' ' }
-
-      declarations[:declaration].each do |d|
-        if (d[:used_by] != :inline) && !previous_declarations.key?(d[:id])
-          var_name = Pretentious::Deconstructor.pick_name(variable_map, d[:id], declared_names)
-          output_buffer << "#{indentation}#{var_name} = #{construct(d, variable_map, declared_names, indentation)}\n"
-        elsif (d[:used_by] != :inline) && previous_declarations[d[:id]]
-          variable_map[d[:id]] = "@#{previous_declarations[d[:id]]}" if previous_declarations[d[:id]][0]!='@'
+      declarations[:declaration].select { |d| d[:used_by] != :inline }.each do |d|
+        if !context.was_declared_previously?(d[:id])
+          var_name = context.pick_name(d[:id])
+          output_buffer << "#{indentation}#{var_name} = #{construct(context, d, indentation)}\n"
+        elsif context.was_declared_previously?(d[:id])
+          context.register_instance_variable(d[:id])
         end
       end
       output_buffer
     end
 
-    def deconstruct_to_ruby(indentation_level = 0, variable_map = {}, declared_names = {}, previous_declarations = {}, method_call_collection = [], *target_objects)
-      declarations, _dependencies = generate_declarations variable_map, method_call_collection, *target_objects
-      build_output(indentation_level, variable_map, declarations, declared_names, previous_declarations)
+    def deconstruct_to_ruby(context, indentation_level = 0, *target_objects)
+      declarations, _dependencies = generate_declarations context, [], *target_objects
+      build_output(context, indentation_level, declarations)
     end
 
     def self.primitive?(value)
       value.is_a?(String) || value.is_a?(Fixnum) || value.is_a?(TrueClass) || value.is_a?(FalseClass) ||
-          value.is_a?(NilClass) || value.is_a?(Symbol) || value.is_a?(Class)
+      value.is_a?(NilClass) || value.is_a?(Symbol) || value.is_a?(Class)
     end
 
     def self.block_param_names(proc)
@@ -238,17 +236,17 @@ module Pretentious
       ''
     end
 
-    def proc_to_ruby(proc, let_variables, declared, indentation = '')
+    def proc_to_ruby(context, proc, indentation = '')
       output_buffer = ''
-      output_buffer << "Proc.new { #{self.class.block_params_generator(proc)}\n"
-      output_buffer << self.class.proc_body(proc, let_variables, declared, indentation)
+      output_buffer << "proc { #{self.class.block_params_generator(proc)}\n"
+      output_buffer << self.class.proc_body(context, proc, indentation)
       output_buffer << "#{indentation}}\n"
       output_buffer
     end
 
-    def self.proc_body(proc, let_variables, declared, indentation = '')
+    def self.proc_body(context, proc, indentation = '')
       if proc.return_value.size == 1
-        "#{indentation}  #{Pretentious.value_ize(proc.return_value[0], let_variables, declared)}\n"
+        "#{indentation}  #{context.value_of(proc.return_value[0])}\n"
       else
         "#{indentation}  \# Variable return values ... can't figure out what goes in here...\n"
       end
@@ -295,59 +293,19 @@ module Pretentious
       target_object.respond_to?(:test_class) ? target_object.test_class : target_object.class
     end
 
-
-    def self.pick_name(variable_map, object_id, declared_names = {}, value = :no_value_passed)
-      var_name = "var_#{object_id}"
-
-      object_id_to_declared_names = {}
-
-      if declared_names
-        declared_names.each { |k, v| object_id_to_declared_names[v[:object_id]] = k if v }
-      end
-      # return immediately if already mapped
-      return object_id_to_declared_names[object_id] if object_id_to_declared_names.include? object_id
-
-      if !variable_map.nil? && variable_map.include?(object_id)
-
-        candidate_name = variable_map[object_id].to_s
-        if !declared_names.include?(candidate_name)
-          var_name = candidate_name
-          declared_names[candidate_name] = { count: 1, object_id: object_id }
-        else
-
-          if declared_names[candidate_name][:object_id] == object_id
-            var_name = candidate_name
-          else
-            new_name = "#{candidate_name}_#{declared_names[candidate_name][:count]}"
-            var_name = "#{new_name}"
-
-            declared_names[candidate_name][:count] += 1
-            declared_names[new_name] = { count: 1, object_id: object_id }
-          end
-
-        end
-      else
-        if value != :no_value_passed
-          return Pretentious.value_ize(value, let_variables, declared_names)
-        end
-      end
-
-      var_name
-    end
-
     private
 
-    def output_array(arr, variable_map, declared_names)
+    def output_array(context, arr)
       output_buffer = '['
       array_elements = []
       arr.each do |v|
-        value = Pretentious.value_ize(v, variable_map, declared_names)
+        value = Pretentious.value_ize(context, v)
         if v.is_a? Hash
-          value = output_hash(v, variable_map, declared_names)
+          value = output_hash(context, v)
         elsif v.is_a? Array
-          value = output_array(v, variable_map, declared_names)
+          value = output_array(context, v)
         elsif v.is_a? Reference
-          value = Pretentious::Deconstructor.pick_name(variable_map, v.tree, declared_names)
+          value = context.pick_name(v.tree)
         end
         array_elements << value
       end
@@ -356,43 +314,43 @@ module Pretentious
       output_buffer
     end
 
-    def output_hash(hash, variable_map, declared_names)
+    def output_hash(context, hash)
       output_buffer = '{ '
       hash_elements = []
-      hash.each { |k, v|
-        value = Pretentious.value_ize(v, variable_map, declared_names)
+      hash.each do |k, v|
+        value = context.value_of(v)
         if v.is_a? Hash
-          value = output_hash(v, variable_map, declared_names)
+          value = output_hash(context, v)
         elsif v.is_a? Array
-          value = output_array(v, variable_map, declared_names)
+          value = output_array(context, v)
         elsif v.is_a? Reference
-          value = Pretentious::Deconstructor.pick_name(variable_map, v.tree, declared_names)
+          value = context.pick_name(v.tree)
         end
 
         if k.is_a? Symbol
           hash_elements << "#{k}: #{value}"
         else
-          hash_elements << "#{Pretentious.value_ize(k, variable_map, declared_names)} => #{value}"
+          hash_elements << "#{context.value_of(k)} => #{value}"
         end
-      }
+      end
       output_buffer << hash_elements.join(', ')
       output_buffer << ' }'
       output_buffer
     end
 
-    def construct(definition, variable_map, declared_names, indentation = '')
+    def construct(context, definition, indentation = '')
       if definition.include? :value
         if definition[:value].is_a? Hash
-          output_hash(definition[:value], variable_map, declared_names)
+          output_hash(context, definition[:value])
         elsif definition[:value].is_a? Array
-          output_array(definition[:value], variable_map, declared_names)
+          output_array(context, definition[:value])
         elsif definition[:value].is_a? UnResolved
           'nil #parameters unresolvable. cannot decompose'
         else
-          Pretentious.value_ize(definition[:value], variable_map, declared_names)
+          context.value_of(definition[:value])
         end
       elsif definition[:class] == Pretentious::RecordedProc
-        proc_to_ruby(definition[:recorded_proc], variable_map, declared_names, indentation)
+        proc_to_ruby(context, definition[:recorded_proc], indentation)
       else
         params = []
         if definition[:ref] && definition[:ref].size > 0
@@ -408,13 +366,9 @@ module Pretentious
 
             # to inline?
             if v.is_a? Hash
-              params << Pretentious.value_ize(v[:value], variable_map, declared_names)
+              params << context.value_of(v[:value])
             else
-              if type == :block
-                params << "&#{Pretentious::Deconstructor.pick_name(variable_map, v, declared_names)}"
-              else
-                params << Pretentious::Deconstructor.pick_name(variable_map, v, declared_names)
-              end
+              params << (type == :block ? "&#{context.pick_name(v)}" : context.pick_name(v))
             end
           end
           "#{definition[:class]}.new(#{params.join(', ')})"
@@ -424,5 +378,6 @@ module Pretentious
 
       end
     end
+
   end
 end

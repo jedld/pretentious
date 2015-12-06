@@ -29,7 +29,7 @@ RSpec.describe Pretentious::Deconstructor do
         a = "Some type of string"
         a._deconstruct_to_ruby
       end
-      expect(output).to eq("a = \"Some type of string\"\n")
+      expect(output).to eq("a = 'Some type of string'\n")
     end
 
     it "deconstructs arrays types" do
@@ -39,7 +39,7 @@ RSpec.describe Pretentious::Deconstructor do
         test_class = TestClass1.new(arr)
         test_class._deconstruct_to_ruby
       end
-      expect(output).to eq("message = [1, 2, 3, \"hello\", { message: \"hello\" }, [\"subarray\", 2, :symbol]]\ntest_class = TestClass1.new(message)\n")
+      expect(output).to eq("message = [1, 2, 3, 'hello', { message: 'hello' }, ['subarray', 2, :symbol]]\ntest_class = TestClass1.new(message)\n")
     end
 
     it "deconstructs hash types" do
@@ -48,7 +48,7 @@ RSpec.describe Pretentious::Deconstructor do
         test_class = TestClass1.new(hash)
         test_class._deconstruct_to_ruby
       end
-      expect(output).to eq("message = { message: \"hello\", arr: [1, 2, 3], hash: { message2: \"msg\" } }\ntest_class = TestClass1.new(message)\n")
+      expect(output).to eq("message = { message: 'hello', arr: [1, 2, 3], hash: { message2: 'msg' } }\ntest_class = TestClass1.new(message)\n")
     end
 
     it "deconstruct multiple objects" do
@@ -58,7 +58,7 @@ RSpec.describe Pretentious::Deconstructor do
         test_class = TestClass3.new(a, b)
         test_class._deconstruct_to_ruby
       end
-      expect(output).to eq("testclass2 = TestClass1.new(\"Hello world\")\ntest_class = TestClass3.new(\"Some type of string\", testclass2)\n")
+      expect(output).to eq("testclass2 = TestClass1.new('Hello world')\ntest_class = TestClass3.new('Some type of string', testclass2)\n")
     end
   end
 
