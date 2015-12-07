@@ -36,15 +36,6 @@ end
 
 eval(example_body, binding, filename, 1)
 
-# collect results
-Pretentious.last_results.each do |g, result_per_generator|
-  puts "#{g}:"
-  result_per_generator.each do |klass, result|
-    output_folder = result[:generator].location(output_folder)
-    FileUtils.mkdir_p output_folder
-    result[:generator].helper(output_folder)
-    filename = result[:generator].naming(output_folder, klass)
-    File.open(filename, 'w') { |f| f.write(result[:output]) }
-    puts "#{filename}"
-  end
-end
+# collect results and write them
+filewriter = Pretentious::FileWriter.new(output_folder: $output_folder)
+filewriter.write_results(Pretentious.last_results)

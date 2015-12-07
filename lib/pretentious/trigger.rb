@@ -38,11 +38,8 @@ module Pretentious
     end
 
     def self.output_file(result, klass, output_folder)
-      FileUtils.mkdir_p output_folder
-      result[:generator].helper(output_folder)
-      filename = result[:generator].naming(output_folder, klass)
-      File.open(filename, 'w') { |f| f.write(result[:output]) }
-      filename
+      file_writer = FileWriter.new({ output_folder: output_folder })
+      file_writer.write klass, result
     end
 
     private

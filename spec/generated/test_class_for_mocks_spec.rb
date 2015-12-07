@@ -8,7 +8,7 @@ RSpec.describe TestClassForMocks do
     end
 
     it 'should pass current expectations' do
-      var_12850500 = [2, 3, 4, 5]
+      var_2177433540 = [2, 3, 4, 5]
       allow_any_instance_of(TestMockSubClass).to receive(:test_method).and_return('a return string')
       allow_any_instance_of(TestMockSubClass).to receive(:increment_val).and_return(2, 3, 4, 5)
 
@@ -32,11 +32,11 @@ RSpec.describe TestClassForMocks do
     end
 
     it 'should pass current expectations' do
-      var_12706260 = { val: 1, str: 'hello world', message: 'a message' }
-      allow_any_instance_of(TestMockSubClass).to receive(:return_hash).and_return(var_12706260)
+      var_2177361000 = { val: 1, str: 'hello world', message: 'a message' }
+      allow_any_instance_of(TestMockSubClass).to receive(:return_hash).and_return(var_2177361000)
 
       # TestClassForMocks#method_with_usage3 when passed message = "a message" should return {:val=>1, :str=>"hello world", :message=>"a message"}
-      expect(@fixture.method_with_usage3('a message')).to eq(var_12706260)
+      expect(@fixture.method_with_usage3('a message')).to eq(var_2177361000)
     end
   end
 

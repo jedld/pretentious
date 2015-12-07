@@ -216,7 +216,7 @@ module Pretentious
 
     def self.primitive?(value)
       value.is_a?(String) || value.is_a?(Fixnum) || value.is_a?(TrueClass) || value.is_a?(FalseClass) ||
-      value.is_a?(NilClass) || value.is_a?(Symbol) || value.is_a?(Class)
+        value.is_a?(NilClass) || value.is_a?(Symbol) || value.is_a?(Class)
     end
 
     def self.block_param_names(proc)

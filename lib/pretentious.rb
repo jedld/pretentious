@@ -8,6 +8,7 @@ require 'pretentious/generator'
 require 'binding_of_caller'
 require 'pretentious/deconstructor'
 require 'pretentious/trigger'
+require 'pretentious/utils/file_writer'
 
 Class.class_eval do
   def _stub(*classes)
