@@ -10,5 +10,5 @@ task :test => :spec
 desc "Runs the minitest suite"
 task :minitest do
   $: << './test'
-  Dir.glob('./test/test_*.rb').each { |file| require file}
+  Dir.glob('./test/**/test_*.rb').each { |file| require file}
 end

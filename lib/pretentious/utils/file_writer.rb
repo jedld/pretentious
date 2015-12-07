@@ -1,5 +1,7 @@
 module Pretentious
+  # Utility function for saving pretentious test artifacts to a file.
   class FileWriter
+    # options for the file writer
     def initialize(options = {})
       @spec_output_folder ||= (options[:spec_output_folder] || 'generated')
       @output_folder = options[:output_folder] || nil

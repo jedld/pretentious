@@ -101,7 +101,7 @@ end
 
 Save your file and then switch to the terminal to invoke:
 
-    $ ddtgen example.rb
+    $ pretentious example.rb
 
 This will automatically generate rspec tests for Fibonacci under /spec of the current working directory.
 
@@ -293,6 +293,18 @@ end
 # spec files will be written to the project root
 ```
 
+or, use the FileWriter utility to write it to a file
+
+```ruby
+# initializers/pretentious.rb
+
+if Rails.env.test? #IMPORTANT don't run this when you don't need it!
+    Pretentious.on(UsersController).method_called(:login).spec_for(UserAuthentication) do |results|
+      file_writer = Pretentious::FileWriter.new
+      file_writer.write UserAuthenticaion, results[UserAuthenticaion]
+    end
+end
+```
 IMPORTANT: If using rails or if it is part of a larger app, make sure to enable this only when you intend to generate specs!
 delete the initializer or comment the code out when it is not needed.
 
