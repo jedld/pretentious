@@ -150,8 +150,8 @@ module Pretentious
                              end
 
           str << "#{indentation}# #{context_prefix}#{k} #{params_desc_str} should return #{block[:result]}\n"
-          str << "#{indentation}#{generate_expectation(context, fixture, k, block[:params], block[:block], block[:result])}\n\n"
-          expectations << str
+          str << "#{indentation}#{generate_expectation(context, fixture, k, block[:params], block[:block], block[:result])}\n"
+          expectations << str unless expectations.include? str
         end
       end
       expectations.join("\n")

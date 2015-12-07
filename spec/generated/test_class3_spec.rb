@@ -5,8 +5,8 @@ RSpec.describe TestClass3 do
   context 'Scenario 1' do
     before do
       another_object = TestClass1.new('test')
-      var_2172775300 = { hello: 'world', test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: { yes: true, obj: another_object } }
-      testclass1 = TestClass1.new(var_2172775300)
+      var_2162975840 = { hello: 'world', test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: { yes: true, obj: another_object } }
+      testclass1 = TestClass1.new(var_2162975840)
       testclass2 = TestClass2.new('This is message 2', nil)
       @fixture = TestClass3.new(testclass1, testclass2)
     end
@@ -20,8 +20,8 @@ RSpec.describe TestClass3 do
   context 'Scenario 2' do
     before do
       another_object = TestClass1.new('test')
-      var_2172775300 = { hello: 'world', test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: { yes: true, obj: another_object } }
-      testclass1 = TestClass1.new(var_2172775300)
+      var_2162975840 = { hello: 'world', test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: { yes: true, obj: another_object } }
+      testclass1 = TestClass1.new(var_2162975840)
       testclass2 = TestClass2.new('This is message 2', nil)
       @fixture = TestClass3.new(testclass1, testclass2)
     end

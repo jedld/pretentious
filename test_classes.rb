@@ -56,7 +56,7 @@ class TestClass1
   end
 
   def something_is_wrong
-    raise StandardError.new
+    fail StandardError
   end
 
   def return_self(message)

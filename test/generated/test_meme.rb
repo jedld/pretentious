@@ -14,10 +14,8 @@ class MemeScenario1 < MemeTest
     # Meme#i_can_has_cheezburger?  should return OHAI!
     assert_equal 'OHAI!', @fixture.i_can_has_cheezburger?
 
-
     # Meme#will_it_blend?  should return YES!
     assert_equal 'YES!', @fixture.will_it_blend?
-
   end
 end
 

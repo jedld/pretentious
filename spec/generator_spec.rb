@@ -144,27 +144,27 @@ RSpec.describe Pretentious::Generator do
 
   context "Pretentious::Generator#generate_for" do
     around(:each) do |example|
-      Pretentious::Generator.test_generator= DummyGenerator
+      Pretentious::Generator.test_generator = DummyGenerator
       example.run
-      Pretentious::Generator.test_generator= nil
+      Pretentious::Generator.test_generator = nil
     end
 
     it "generates call artifacts for target class" do
       call_artifacts = Pretentious::Generator.generate_for(TestClass) do
         instance = TestClass.new
-        instance.message("hello")
+        instance.message('hello')
       end
 
-      expect(call_artifacts).to eq({TestClass=>{output:
-                                        [{:begin=>TestClass},
-                                         {:instance=>"TestClassImpostor",
-                                          :instance_method_calls=>
-                                              [{:method=>:message,
-                                                :params=>["hello"],
-                                                :block=>nil,
-                                                :names=>[[:req, :params1]],
-                                                :context=>{:calls=>[]}, :result=>"hello"}],
-                                          :instance_count=>1}, :end], generator: DummyGenerator}})
+      expect(call_artifacts).to eq(TestClass => { output:
+                                        [{ begin: TestClass },
+                                         { instance: 'TestClassImpostor',
+                                           instance_method_calls:
+                                              [{ method: :message,
+                                                 params: ["hello"],
+                                                 block: nil,
+                                                 names: [[:req, :params1]],
+                                                 context: {calls: []}, result: 'hello'}],
+                                           instance_count: 1}, :end], generator: DummyGenerator})
     end
 
     context "auto mocks generator" do
