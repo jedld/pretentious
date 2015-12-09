@@ -1,6 +1,8 @@
 module Pretentious
   # Contains references to scoped variables
   class Context
+    VARIABLE_NAMES = %w(a b c d e f g h i j k l m n o p)
+
     attr_accessor :declared_names, :variable_map,
                   :previous_declarations
 
@@ -8,6 +10,7 @@ module Pretentious
       @declared_names = declared_names
       @variable_map = variable_map
       @previous_declarations = previous_declarations
+      @current_name_dict = 0
     end
 
     def subcontext(declarations)
@@ -43,15 +46,16 @@ module Pretentious
     end
 
     def pick_name(object_id, value = :no_value_passed)
-      var_name = "var_#{object_id}"
-
       object_id_to_declared_names = {}
 
       if @declared_names
         @declared_names.each { |k, v| object_id_to_declared_names[v[:object_id]] = k if v }
       end
+
       # return immediately if already mapped
       return object_id_to_declared_names[object_id] if object_id_to_declared_names.include? object_id
+
+      var_name = "var_#{object_id}"
 
       if !@variable_map.nil? && @variable_map.include?(object_id)
 
@@ -73,7 +77,16 @@ module Pretentious
 
         end
       else
-        return value_of(value) if value != :no_value_passed
+        v = nil
+
+        Kernel.loop do
+          v = provide_name
+          break if !@declared_names.key?(v) || v.nil?
+        end
+
+        var_name = v
+
+        @declared_names[var_name] = { count: 1, object_id: object_id }
       end
 
       var_name
@@ -81,6 +94,16 @@ module Pretentious
 
     def value_of(value)
       Pretentious.value_ize(self, value)
+    end
+
+    private
+
+    def provide_name
+      if @current_name_dict < VARIABLE_NAMES.length
+        VARIABLE_NAMES[@current_name_dict].tap { @current_name_dict += 1 }
+      else
+        nil
+      end
     end
   end
 end

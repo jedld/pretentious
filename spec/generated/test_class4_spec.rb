@@ -4,12 +4,12 @@ require 'spec_helper'
 RSpec.describe TestClass4 do
   context 'Scenario 1' do
     before do
-      var_8 = nil
-      var_2163583140 = proc { 
+      c = nil
+      d = proc { 
         # Variable return values ... can't figure out what goes in here...
       }
 
-      @fixture = TestClass4.new(&var_2163583140)
+      @fixture = TestClass4.new(&d)
     end
 
     it 'should pass current expectations' do

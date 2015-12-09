@@ -21,23 +21,23 @@ RSpec.describe TestClass1 do
     end
 
     it 'should pass current expectations' do
-      var_2163685940 = proc { |message|
+      a = proc { |message|
         @message
       }
 
       filewriter = nil
-      var_2163680400 = proc { 
+      b = proc { 
         # Variable return values ... can't figure out what goes in here...
       }
 
       # TestClass1#print_message  should return 
       expect(@fixture.print_message).to be_nil
 
-      # TestClass1#set_block  should return #<Pretentious::RecordedProc:0x00000101ee40b0@example.rb:73>
-      expect(@fixture.set_block  &var_2163685940).to eq(var_2163685940)
+      # TestClass1#set_block  should return #<Pretentious::RecordedProc:0x000001048ab790@example.rb:73>
+      expect(@fixture.set_block  &a).to eq(a)
 
-      # TestClass1#call_block  should return {:hello=>"world", :test=>#<TestClass1:0x00000101d177c8 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2162734220=>"message"}>, :arr_1=>[1, 2, 3, 4, 5, #<TestClass1:0x00000101d177c8 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2162734220=>"message"}>], :sub_hash=>{:yes=>true, :obj=>#<TestClass1:0x00000101d177c8 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2162734220=>"message"}>}}
-      expect(@fixture.call_block  &var_2163680400).to eq(@message)
+      # TestClass1#call_block  should return {:hello=>"world", :test=>#<TestClass1:0x00000101e36a78 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2163324440=>"message"}>, :arr_1=>[1, 2, 3, 4, 5, #<TestClass1:0x00000101e36a78 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2163324440=>"message"}>], :sub_hash=>{:yes=>true, :obj=>#<TestClass1:0x00000101e36a78 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={2163324440=>"message"}>}}
+      expect(@fixture.call_block  &b).to eq(@message)
 
       # TestClass1#something_is_wrong  should return StandardError
       expect { @fixture.something_is_wrong }.to raise_error
@@ -54,7 +54,7 @@ RSpec.describe TestClass1 do
 
     it 'should pass current expectations' do
       another_object = TestClass1.new('test')
-      # TestClass1#return_self when passed message = #<TestClass1:0x00000101d177c8> should return #<TestClass1:0x00000101d177c8>
+      # TestClass1#return_self when passed message = #<TestClass1:0x00000101e36a78> should return #<TestClass1:0x00000101e36a78>
       expect(@fixture.return_self(another_object)).to eq(another_object)
     end
   end
@@ -66,7 +66,7 @@ RSpec.describe TestClass1 do
     end
 
     it 'should pass current expectations' do
-      # TestClass1#message  should return #<TestClass1:0x00000101d177c8>
+      # TestClass1#message  should return #<TestClass1:0x00000101e36a78>
       expect(@fixture.message).to eq(@message)
     end
   end
