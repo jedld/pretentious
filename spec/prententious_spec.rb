@@ -73,7 +73,7 @@ RSpec.describe Pretentious::Generator do
           'a string'
         end
       end
-      expect(result[TestClass1][:output]).to match('expect(@fixture.set_block  &c).to eq(a)')
+      expect(result[TestClass1][:output]).to be < 'expect(@fixture.set_block  &c).to eq(a)'
     end
   end
 

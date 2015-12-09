@@ -1,7 +1,9 @@
 module Pretentious
   # Contains references to scoped variables
   class Context
-    VARIABLE_NAMES = %w(a b c d e f g h i j k l m n o p)
+
+    # list of variable names to use. i j are not there on purpose
+    VARIABLE_NAMES = %w(a b c d e f g h k l m n o p q r s t u v w x y z)
 
     attr_accessor :declared_names, :variable_map,
                   :previous_declarations
