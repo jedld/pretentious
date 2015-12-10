@@ -132,7 +132,7 @@ module Pretentious
                               ''
                             end
 
-          buffer_to_string(str, "# #{context_prefix}#{k} #{params_desc_str} should return #{block[:result]}", 3)
+          buffer_to_string(str, "# #{context_prefix}#{k} #{params_desc_str} should return #{context.value_of(block[:result])}", 3)
           buffer_inline_to_string(str, generate_expectation(context, fixture, k, block[:params], block[:block], block[:result]))
           expectations << str unless expectations.include? str
         end

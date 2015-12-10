@@ -25,6 +25,16 @@ class Meme
   end
 end
 
+class TestClassMethodMissing
+  def method_missing(method, *args, &block)
+    if (method == :handled_by_method_missing)
+      return "YOU GOT ME!!!!"
+    else
+      super(method, *args, &block)
+    end
+  end
+end
+
 class TestClass1
 
   def initialize(message)

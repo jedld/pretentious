@@ -8,7 +8,7 @@ RSpec.describe TestClass2 do
     end
 
     it 'should pass current expectations' do
-      # TestClass2#print_message  should return 
+      # TestClass2#print_message  should return nil
       expect(@fixture.print_message).to be_nil
     end
   end
@@ -30,7 +30,7 @@ RSpec.describe TestClass2 do
     end
 
     it 'should pass current expectations' do
-      # TestClass2#test when passed object = "This is message 3" should return This is message 3
+      # TestClass2#test when passed object = "This is message 3" should return 'This is message 3'
       expect(@fixture.test(@message2)).to eq('This is message 3')
     end
   end

@@ -31,7 +31,7 @@ RSpec.describe Fibonacci do
   end
 
     it 'should pass current expectations' do
-      # Fibonacci::say_hello  should return hello
+      # Fibonacci::say_hello  should return 'hello'
       expect(Fibonacci.say_hello).to eq('hello')
     end
 

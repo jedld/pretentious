@@ -32,7 +32,7 @@ end
 
 class FibonacciScenario2 < FibonacciTest
   def test_current_expectation
-    # Fibonacci::say_hello  should return hello
+    # Fibonacci::say_hello  should return 'hello'
     assert_equal 'hello', Fibonacci.say_hello
   end
 

@@ -11,9 +11,9 @@ class TestClass2Scenario1 < TestClass2Test
   end
 
   def test_current_expectation
-    # TestClass2#print_message  should return 
+    # TestClass2#print_message  should return nil
     assert_nil @fixture.print_message
-    # TestClass2#print_message  should return 
+    # TestClass2#print_message  should return nil
     assert_nil @fixture.print_message
   end
 end
@@ -35,7 +35,7 @@ class TestClass2Scenario3 < TestClass2Test
   end
 
   def test_current_expectation
-    # TestClass2#test when passed object = "This is message 3" should return This is message 3
+    # TestClass2#test when passed object = "This is message 3" should return 'This is message 3'
     assert_equal 'This is message 3', @fixture.test(@message2)
   end
 end

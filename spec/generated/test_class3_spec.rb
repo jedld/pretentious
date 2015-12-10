@@ -12,7 +12,7 @@ RSpec.describe TestClass3 do
     end
 
     it 'should pass current expectations' do
-      # TestClass3#show_messages  should return awesome!!!
+      # TestClass3#show_messages  should return 'awesome!!!'
       expect(@fixture.show_messages).to eq('awesome!!!')
     end
   end
@@ -27,7 +27,7 @@ RSpec.describe TestClass3 do
     end
 
     it 'should pass current expectations' do
-      # TestClass3#show_messages  should return awesome!!!
+      # TestClass3#show_messages  should return 'awesome!!!'
       expect(@fixture.show_messages).to eq('awesome!!!')
     end
   end

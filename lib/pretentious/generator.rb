@@ -240,8 +240,6 @@ module Pretentious
 
               info_block[:block] = recorded_proc
 
-              info_block[:names] = @_instance.method(method_sym).parameters
-
               begin
 
                 unless is_stub
@@ -252,6 +250,7 @@ module Pretentious
                 end
 
                 if @_instance.methods.include? method_sym
+                  info_block[:names] = @_instance.method(method_sym).parameters
                   result = @_instance.send(method_sym, *arguments, &recorded_proc)
                 else
                   result = @_instance.send(:method_missing, method_sym, *arguments, &recorded_proc)

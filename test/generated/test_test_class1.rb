@@ -11,7 +11,7 @@ class TestClass1Scenario1 < TestClass1Test
   end
 
   def test_current_expectation
-    # TestClass1#message  should return test
+    # TestClass1#message  should return 'test'
     assert_equal 'test', @fixture.message
   end
 end
@@ -34,18 +34,18 @@ class TestClass1Scenario2 < TestClass1Test
     }
 
 
-    # TestClass1#print_message  should return 
+    # TestClass1#print_message  should return nil
     assert_nil @fixture.print_message
-    # TestClass1#print_message  should return 
+    # TestClass1#print_message  should return nil
     assert_nil @fixture.print_message
 
-    # TestClass1#set_block  should return #<Pretentious::RecordedProc:0x000000024c54d0@example.rb:73>
+    # TestClass1#set_block  should return a
     assert_equal a, @fixture.set_block( &a)
 
-    # TestClass1#call_block  should return {:hello=>"world", :test=>#<TestClass1:0x00000002692ee8 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={20224160=>"message"}>, :arr_1=>[1, 2, 3, 4, 5, #<TestClass1:0x00000002692ee8 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={20224160=>"message"}>], :sub_hash=>{:yes=>true, :obj=>#<TestClass1:0x00000002692ee8 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={20224160=>"message"}>}}
+    # TestClass1#call_block  should return @message
     assert_equal @message, @fixture.call_block( &b)
 
-    # TestClass1#something_is_wrong  should return StandardError
+    # TestClass1#something_is_wrong  should return e
     assert_raises(StandardError) { @fixture.something_is_wrong }
 
     # TestClass1#just_returns_true  should return true
@@ -61,7 +61,7 @@ class TestClass1Scenario3 < TestClass1Test
   def test_current_expectation
     another_object = TestClass1.new('test')
 
-    # TestClass1#return_self when passed message = #<TestClass1:0x00000002692ee8> should return #<TestClass1:0x00000002692ee8>
+    # TestClass1#return_self when passed message = #<TestClass1:0x00000002440e10> should return another_object
     assert_equal another_object, @fixture.return_self(another_object)
   end
 end
@@ -73,7 +73,7 @@ class TestClass1Scenario4 < TestClass1Test
   end
 
   def test_current_expectation
-    # TestClass1#message  should return #<TestClass1:0x00000002692ee8>
+    # TestClass1#message  should return @message
     assert_equal @message, @fixture.message
   end
 end

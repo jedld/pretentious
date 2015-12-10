@@ -15,7 +15,7 @@ class TestClass3Scenario1 < TestClass3Test
   end
 
   def test_current_expectation
-    # TestClass3#show_messages  should return awesome!!!
+    # TestClass3#show_messages  should return 'awesome!!!'
     assert_equal 'awesome!!!', @fixture.show_messages
   end
 end
@@ -30,7 +30,7 @@ class TestClass3Scenario2 < TestClass3Test
   end
 
   def test_current_expectation
-    # TestClass3#show_messages  should return awesome!!!
+    # TestClass3#show_messages  should return 'awesome!!!'
     assert_equal 'awesome!!!', @fixture.show_messages
   end
 end

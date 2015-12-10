@@ -8,7 +8,7 @@ RSpec.describe TestClass1 do
     end
 
     it 'should pass current expectations' do
-      # TestClass1#message  should return test
+      # TestClass1#message  should return 'test'
       expect(@fixture.message).to eq('test')
     end
   end
@@ -30,16 +30,16 @@ RSpec.describe TestClass1 do
         # Variable return values ... can't figure out what goes in here...
       }
 
-      # TestClass1#print_message  should return 
+      # TestClass1#print_message  should return nil
       expect(@fixture.print_message).to be_nil
 
-      # TestClass1#set_block  should return #<Pretentious::RecordedProc:0x0000000279b3f8@example.rb:73>
+      # TestClass1#set_block  should return a
       expect(@fixture.set_block  &a).to eq(a)
 
-      # TestClass1#call_block  should return {:hello=>"world", :test=>#<TestClass1:0x000000028113c8 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={21007100=>"message"}>, :arr_1=>[1, 2, 3, 4, 5, #<TestClass1:0x000000028113c8 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={21007100=>"message"}>], :sub_hash=>{:yes=>true, :obj=>#<TestClass1:0x000000028113c8 @message="test", @_init_arguments={:params=>["test"], :params_types=>[[:req, :message]]}, @_variable_names={21007100=>"message"}>}}
+      # TestClass1#call_block  should return @message
       expect(@fixture.call_block  &b).to eq(@message)
 
-      # TestClass1#something_is_wrong  should return StandardError
+      # TestClass1#something_is_wrong  should return e
       expect { @fixture.something_is_wrong }.to raise_error
 
       # TestClass1#just_returns_true  should return true
@@ -54,7 +54,7 @@ RSpec.describe TestClass1 do
 
     it 'should pass current expectations' do
       another_object = TestClass1.new('test')
-      # TestClass1#return_self when passed message = #<TestClass1:0x000000028113c8> should return #<TestClass1:0x000000028113c8>
+      # TestClass1#return_self when passed message = #<TestClass1:0x000000025cbca8> should return another_object
       expect(@fixture.return_self(another_object)).to eq(another_object)
     end
   end
@@ -66,7 +66,7 @@ RSpec.describe TestClass1 do
     end
 
     it 'should pass current expectations' do
-      # TestClass1#message  should return #<TestClass1:0x000000028113c8>
+      # TestClass1#message  should return @message
       expect(@fixture.message).to eq(@message)
     end
   end
