@@ -1,7 +1,6 @@
 module Pretentious
   # Contains references to scoped variables
   class Context
-
     # list of variable names to use. i j are not there on purpose
     VARIABLE_NAMES = %w(a b c d e f g h k l m n o p q r s t u v w x y z)
 
@@ -34,7 +33,7 @@ module Pretentious
     end
 
     def register_instance_variable(object_id)
-      @variable_map[object_id] = "@#{@previous_declarations[object_id]}" if @previous_declarations[object_id][0]!='@'
+      @variable_map[object_id] = "@#{@previous_declarations[object_id]}" if @previous_declarations[object_id][0] != '@'
     end
 
     def register(object_id, name)
@@ -51,7 +50,9 @@ module Pretentious
       object_id_to_declared_names = {}
 
       if @declared_names
-        @declared_names.each { |k, v| object_id_to_declared_names[v[:object_id]] = k if v }
+        @declared_names.each do |k, v|
+          object_id_to_declared_names[v[:object_id]] = k if v
+        end
       end
 
       # return immediately if already mapped
