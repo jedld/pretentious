@@ -1,10 +1,20 @@
+## 0.1.11 (2015-12-12)
+
+Bugfixes:
+
+  - fix code style
+
+Features:
+
+  - matchers should now prefer variable references in assertions if previously declared
+
 ## 0.1.10 (2015-12-11)
 
 Bugfixes:
 
   - fix regression wherein method_missing is not handled properly
 
-Featuers:
+Features:
 
   - Fix weird generated comments
 
