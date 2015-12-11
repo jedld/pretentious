@@ -16,35 +16,36 @@ module Pretentious
       @output_buffer
     end
 
+    private
+
     def generate(test_instance, instance_count)
+      output_buffer = ''
       if test_instance.is_a? Class
         context = Pretentious::Context.new(test_instance.let_variables)
         # class methods
         class_method_calls = test_instance.method_calls_by_method
-        buffer(generate_specs(context, "#{test_instance.test_class.name}::", test_instance.test_class.name,
+        buffer_inline_to_string(output_buffer, generate_specs(0, context, "#{test_instance.test_class.name}::", test_instance.test_class.name,
                               class_method_calls))
       else
-        buffer("context 'Scenario #{instance_count}' do", 1)
+        buffer_to_string(output_buffer, "context 'Scenario #{instance_count}' do", 1)
 
-        buffer('before do', 2)
+        buffer_to_string(output_buffer, 'before do', 2)
 
         context, declarations = setup_fixture(test_instance)
         method_calls = test_instance.method_calls_by_method
         spec_context = context.subcontext(declarations[:declaration])
-        specs_buffer = generate_specs(spec_context, "#{test_instance.test_class.name}#", "@fixture", method_calls)
+        specs_buffer = generate_specs(1, spec_context, "#{test_instance.test_class.name}#", "@fixture", method_calls)
         context.declared_names = {}
         deconstruct_output = @deconstructor.build_output(context, 3 * @_indentation.length, declarations)
 
-        buffer_inline(deconstruct_output)
-        buffer('end', 2)
-        whitespace
-        buffer_inline(specs_buffer)
-        buffer('end', 1)
-        whitespace
+        buffer_inline_to_string(output_buffer, deconstruct_output)
+        buffer_to_string(output_buffer, 'end', 2)
+        buffer_to_string(output_buffer, '')
+        buffer_inline_to_string(output_buffer, specs_buffer)
+        buffer_to_string(output_buffer, 'end', 1)
       end
+      output_buffer
     end
-
-    private
 
     def proc_function_generator(block, method)
       "func_#{method}(#{Pretentious::Deconstructor.block_params_generator(block)})"
@@ -54,7 +55,7 @@ module Pretentious
       " &#{context.pick_name(block.target_proc.object_id)}"
     end
 
-    def generate_expectation(context, fixture, method, params, block, result)
+    def generate_expectation(indentation_level, context, fixture, method, params, block, result)
       output = ''
       block_source = if !block.nil? && block.is_a?(Pretentious::RecordedProc)
                        get_block_source(context, block)
@@ -63,7 +64,7 @@ module Pretentious
                      end
 
       statement = if params.size > 0
-                    "#{fixture}.#{method}(#{params_generator(context, params)})#{block_source}"
+                    "#{fixture}.#{prettify_method_name(method)}(#{params_generator(context, params)})#{block_source}"
                   else
                     stmt = []
                     stmt << "#{fixture}.#{method}"
@@ -72,16 +73,16 @@ module Pretentious
                   end
 
       if result.is_a? Exception
-        buffer_to_string(output, "expect { #{statement} }.to #{pick_matcher(context, result)}",3)
+        buffer_to_string(output, "expect { #{statement} }.to #{pick_matcher(context, result)}", indentation_level + 2)
       else
-        buffer_to_string(output, "expect(#{statement}).to #{pick_matcher(context, result)}",3)
+        buffer_to_string(output, "expect(#{statement}).to #{pick_matcher(context, result)}", indentation_level + 2)
       end
       output
     end
 
-    def generate_specs(context, context_prefix, fixture, method_calls)
+    def generate_specs(indentation_level, context, context_prefix, fixture, method_calls)
       output = ''
-      buffer_to_string(output, "it 'should pass current expectations' do", 2)
+      buffer_to_string(output, "it 'should pass current expectations' do", indentation_level + 1)
       # collect all params
       params_collection = []
       mocks_collection = {}
@@ -111,13 +112,13 @@ module Pretentious
       end
 
       if params_collection.size > 0
-        deps = declare_dependencies(context, params_collection, 3)
+        deps = declare_dependencies(context, params_collection, indentation_level + 2)
         buffer_inline_to_string(output, deps) if deps != ''
       end
 
       if mocks_collection.keys.size > 0
         buffer_to_string(output, generate_rspec_stub(context, mocks_collection,
-                                                     3 * @_indentation.length))
+                                                     (indentation_level + 2) * @_indentation.length))
       end
 
       expectations = []
@@ -132,13 +133,13 @@ module Pretentious
                               ''
                             end
 
-          buffer_to_string(str, "# #{context_prefix}#{k} #{params_desc_str} should return #{context.value_of(block[:result])}", 3)
-          buffer_inline_to_string(str, generate_expectation(context, fixture, k, block[:params], block[:block], block[:result]))
+          buffer_to_string(str, "# #{context_prefix}#{k} #{params_desc_str} should return #{context.value_of(block[:result])}", indentation_level + 2)
+          buffer_inline_to_string(str, generate_expectation(indentation_level, context, fixture, k, block[:params], block[:block], block[:result]))
           expectations << str unless expectations.include? str
         end
       end
       buffer_inline_to_string(output, expectations.join("\n"))
-      buffer_to_string(output, 'end', 2)
+      buffer_to_string(output, 'end', indentation_level + 1)
       output
     end
 
@@ -167,8 +168,8 @@ module Pretentious
         'be_nil'
       elsif result.is_a? Exception
         'raise_error'
-      elsif context.variable_map[result.object_id]
-        "eq(#{context.value_of(result)})"
+      elsif context.map_name result.object_id
+        "eq(#{context.map_name(result.object_id)})"
       else
         "eq(#{Pretentious.value_ize(Pretentious::Context.new, result)})"
       end

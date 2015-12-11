@@ -15,5 +15,4 @@ RSpec.describe TestClass4 do
     it 'should pass current expectations' do
     end
   end
-
 end

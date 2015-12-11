@@ -35,6 +35,12 @@ class DummyGenerator
     @data << {begin: test_class}
   end
 
+  def body(instances)
+    instances.each_with_index do |instance, num|
+      generate(instance, num + 1)
+    end
+  end
+
   def generate(test_instance, instance_count)
     @data << {instance: test_instance.class.to_s,
               instance_method_calls: test_instance.method_calls,
@@ -55,11 +61,16 @@ class DummyGenerator2
 
   def initialize
     @data = []
-
   end
 
   def begin_spec(test_class)
     @data << {begin: test_class}
+  end
+
+  def body(instances)
+    instances.each_with_index do |instance, num|
+      generate(instance, num + 1)
+    end
   end
 
   def generate(test_instance, instance_count)

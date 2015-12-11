@@ -13,8 +13,7 @@ RSpec.describe TestClassForAutoStub do
       allow_any_instance_of(AnotherClassUsedByTestClass).to receive(:get_message).and_return('HI THERE!!!!')
 
       # TestClassForAutoStub#method_that_uses_the_class_to_stub  should return ["Hello Glorious world", "HI THERE!!!!"]
-      expect(@fixture.method_that_uses_the_class_to_stub).to eq(["Hello Glorious world", "HI THERE!!!!"])
+      expect(@fixture.method_that_uses_the_class_to_stub).to eq(a)
     end
   end
-
 end

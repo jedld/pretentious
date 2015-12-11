@@ -369,19 +369,16 @@ module Pretentious
 
         generator = test_generator.new
         generator.begin_spec(klass)
-        num = 1
 
-        new_standin_klass._instances.each do |instance|
-          generator.generate(instance, num)
-          num += 1
-        end unless new_standin_klass._instances.nil?
+        generator.body(new_standin_klass._instances) unless new_standin_klass._instances.nil?
 
         generator.end_spec
 
         result = all_results[klass]
         all_results[klass] = [] if result.nil?
 
-        all_results[klass] = { output: generator.output, generator: generator.class }
+        result_output = generator.output.is_a?(String) ? generator.output.chomp : generator.output
+        all_results[klass] = { output: result_output, generator: generator.class }
       end unless klasses.nil?
 
       all_results

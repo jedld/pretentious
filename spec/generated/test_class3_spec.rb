@@ -31,5 +31,4 @@ RSpec.describe TestClass3 do
       expect(@fixture.show_messages).to eq('awesome!!!')
     end
   end
-
 end

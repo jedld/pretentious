@@ -13,13 +13,13 @@ RSpec.describe TestClassForMocks do
       allow_any_instance_of(TestMockSubClass).to receive(:increment_val).and_return(2, 3, 4, 5)
 
       # TestClassForMocks#method_with_assign= when passed params2 = "test" should return 'test'
-      expect(@fixture.method_with_assign=('test')).to eq('test')
+      expect(@fixture.method_with_assign = ('test')).to eq('test')
 
       # TestClassForMocks#method_with_usage  should return 'a return string'
       expect(@fixture.method_with_usage).to eq('a return string')
 
       # TestClassForMocks#method_with_usage2  should return [2, 3, 4, 5]
-      expect(@fixture.method_with_usage2).to eq([2, 3, 4, 5])
+      expect(@fixture.method_with_usage2).to eq(a)
 
       # TestClassForMocks#method_with_usage4  should return 'a return string'
       expect(@fixture.method_with_usage4).to eq('a return string')
@@ -39,5 +39,4 @@ RSpec.describe TestClassForMocks do
       expect(@fixture.method_with_usage3('a message')).to eq(a)
     end
   end
-
 end

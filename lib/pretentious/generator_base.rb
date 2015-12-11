@@ -35,6 +35,14 @@ module Pretentious
       [context, declarations]
     end
 
+    def body(instances)
+      specs = []
+      instances.each_with_index do |instance, num|
+        specs << generate(instance, num + 1)
+      end
+      buffer_inline(specs.join("\n"))
+    end
+
     protected
 
     def declare_dependencies(context, args, level)
@@ -89,6 +97,14 @@ module Pretentious
 
     def whitespace(level = 0)
       @output_buffer << "#{indentation(level)}\n"
+    end
+
+    def prettify_method_name(method_name)
+      if method_name.to_s.end_with? '='
+        "#{method_name.to_s.chop} = "
+      else
+        method_name.to_s
+      end
     end
   end
 end

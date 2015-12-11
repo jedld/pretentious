@@ -47,16 +47,8 @@ module Pretentious
     end
 
     def pick_name(object_id, value = :no_value_passed)
-      object_id_to_declared_names = {}
-
-      if @declared_names
-        @declared_names.each do |k, v|
-          object_id_to_declared_names[v[:object_id]] = k if v
-        end
-      end
-
-      # return immediately if already mapped
-      return object_id_to_declared_names[object_id] if object_id_to_declared_names.include? object_id
+      var_name = map_name(object_id)
+      return var_name if var_name
 
       var_name = "var_#{object_id}"
 
@@ -97,6 +89,20 @@ module Pretentious
 
     def value_of(value)
       Pretentious.value_ize(self, value)
+    end
+
+    def map_name(object_id)
+      object_id_to_declared_names = {}
+
+      if @declared_names
+        @declared_names.each do |k, v|
+          object_id_to_declared_names[v[:object_id]] = k if v
+        end
+      end
+
+      # return immediately if already mapped
+      return object_id_to_declared_names[object_id] if object_id_to_declared_names.include? object_id
+      nil
     end
 
     private

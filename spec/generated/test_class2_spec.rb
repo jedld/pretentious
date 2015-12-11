@@ -31,8 +31,7 @@ RSpec.describe TestClass2 do
 
     it 'should pass current expectations' do
       # TestClass2#test when passed object = "This is message 3" should return 'This is message 3'
-      expect(@fixture.test(@message2)).to eq('This is message 3')
+      expect(@fixture.test(@message2)).to eq(@message2)
     end
   end
-
 end

@@ -14,25 +14,24 @@ RSpec.describe Fibonacci do
       n_3 = 4
       n_4 = 5
       # Fibonacci#fib when passed n = 1 should return 1
-      expect(@fixture.fib(n)).to eq(1)
+      expect(@fixture.fib(n)).to eq(n)
 
       # Fibonacci#fib when passed n = 2 should return 1
-      expect(@fixture.fib(n_1)).to eq(1)
+      expect(@fixture.fib(n_1)).to eq(n)
 
       # Fibonacci#fib when passed n = 3 should return 2
-      expect(@fixture.fib(n_2)).to eq(2)
+      expect(@fixture.fib(n_2)).to eq(n_1)
 
       # Fibonacci#fib when passed n = 4 should return 3
-      expect(@fixture.fib(n_3)).to eq(3)
+      expect(@fixture.fib(n_3)).to eq(n_2)
 
       # Fibonacci#fib when passed n = 5 should return 5
-      expect(@fixture.fib(n_4)).to eq(5)
+      expect(@fixture.fib(n_4)).to eq(n_4)
     end
   end
 
-    it 'should pass current expectations' do
-      # Fibonacci::say_hello  should return 'hello'
-      expect(Fibonacci.say_hello).to eq('hello')
-    end
-
+  it 'should pass current expectations' do
+    # Fibonacci::say_hello  should return 'hello'
+    expect(Fibonacci.say_hello).to eq('hello')
+  end
 end
