@@ -19,12 +19,16 @@ class FibonacciScenario1 < FibonacciTest
 
     # Fibonacci#fib when passed n = 1 should return 1
     assert_equal 1, @fixture.fib(n)
+
     # Fibonacci#fib when passed n = 2 should return 1
     assert_equal 1, @fixture.fib(n_1)
+
     # Fibonacci#fib when passed n = 3 should return 2
     assert_equal 2, @fixture.fib(n_2)
+
     # Fibonacci#fib when passed n = 4 should return 3
     assert_equal 3, @fixture.fib(n_3)
+
     # Fibonacci#fib when passed n = 5 should return 5
     assert_equal 5, @fixture.fib(n_4)
   end

@@ -305,7 +305,6 @@ No need to do anything special, just do as what you would do normally and the pr
     end
 
     class TestClass3
-
       def initialize(testclass1, testclass2)
         @class1 = testclass1
         @class2 = testclass2
@@ -316,7 +315,6 @@ No need to do anything special, just do as what you would do normally and the pr
         @class2.print_message
         "awesome!!!"
       end
-
     end
 ```
 
@@ -453,7 +451,13 @@ Given an instance of an activerecord base connection for example
 ActiveRecord::Base.connection
 ```
 
-running deconstruct would generate:
+running deconstruct on ActiveRecord::Base.connection
+
+```ruby
+ActiveRecord::Base.connection._deconstruct_to_ruby
+```
+
+will generate the output below:
 
 ```ruby
 var_70301267513280 = #<File:0x007fe094279f80>

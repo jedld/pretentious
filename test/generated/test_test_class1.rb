@@ -36,8 +36,6 @@ class TestClass1Scenario2 < TestClass1Test
 
     # TestClass1#print_message  should return nil
     assert_nil @fixture.print_message
-    # TestClass1#print_message  should return nil
-    assert_nil @fixture.print_message
 
     # TestClass1#set_block  should return a
     assert_equal a, @fixture.set_block( &a)
@@ -61,7 +59,7 @@ class TestClass1Scenario3 < TestClass1Test
   def test_current_expectation
     another_object = TestClass1.new('test')
 
-    # TestClass1#return_self when passed message = #<TestClass1:0x000000010f3808> should return another_object
+    # TestClass1#return_self when passed message = #<TestClass1:0x000000014a2eb8> should return another_object
     assert_equal another_object, @fixture.return_self(another_object)
   end
 end

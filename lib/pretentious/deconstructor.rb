@@ -345,7 +345,7 @@ module Pretentious
         elsif definition[:value].is_a? Array
           output_array(context, definition[:value])
         elsif definition[:value].is_a? UnResolved
-          'nil #parameters unresolvable. cannot decompose'
+          "#{definition[:value].target_object.class.to_s}.new # parameters unresolvable. The watcher needs to be installed before this object is created"
         else
           context.value_of(definition[:value])
         end

@@ -140,11 +140,12 @@ module Pretentious
       indentation = ''
       indentation_level.times { indentation << @_indentation }
       method_calls.each_key do |k|
-        str = ''
+
         info_blocks_arr = method_calls[k]
 
         info_blocks_arr.each do |block|
-          params_desc_str =  if block[:params].size > 0
+          str = ''
+          params_desc_str = if block[:params].size > 0
                                "when passed #{desc_params(block)}"
                              else
                                ''

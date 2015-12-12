@@ -13,8 +13,6 @@ class TestClass2Scenario1 < TestClass2Test
   def test_current_expectation
     # TestClass2#print_message  should return nil
     assert_nil @fixture.print_message
-    # TestClass2#print_message  should return nil
-    assert_nil @fixture.print_message
   end
 end
 

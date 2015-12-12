@@ -7,7 +7,7 @@ RSpec.describe Pretentious::Deconstructor do
 
   describe "#build_tree" do
     it "should decompose an object" do
-      message = "test"
+      message = 'test'
       another_object = Pretentious.watch {
         TestClass1.new(message)
       }
@@ -20,6 +20,36 @@ RSpec.describe Pretentious::Deconstructor do
                                                                         composition: "test"}],
                                                         params_types: [[:req, :message]])
 
+    end
+
+    context "Special 'native' objects like File" do
+      it "Decomposes properly" do
+        file = nil
+        filename = nil
+        another_object = Pretentious.watch {
+          filename = "example.rb"
+          file = File.new(filename)
+          TestClass1.new(file)
+        }
+        result = @fixture.build_tree(another_object)
+        result[:composition][0][:composition][0][:id] = filename.object_id
+
+        expect(result)
+          .to eq(
+            class: TestClass1,
+            id: another_object.object_id,
+            composition: [
+              { class: File,
+                id: file.object_id,
+                composition: [
+                  {
+                    class: String,
+                    id: filename.object_id,
+                    composition: 'example.rb'
+                  }]
+                }],
+            params_types: [[:req, :message]])
+      end
     end
   end
 
@@ -40,6 +70,29 @@ RSpec.describe Pretentious::Deconstructor do
         test_class._deconstruct_to_ruby
       end
       expect(output).to eq("message = [1, 2, 3, 'hello', { message: 'hello' }, ['subarray', 2, :symbol]]\ntest_class = TestClass1.new(message)\n")
+    end
+
+    it "deconstructs 'native' types" do
+      file = nil
+      filename = nil
+      another_object = Pretentious.watch do
+        filename = "example.rb"
+        file = File.new(filename)
+        test_class = TestClass1.new(file)
+        test_class._deconstruct_to_ruby
+      end
+      expect(another_object).to eq("message = File.new('example.rb')\ntest_class = TestClass1.new(message)\n")
+    end
+
+    it "has special handling for unresolvable types" do
+      # objects outside of the watch scope
+      a = "Some type of string"
+      b = TestClass1.new("Hello world")
+      output = Pretentious.watch do
+        test_class = TestClass3.new(a, b)
+        test_class._deconstruct_to_ruby
+      end
+      expect(output).to eq("a = TestClass1.new # parameters unresolvable. The watcher needs to be installed before this object is created\ntestclass2 = TestClass1.new(a)\ntest_class = TestClass3.new('Some type of string', testclass2)\n")
     end
 
     it "deconstructs hash types" do

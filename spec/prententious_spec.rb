@@ -71,7 +71,7 @@ RSpec.describe Pretentious::Generator do
       test_class.handled_by_method_missing
     end
 
-      expect(result[TestClassMethodMissing][:output]).to match("YOU GOT ME!!!!")
+    expect(result[TestClassMethodMissing][:output]).to match("YOU GOT ME!!!!")
   end
 
   context "proc handling" do
