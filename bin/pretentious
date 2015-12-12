@@ -6,6 +6,25 @@ require 'ripper'
 require 'readline'
 require 'json'
 require 'fileutils'
+require 'yaml'
+
+def process_file(filename, output_folder, output_subfolder)
+  example_body = ''
+  index = 0
+  File.open(filename, "r") do |f|
+    f.each_line do |line|
+      example_body << "#{line}\n"
+    end
+  end
+
+  eval(example_body, binding, filename, 1)
+
+  # collect results and write them
+  puts "writing tests to #{output_folder}"
+  filewriter = Pretentious::FileWriter.new(output_folder: output_folder,
+                                           spec_output_folder: output_subfolder)
+  filewriter.write_results(Pretentious.last_results)
+end
 
 output_folder = nil
 output_subfolder =nil
@@ -26,24 +45,22 @@ end
 filename = ARGV[0]
 
 if filename.nil?
-  puts 'an example file is required.'
-  puts options
-  exit(1)
-end
+  if File.exists?('pretentious.yml')
+    targets_file = YAML.load_file('pretentious.yml')
+    targets_file['targets'].each do |target|
+      puts "generate for #{target['class']}"
+      Pretentious::LazyTrigger.new(target['class'], {})
+    end
 
-example_body = ''
-
-index = 0
-File.open(filename, "r") do |f|
-  f.each_line do |line|
-    example_body << "#{line}\n"
+    targets_file['examples'].each do |f|
+      puts "executing target #{f}"
+      process_file(f, output_folder, output_subfolder)
+    end
+  else
+    puts 'a target or an example file is required.'
+    puts options
+    exit(1)
   end
+else
+  process_file(filename, output_folder, output_subfolder)
 end
-
-eval(example_body, binding, filename, 1)
-
-# collect results and write them
-puts "writing tests to #{output_folder}"
-filewriter = Pretentious::FileWriter.new(output_folder: output_folder,
-                                         spec_output_folder: output_subfolder)
-filewriter.write_results(Pretentious.last_results)

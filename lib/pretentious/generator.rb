@@ -448,6 +448,9 @@ module Pretentious
           def new(*args, &block)
             instance = _ddt_old_new(*args, &block)
 
+            if Pretentious::LazyTrigger.lookup(self.to_s)
+              
+            end
             # rescues for handling native objects that don't have standard methods
             begin
               if instance.respond_to?(:_set_init_arguments)

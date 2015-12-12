@@ -1,0 +1,8 @@
+# Sample pretentious targets file
+targets:
+  - class: TestClass1
+  - class: TestClass3
+    stub:
+      - TestClass1
+examples:
+  - exampler.rb
