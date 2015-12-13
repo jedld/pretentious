@@ -306,7 +306,7 @@ module Pretentious
       new_standin_klass
     end
 
-    def self.replace_class(klass, stub = false)
+    def self.denamespace(klass)
       klass_name_parts = klass.name.split('::')
       last_part = klass_name_parts.pop
 
@@ -318,7 +318,13 @@ module Pretentious
         end
       end
 
+      [last_part, module_space]
+    end
+
+    def self.replace_class(klass, stub = false)
+      last_part, module_space = denamespace(klass)
       new_standin_klass = impostor_for module_space, klass
+
       new_standin_klass._set_is_stub if stub
 
       module_space.send(:remove_const, last_part.to_sym)
@@ -391,7 +397,7 @@ module Pretentious
         end
 
         def _set_init_arguments(*args, &block)
-          @_init_arguments = @_init_arguments || {}
+          @_init_arguments ||= {}
           @_init_arguments[:params]  = args
           unless (block.nil?)
             @_init_arguments[:block] = RecordedProc.new(block) {}
@@ -409,7 +415,6 @@ module Pretentious
             p = params[index]
             @_variable_names[arg.object_id] = p[1].to_s if p && p.size > 1
           end unless args.nil?
-
         end
 
         def _variable_map
@@ -446,11 +451,21 @@ module Pretentious
           alias_method :_ddt_old_new, :new
 
           def new(*args, &block)
-            instance = _ddt_old_new(*args, &block)
+            lazy_trigger = Pretentious::LazyTrigger.lookup(self.to_s)
+            instance = nil
+            if !lazy_trigger.nil?
+              instance = if methods.include? :_current_old_class
+                           _ddt_old_new(*args, &block)
+                         else
+                           Pretentious::Generator.replace_class(self)
+                           _ddt_old_new(*args, &block)
+                         end
 
-            if Pretentious::LazyTrigger.lookup(self.to_s)
-              
+              lazy_trigger.register_object(instance)
+            else
+              instance = _ddt_old_new(*args, &block)
             end
+
             # rescues for handling native objects that don't have standard methods
             begin
               if instance.respond_to?(:_set_init_arguments)
@@ -460,6 +475,7 @@ module Pretentious
               begin
                 instance._set_init_arguments(*args, &block)
               rescue NoMethodError
+                # eat up NoMethodError for now
               end
             end
 
