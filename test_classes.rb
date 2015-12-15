@@ -36,6 +36,7 @@ class TestClassMethodMissing
 end
 
 class TestClass1
+  SOME_CONSTANT = 'Yes this is a constant'
 
   def initialize(message)
     @message = message

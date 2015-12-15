@@ -65,6 +65,12 @@ module Pretentious
                              .generate_for(*klasses, &block))
   end
 
+  def self.write_results(output_folder = nil, output_subfolder = nil)
+    filewriter = Pretentious::FileWriter.new(output_folder: output_folder,
+                                             spec_output_folder: output_subfolder)
+    filewriter.write_results(Pretentious.last_results)
+  end
+
   def self.clear_results
     @spec_results = {}
     @minitest_results = {}

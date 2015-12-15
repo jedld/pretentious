@@ -67,8 +67,11 @@ module Pretentious
           v_locals = caller_context.eval('local_variables')
 
           v_locals.each do |v|
-            variable_value = caller_context.eval("#{v.to_s}")
-            @_init_let_variables[variable_value.object_id] = v
+            begin
+              variable_value = caller_context.eval("#{v.to_s}")
+              @_init_let_variables[variable_value.object_id] = v
+            rescue NoMethodError
+            end
           end
 
           args.each_with_index do |a, index|
@@ -171,7 +174,7 @@ module Pretentious
           end
 
           def let_variables
-            @_let_variables.dup
+            @_let_variables ? @_let_variables.dup : {}
           end
 
           def method_calls_by_method
@@ -226,8 +229,11 @@ module Pretentious
               v_locals = caller_context.eval('local_variables')
 
               v_locals.each do |v|
-                variable_value = caller_context.eval("#{v}")
-                @_let_variables[variable_value.object_id] = v
+                begin
+                  variable_value = caller_context.eval("#{v}")
+                  @_let_variables[variable_value.object_id] = v
+                rescue NoMethodError
+                end
               end
 
               klass.replace_procs_with_recorders(arguments)
@@ -299,6 +305,12 @@ module Pretentious
               _add_instances(self)
               @_instance = _current_old_class
               _call_method(self, method_sym, *arguments, &block)
+            end
+
+            def const_missing(sym)
+              _add_instances(self)
+              @_instance = _current_old_class
+              @_instance.const_get(sym)
             end
         end
       end

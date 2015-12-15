@@ -23,7 +23,7 @@ module Pretentious
         puts "#{g}:"
         result_per_generator.each do |klass, result|
           puts write(klass, result)
-        end
+        end if result_per_generator
       end
     end
   end

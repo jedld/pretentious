@@ -5,4 +5,4 @@ targets:
     stub:
       - TestClass1
 examples:
-  - exampler.rb
+  - example.rb

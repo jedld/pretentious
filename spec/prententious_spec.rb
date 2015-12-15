@@ -65,6 +65,12 @@ RSpec.describe Pretentious::Generator do
     expect(result[TestClass1][:output]).to match('expect { @fixture.something_is_wrong }.to raise_error')
   end
 
+  it "handles constants inside classes" do
+    Pretentious.spec_for(TestClass1) do
+      expect(TestClass1::SOME_CONSTANT).to eq('Yes this is a constant')
+    end
+  end
+
   it "handles method missing" do
     result = Pretentious.spec_for(TestClassMethodMissing) do
       test_class = TestClassMethodMissing.new

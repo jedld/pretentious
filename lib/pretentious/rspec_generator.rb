@@ -88,6 +88,8 @@ module Pretentious
       mocks_collection = {}
       method_call_collection = []
 
+      return if method_calls.nil?
+
       method_calls.each_key do |k|
         info_blocks_arr = method_calls[k]
         info_blocks_arr.each do |block|
