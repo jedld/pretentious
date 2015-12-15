@@ -454,14 +454,15 @@ module Pretentious
             lazy_trigger = Pretentious::LazyTrigger.lookup(self.to_s)
             instance = nil
             if !lazy_trigger.nil?
+              klass = self
               instance = if methods.include? :_current_old_class
                            _ddt_old_new(*args, &block)
                          else
-                           Pretentious::Generator.replace_class(self)
+                           _module_space, _klass, _last_part, klass = Pretentious::Generator.replace_class(self)
                            _ddt_old_new(*args, &block)
                          end
 
-              lazy_trigger.register_object(instance)
+              lazy_trigger.register_class(klass)
             else
               instance = _ddt_old_new(*args, &block)
             end

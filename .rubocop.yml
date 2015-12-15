@@ -1,0 +1,238 @@
+AllCops:
+  Exclude:
+    - '*.gemspec'
+    - 'Gemfile'
+    - 'bin/**/*'
+    - 'db/migrate/**/*'
+    - 'db/schema.rb'
+    - 'log/**/*'
+    - 'tmp/**/*'
+    - 'vendor/**/*'
+  DisplayCopNames: true
+  RunRailsCops: true
+
+Metrics/LineLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/ExtraSpacing:
+  AllowForAlignment: true
+
+Style/MultilineOperationIndentation:
+  Enabled: false
+
+Style/NegatedIf:
+  Enabled: false
+
+Style/RegexpLiteral:
+  Enabled: false
+
+Style/SingleSpaceBeforeFirstArg:
+  Enabled: false
+
+Style/SpaceAroundOperators:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/TrailingComma:
+  EnforcedStyleForMultiline: 'comma'
+
+Rails/Date:
+  Enabled: false
+
+# Offense count: 9
+# Configuration parameters: AllowSafeAssignment.
+Lint/AssignmentInCondition:
+  Exclude:
+    - 'app/controllers/support/disbursements_controller.rb'
+    - 'db/seeds.rb'
+
+# Offense count: 11
+# Cop supports --auto-correct.
+# Configuration parameters: IgnoreEmptyBlocks.
+Lint/UnusedBlockArgument:
+  Exclude:
+    - 'Guardfile'
+    - 'app/admin/admin_user_roles.rb'
+    - 'app/admin/admin_users.rb'
+    - 'app/admin/agents.rb'
+    - 'app/admin/banks.rb'
+    - 'app/admin/loan_applications.rb'
+    - 'app/admin/loans.rb'
+    - 'app/admin/roles.rb'
+    - 'app/admin/users.rb'
+    - 'config/initializers/doorkeeper.rb'
+
+# Offense count: 13
+# Cop supports --auto-correct.
+# Configuration parameters: AllowUnusedKeywordArguments, IgnoreEmptyMethods.
+Lint/UnusedMethodArgument:
+  Exclude:
+    - 'app/controllers/base_controller.rb'
+    - 'app/controllers/tenants/confirmations_controller.rb'
+    - 'app/controllers/tenants/passwords_controller.rb'
+    - 'app/models/loans/amortizers/base_amortizer.rb'
+    - 'app/models/loans/start_dates/alpha.rb'
+    - 'app/resources/base_resource.rb'
+    - 'app/workers/track_sign_up_worker.rb'
+    - 'spec/support/api_macros.rb'
+    - 'spec/support/tenants/public/evaluator.rb'
+
+# Offense count: 12
+Lint/UselessAssignment:
+  Exclude:
+    - 'app/models/loan_application.rb'
+    - 'app/models/operations/make_offer.rb'
+    - 'app/workers/update_zendesk_ticket_with_document_worker.rb'
+    - 'spec/models/period_spec.rb'
+    - 'spec/models/tenants/yes_credit/mailer_spec.rb'
+    - 'spec/workers/create_docusign_worker_spec.rb'
+
+# Offense count: 64
+Metrics/AbcSize:
+  Enabled: false
+
+# Offense count: 12
+# Configuration parameters: CountComments.
+Metrics/ClassLength:
+  Max: 230
+
+# Offense count: 5
+Metrics/CyclomaticComplexity:
+  Max: 23
+
+# Offense count: 3
+Metrics/PerceivedComplexity:
+  Max: 16
+
+# Offense count: 8
+# Cop supports --auto-correct.
+Rails/Delegate:
+  Exclude:
+    - 'app/decorators/contract_loan_decorator.rb'
+    - 'app/models/operations/confirm_loan_amount.rb'
+    - 'app/models/operations/evaluate_retroactive.rb'
+    - 'app/models/operations/make_offer.rb'
+    - 'app/models/operations/validate_complete_profile.rb'
+
+# Offense count: 2
+# Cop supports --auto-correct.
+# Configuration parameters: Include.
+Rails/FindBy:
+  Exclude:
+    - 'app/models/concerns/has_a_mobile_number.rb'
+    - 'app/models/incoming_payment.rb'
+
+# Offense count: 4
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle, SupportedStyles, ProceduralMethods, FunctionalMethods, IgnoredMethods.
+Style/BlockDelimiters:
+  Exclude:
+    - 'config/initializers/simple_form.rb'
+    - 'spec/requests/api/v1/actions_api_spec.rb'
+
+# Offense count: 2
+# Cop supports --auto-correct.
+Style/CommentIndentation:
+  Exclude:
+    - 'app/models/admin_user.rb'
+    - 'app/models/user.rb'
+
+Style/DoubleNegation:
+  Enabled: false
+
+# Offense count: 10
+# Cop supports --auto-correct.
+# Configuration parameters: AllowForAlignment.
+Style/ExtraSpacing:
+  Exclude:
+    - 'app/controllers/support/users/bank_accounts_controller.rb'
+    - 'app/decorators/periods_decorator.rb'
+    - 'app/models/concerns/csv_printable.rb'
+    - 'app/models/operations/confirm_documents.rb'
+    - 'app/models/operations/generate_document.rb'
+    - 'app/models/profile.rb'
+    - 'config/routes.rb'
+    - 'db/seeds.rb'
+    - 'spec/models/operations/generate_docusign_document_spec.rb'
+    - 'spec/requests/api/v1/actions_api_spec.rb'
+
+# Offense count: 3
+# Configuration parameters: EnforcedStyle, SupportedStyles.
+Style/FormatString:
+  Exclude:
+    - 'app/models/concerns/csv_printable.rb'
+
+# Offense count: 6
+# Configuration parameters: AllowedVariables.
+Style/GlobalVars:
+  Exclude:
+    - 'app/workers/create_zendesk_ticket_worker.rb'
+    - 'app/workers/update_zendesk_ticket_with_document_worker.rb'
+    - 'config/initializers/100_redis.rb'
+    - 'config/initializers/zendesk.rb'
+    - 'spec/models/loan_application_spec.rb'
+
+# Offense count: 17
+# Configuration parameters: MinBodyLength.
+Style/GuardClause:
+  Exclude:
+    - 'app/controllers/base_controller.rb'
+    - 'app/controllers/support/loan_applications_controller.rb'
+    - 'app/models/concerns/has_a_mobile_number.rb'
+    - 'app/models/operations/confirm_documents.rb'
+    - 'app/models/operations/register_and_apply.rb'
+    - 'app/models/operations/validate_complete_documents.rb'
+    - 'app/models/profile.rb'
+    - 'app/models/proxies/user_proxy.rb'
+    - 'app/models/tenants/yes_credit/helpers/payment_calculator.rb'
+    - 'db/seeds.rb'
+    - 'scripts/frequency_fixer.rb'
+
+# Offense count: 5
+# Cop supports --auto-correct.
+# Configuration parameters: MaxLineLength.
+Style/IfUnlessModifier:
+  Exclude:
+    - 'app/controllers/actions_controller.rb'
+    - 'app/models/concerns/has_a_mobile_number.rb'
+    - 'app/models/concerns/reference_coded.rb'
+    - 'app/models/operations/generate_docusign_document.rb'
+    - 'scripts/frequency_fixer.rb'
+
+# Offense count: 6
+# Configuration parameters: NamePrefix, NamePrefixBlacklist, NameWhitelist.
+Style/PredicateName:
+  Exclude:
+    - 'app/policies/application_policy.rb'
+    - 'app/resources/user_resource.rb'
+
+# Offense count: 2
+# Configuration parameters: SupportedStyles.
+Style/RaiseArgs:
+  EnforcedStyle: compact
+
+# Offense count: 1
+# Configuration parameters: Methods.
+Style/SingleLineBlockParams:
+  Exclude:
+    - 'app/models/loan_application.rb'
+
+# Offense count: 1
+Style/StructInheritance:
+  Exclude:
+    - 'app/policies/application_policy.rb'
+
+Style/WordArray:
+  Enabled: false
+  MinSize: 5

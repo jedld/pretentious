@@ -13,8 +13,8 @@ module Pretentious
       Pretentious::LazyTrigger.unregister_instance(self)
     end
 
-    def register_object(object)
-      @instances << object unless @instances.include? object
+    def register_class(klass)
+      @instances << klass unless @instances.include? klass
     end
 
     class << self
