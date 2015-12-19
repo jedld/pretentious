@@ -1,3 +1,11 @@
+# 0.2 (2015-12-19)
+Bugfixes:
+- Fix constants not getting resolved
+
+Features:
+- support for pretentious.yml file
+- Strings can now be passed to spec_for
+
 # 0.1.12 (2015-12-12)
 Bugfixes:
 - fix duplicate specs inside minitest

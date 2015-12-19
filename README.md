@@ -7,18 +7,17 @@ On a serious note, this gem allows you to generate tests template used for "char
 
 ## Table of Contents
 1. [Installation](#installation)
-- [Usage](#usage)
-  1. [Using the pretentious.yml file](#using-pretentious.yml)
-  2. [Declarative generation without using example files](#declarative-generation-without-using-example-files)
-  3. [Minitest](#minitest)
-
-- [Handling complex parameters and object constructors](#handling-complex-parameters-and-object-constructors)
-2. [Capturing Exceptions](#capturing-exceptions)
-3. [Auto Stubbing](#auto-stubbing)
-4. [Object Deconstruction Utility](#object-deconstruction-utility)
-5. [Using the Object deconstructor in rails](#using-the-object-deconstructor-in-rails)
-6. [Things to do after](#things-to-do-after)
-7. [Limitations](#limitations)
+2. [Usage](#usage)
+3. [Using the pretentious.yml file](#using-pretentious.yml)
+4. [Declarative generation without using example files](#declarative-generation-without-using-example-files)
+5. [Minitest](#minitest)
+6. [Handling complex parameters and object constructors](#handling-complex-parameters-and-object-constructors)
+7. [Capturing Exceptions](#capturing-exceptions)
+8. [Auto Stubbing](#auto-stubbing)
+9. [Object Deconstruction Utility](#object-deconstruction-utility)
+10. [Using the Object deconstructor in rails](#using-the-object-deconstructor-in-rails)
+11. [Things to do after](#things-to-do-after)
+12. [Limitations](#limitations)
 
 ## Installation
 Add this line to your application's Gemfile:
