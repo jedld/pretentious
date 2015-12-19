@@ -1,8 +1,8 @@
 # Sample pretentious targets file
 targets:
-  - class: TestClass1
-  - class: TestClass3
-    stub:
-      - TestClass1
+  - class: Meme
+generators:
+  - rspec
+  - minitest
 examples:
-  - example.rb
+  - sample.rb

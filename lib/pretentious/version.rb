@@ -1,4 +1,4 @@
 # Pretentious - version
 module Pretentious
-  VERSION = '0.1.12'
+  VERSION = '0.2'
 end

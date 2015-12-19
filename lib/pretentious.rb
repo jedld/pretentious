@@ -65,10 +65,10 @@ module Pretentious
                              .generate_for(*klasses, &block))
   end
 
-  def self.write_results(output_folder = nil, output_subfolder = nil)
+  def self.write_results(output_folder = nil, output_subfolder = nil, last_results = nil)
     filewriter = Pretentious::FileWriter.new(output_folder: output_folder,
                                              spec_output_folder: output_subfolder)
-    filewriter.write_results(Pretentious.last_results)
+    filewriter.write_results(last_results || Pretentious.last_results)
   end
 
   def self.clear_results

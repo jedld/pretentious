@@ -7,7 +7,6 @@ class TestSubClass
 end
 
 class TestClass
-
   def initialize(dep = nil)
     @test_class2 = TestSubClass.new
   end
@@ -26,7 +25,6 @@ class TestClass
 end
 
 class DummyGenerator
-
   def initialize
     @data = []
   end
@@ -47,24 +45,22 @@ class DummyGenerator
               instance_count: instance_count}
   end
 
-  def end_spec()
+  def end_spec
     @data << :end
   end
 
   def output
     @data
   end
-
 end
 
 class DummyGenerator2
-
   def initialize
     @data = []
   end
 
   def begin_spec(test_class)
-    @data << {begin: test_class}
+    @data << { begin: test_class }
   end
 
   def body(instances)
@@ -80,10 +76,10 @@ class DummyGenerator2
 
     deconstruct_targets = [test_instance]
     test_instance.method_calls.each do |method_calls|
-      deconstruct_targets = deconstruct_targets + method_calls[:params]
+      deconstruct_targets += method_calls[:params]
     end
 
-    deconstruct =  deconstructor.deconstruct(test_instance.method_calls, *deconstruct_targets)
+    deconstruct = deconstructor.deconstruct(test_instance.method_calls, *deconstruct_targets)
     deconstruct[:declaration].each do |d|
       @data << d
     end
@@ -94,18 +90,16 @@ class DummyGenerator2
     @data << :generate_end
   end
 
-  def end_spec()
+  def end_spec
     @data << :end
   end
 
   def output
     @data
   end
-
 end
 
 RSpec.describe Pretentious::Generator do
-
   context 'Pretentious::Generator#impostor_for' do
     before do
       @impostor = Pretentious::Generator.impostor_for(Object, TestClass)
@@ -126,7 +120,6 @@ RSpec.describe Pretentious::Generator do
   end
 
   context "Pretentious::Generator#replace_class" do
-
     around(:each) do |example|
       @old_class = TestClass
       module_space, klass, last, new_class = Pretentious::Generator.replace_class(TestClass)
@@ -179,7 +172,6 @@ RSpec.describe Pretentious::Generator do
     end
 
     context "auto mocks generator" do
-
       it "generates a stub call structure" do
 
         call_artifacts = Pretentious::Generator.generate_for(TestClass._stub(TestSubClass)) do

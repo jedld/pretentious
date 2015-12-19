@@ -8,7 +8,7 @@ require 'json'
 require 'fileutils'
 require 'yaml'
 
-def process_file(filename, output_folder, output_subfolder)
+def eval_example(filename)
   example_body = ''
   index = 0
   File.open(filename, "r") do |f|
@@ -18,12 +18,19 @@ def process_file(filename, output_folder, output_subfolder)
   end
 
   eval(example_body, binding, filename, 1)
+end
 
+def write_output(output_folder, output_subfolder, last_results = nil)
   # collect results and write them
   puts "writing tests to #{output_folder}"
   filewriter = Pretentious::FileWriter.new(output_folder: output_folder,
                                            spec_output_folder: output_subfolder)
-  filewriter.write_results(Pretentious.last_results)
+  filewriter.write_results(last_results || Pretentious.last_results)
+end
+
+def process_file(filename, output_folder, output_subfolder, last_results = nil)
+  eval_example(filename)
+  write_output(output_folder, output_subfolder, last_results)
 end
 
 output_folder = nil
@@ -52,10 +59,46 @@ if filename.nil?
       Pretentious::LazyTrigger.new(target['class'], {})
     end
 
-    targets_file['examples'].each do |f|
-      puts "executing target #{f}"
-      process_file(f, output_folder, output_subfolder)
+    Pretentious.watch {
+      targets_file['examples'].each do |f|
+        puts "executing target #{f}"
+        eval_example(f)
+      end
+    }
+
+    generator_classes = targets_file['generators'].collect do |g|
+      case g
+        when 'rspec'
+          Pretentious::RspecGenerator
+        when 'minitest'
+          Pretentious::MinitestGenerator
+      end
     end
+
+    per_spec = {}
+    generator_classes.each do |generator_class|
+      puts "generating #{generator_class.to_sym} tests"
+      all_results = {}
+      Pretentious::LazyTrigger.collect_targets.each do |target|
+        standin_klass = target.stand_in_klass
+        klass = target.original_klass
+        puts "generate for #{klass}"
+        generator = generator_class.new
+
+        generator.begin_spec(klass)
+        generator.body(standin_klass._instances) unless standin_klass._instances.nil?
+        generator.end_spec
+
+        result = all_results[klass]
+        all_results[klass] = [] if result.nil?
+
+        result_output = generator.output.is_a?(String) ? generator.output.chomp : generator.output
+        all_results[klass] = { output: result_output, generator: generator.class }
+      end
+      per_spec[generator_class.to_sym] = all_results
+    end
+    puts "writing output..."
+    write_output(output_folder, output_subfolder, per_spec)
   else
     puts 'a target or an example file is required.'
     puts options

@@ -54,7 +54,7 @@ RSpec.describe TestClass1 do
 
     it 'should pass current expectations' do
       another_object = TestClass1.new('test')
-      # TestClass1#return_self when passed message = #<TestClass1:0x000000014111e8> should return another_object
+      # TestClass1#return_self when passed message = #<TestClass1:0x000000012b4098> should return another_object
       expect(@fixture.return_self(another_object)).to eq(another_object)
     end
   end

@@ -59,7 +59,7 @@ class TestClass1Scenario3 < TestClass1Test
   def test_current_expectation
     another_object = TestClass1.new('test')
 
-    # TestClass1#return_self when passed message = #<TestClass1:0x00000002236a70> should return another_object
+    # TestClass1#return_self when passed message = #<TestClass1:0x0000000214e978> should return another_object
     assert_equal another_object, @fixture.return_self(another_object)
   end
 end

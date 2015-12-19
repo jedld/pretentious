@@ -42,7 +42,15 @@ module Pretentious
       ")
 
       new_standin_klass.class_exec do
+
         def initialize(*args, &block)
+          #check for special invocations
+          an_instance = if args[0] == :_no_init
+            _cmd, an_instance = args.shift(2)
+            an_instance
+          else
+            nil
+          end
           @_instance_init = { object_id: object_id, params: [], block: nil }
 
           self.class.replace_procs_with_recorders(args)
@@ -52,7 +60,12 @@ module Pretentious
 
           @_instance_init[:block] = recorded_proc
 
-          setup_instance(*args, &recorded_proc)
+          @_instance = if an_instance
+                         an_instance
+                       else
+                         setup_instance(*args, &recorded_proc)
+                       end
+
           param_types = @_instance.method(:initialize).parameters
           @_instance_init[:params_types] = param_types
 
@@ -85,6 +98,10 @@ module Pretentious
           @_instance_init
         end
 
+        def _get_init_arguments
+          @_instance_init
+        end
+
         def test_class
           @_instance.class
         end
@@ -111,6 +128,10 @@ module Pretentious
 
         def to_s
           @_instance.to_s
+        end
+
+        def impostor?
+          true
         end
 
         def ==(other)
@@ -150,6 +171,10 @@ module Pretentious
         end
 
         class << self
+
+          def impostor?
+            true
+          end
 
           def replace_procs_with_recorders(args)
             (0..args.size).each do |index|
@@ -359,16 +384,20 @@ module Pretentious
       mock_dict = {}
 
       klasses_or_instances.each do |klass_or_instance|
-        klass = klass_or_instance.class == Class ? klass_or_instance : klass_or_instance.class
-        klasses << replace_class(klass)
+        if klass_or_instance.is_a? String
+          Pretentious::LazyTrigger.new(klass_or_instance, {})
+        else
+          klass = klass_or_instance.class == Class ? klass_or_instance : klass_or_instance.class
+          klasses << replace_class(klass)
 
-        mock_klasses = []
+          mock_klasses = []
 
-        klass._get_mock_classes.each do |mock_klass|
-          mock_klasses << replace_class(mock_klass, true)
-        end unless klass._get_mock_classes.nil?
+          klass._get_mock_classes.each do |mock_klass|
+            mock_klasses << replace_class(mock_klass, true)
+          end unless klass._get_mock_classes.nil?
 
-        mock_dict[klass] = mock_klasses
+          mock_dict[klass] = mock_klasses
+        end
       end
 
       watch_new_instances
@@ -377,13 +406,17 @@ module Pretentious
 
       unwatch_new_instances
 
+      # check for lazy triggers, collect and then clean
+      klasses += Pretentious::LazyTrigger.collect_targets.map(&:to_a)
+      Pretentious::LazyTrigger.clear
+
       klasses.each do |module_space, klass, last_part, new_standin_klass|
         # restore the previous class
         restore_class module_space, klass, last_part
 
         mock_dict[klass].each do |mock_module_space, mock_klass, mock_last_part, mock_new_standin_klass|
           restore_class mock_module_space, mock_klass, mock_last_part
-        end
+        end if mock_dict[klass]
 
         generator = test_generator.new
         generator.begin_spec(klass)
@@ -410,8 +443,8 @@ module Pretentious
 
         def _set_init_arguments(*args, &block)
           @_init_arguments ||= {}
-          @_init_arguments[:params]  = args
-          unless (block.nil?)
+          @_init_arguments[:params] = args
+          unless block.nil?
             @_init_arguments[:block] = RecordedProc.new(block) {}
           end
           @_variable_names = {}
@@ -470,22 +503,23 @@ module Pretentious
               instance = if methods.include? :_current_old_class
                            _ddt_old_new(*args, &block)
                          else
-                           _module_space, _klass, _last_part, klass = Pretentious::Generator.replace_class(self)
-                           _ddt_old_new(*args, &block)
+                           module_space, klass, last_part, stand_in_class = Pretentious::Generator.replace_class(self)
+                           lazy_trigger.register_class(module_space, klass, last_part, stand_in_class)
+                           inst = _ddt_old_new(*args, &block)
+                           stand_in_class.new(*([:_no_init, inst] + args), &block)
                          end
-
-              lazy_trigger.register_class(klass)
             else
               instance = _ddt_old_new(*args, &block)
             end
 
             # rescues for handling native objects that don't have standard methods
             begin
-              if instance.respond_to?(:_set_init_arguments)
+              if instance.respond_to?(:_set_init_arguments) && !instance.respond_to?(:impostor?)
                 instance._set_init_arguments(*args, &block)
               end
             rescue NoMethodError
               begin
+                puts "no method error"
                 instance._set_init_arguments(*args, &block)
               rescue NoMethodError
                 # eat up NoMethodError for now

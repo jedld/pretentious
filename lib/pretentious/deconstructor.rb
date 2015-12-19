@@ -355,13 +355,11 @@ module Pretentious
         params = []
         if definition[:ref] && definition[:ref].size > 0
 
-          i = 0
           params_types = definition[:params_types]
           definition[:ref].each_with_index do |v, index|
             type = :param
-            if params_types
+            if params_types && params_types[index]
               type = params_types[index][0]
-              i += 1
             end
 
             # to inline?
