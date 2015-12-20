@@ -9,9 +9,9 @@ class TestClass3Scenario1 < TestClass3Test
   def setup
     another_object = TestClass1.new('test')
     b = { hello: 'world', test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: { yes: true, obj: another_object } }
-    testclass1 = TestClass1.new(b)
-    testclass2 = TestClass2.new('This is message 2', nil)
-    @fixture = TestClass3.new(testclass1, testclass2)
+    test_class_one = TestClass1.new(b)
+    test_class_two = TestClass2.new('This is message 2', nil)
+    @fixture = TestClass3.new(test_class_one, test_class_two)
   end
 
   def test_current_expectation
@@ -24,9 +24,9 @@ class TestClass3Scenario2 < TestClass3Test
   def setup
     another_object = TestClass1.new('test')
     b = { hello: 'world', test: another_object, arr_1: [1, 2, 3, 4, 5, another_object], sub_hash: { yes: true, obj: another_object } }
-    testclass1 = TestClass1.new(b)
-    testclass2 = TestClass2.new('This is message 2', nil)
-    @fixture = TestClass3.new(testclass1, testclass2)
+    test_class_one = TestClass1.new(b)
+    test_class_two = TestClass2.new('This is message 2', nil)
+    @fixture = TestClass3.new(test_class_one, test_class_two)
   end
 
   def test_current_expectation

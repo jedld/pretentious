@@ -7,12 +7,11 @@ end
 
 class TestClass4Scenario1 < TestClass4Test
   def setup
-    c = nil
-    d = proc { 
-      # Variable return values ... can't figure out what goes in here...
+    b = proc { 
+      'test'
     }
 
-    @fixture = TestClass4.new(&d)
+    @fixture = TestClass4.new(&b)
   end
 
   def test_current_expectation

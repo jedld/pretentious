@@ -244,5 +244,21 @@ class TestClassForAutoStub
     return_values << @class_to_be_used2.get_message
     return_values
   end
+end
 
+class TestClassR1
+  SOME_CONSTANT = "CONST"
+
+  def hello
+  end
+end
+
+class TestClassR2
+  def hello_again
+    "hi"
+  end
+
+  def pass_message(message)
+    "#{message} #{TestClassR1::SOME_CONSTANT}"
+  end
 end

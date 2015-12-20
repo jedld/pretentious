@@ -24,14 +24,14 @@ RSpec.describe TestClass2 do
 
   context 'Scenario 3' do
     before do
-      @message2 = 'This is message 3'
-      message = TestClass2.new(@message2, nil)
-      @fixture = TestClass2.new(message, @message2)
+      @message3 = 'This is message 3'
+      t = TestClass2.new(@message3, nil)
+      @fixture = TestClass2.new(t, @message3)
     end
 
     it 'should pass current expectations' do
       # TestClass2#test when passed object = "This is message 3" should return 'This is message 3'
-      expect(@fixture.test(@message2)).to eq(@message2)
+      expect(@fixture.test(@message3)).to eq(@message3)
     end
   end
 end

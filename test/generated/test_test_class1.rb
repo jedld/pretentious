@@ -19,16 +19,16 @@ end
 class TestClass1Scenario2 < TestClass1Test
   def setup
     @another_object = TestClass1.new('test')
-    @message = { hello: 'world', test: @another_object, arr_1: [1, 2, 3, 4, 5, @another_object], sub_hash: { yes: true, obj: @another_object } }
-    @fixture = TestClass1.new(@message)
+    @a = { hello: 'world', test: @another_object, arr_1: [1, 2, 3, 4, 5, @another_object], sub_hash: { yes: true, obj: @another_object } }
+    @fixture = TestClass1.new(@a)
   end
 
   def test_current_expectation
     a = proc { |message|
-      @message
+      @a
     }
 
-    filewriter = nil
+    test_class1 = nil
     b = proc { 
       # Variable return values ... can't figure out what goes in here...
     }
@@ -40,8 +40,8 @@ class TestClass1Scenario2 < TestClass1Test
     # TestClass1#set_block  should return a
     assert_equal a, @fixture.set_block( &a)
 
-    # TestClass1#call_block  should return @message
-    assert_equal @message, @fixture.call_block( &b)
+    # TestClass1#call_block  should return @a
+    assert_equal @a, @fixture.call_block( &b)
 
     # TestClass1#something_is_wrong  should return e
     assert_raises(StandardError) { @fixture.something_is_wrong }
@@ -59,19 +59,19 @@ class TestClass1Scenario3 < TestClass1Test
   def test_current_expectation
     another_object = TestClass1.new('test')
 
-    # TestClass1#return_self when passed message = #<TestClass1:0x0000000214e978> should return another_object
+    # TestClass1#return_self when passed message = #<TestClass1:0x00000001174fe8> should return another_object
     assert_equal another_object, @fixture.return_self(another_object)
   end
 end
 
 class TestClass1Scenario4 < TestClass1Test
   def setup
-    @message = TestClass1.new('test')
-    @fixture = TestClass1.new(@message)
+    @another_object = TestClass1.new('test')
+    @fixture = TestClass1.new(@another_object)
   end
 
   def test_current_expectation
-    # TestClass1#message  should return @message
-    assert_equal @message, @fixture.message
+    # TestClass1#message  should return @another_object
+    assert_equal @another_object, @fixture.message
   end
 end

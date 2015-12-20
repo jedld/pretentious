@@ -11,3 +11,27 @@ end
 meme = Meme.new
 meme.i_can_has_cheezburger?
 meme.will_it_blend?
+
+class TestClassR1
+  SOME_CONSTANT = "CONST"
+
+  def hello
+  end
+end
+
+class TestClassR2
+  def hello_again
+    "hi"
+  end
+
+  def pass_message(message)
+    "#{message} #{TestClassR1::SOME_CONSTANT}"
+  end
+end
+
+test_class1 = TestClassR1.new
+test_class1.hello
+
+test_class2 = TestClassR2.new
+test_class2.hello_again
+test_class2.pass_message("a message")

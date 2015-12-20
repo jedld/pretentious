@@ -56,7 +56,12 @@ if filename.nil?
     targets_file = YAML.load_file('pretentious.yml')
     targets_file['targets'].each do |target|
       puts "generate for #{target['class']}"
-      Pretentious::LazyTrigger.new(target['class'], {})
+      if target['class'].start_with?('$')
+        target['class'][0] = ''
+        Pretentious::LazyTrigger.new(eval(target['class']), {})
+      else
+        Pretentious::LazyTrigger.new(target['class'], {})
+      end
     end
 
     Pretentious.watch {

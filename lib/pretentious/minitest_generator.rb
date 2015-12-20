@@ -119,7 +119,7 @@ module Pretentious
             params_collection << mock_block[:result]
           end if block[:context]
         end
-      end
+      end if method_calls
 
       if params_collection.size > 0
         deps = declare_dependencies(context, params_collection, 2)
@@ -144,7 +144,6 @@ module Pretentious
       indentation = ''
       indentation_level.times { indentation << @_indentation }
       method_calls.each_key do |k|
-
         info_blocks_arr = method_calls[k]
 
         info_blocks_arr.each do |block|
@@ -159,7 +158,7 @@ module Pretentious
           str << "#{indentation}#{generate_expectation(context, fixture, k, block[:params], block[:block], block[:result])}\n"
           expectations << str unless expectations.include? str
         end
-      end
+      end if method_calls
       expectations.join("\n")
     end
 
