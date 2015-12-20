@@ -18,7 +18,7 @@ RSpec.describe Pretentious::Generator do
 
     it "classes should have a stub class section" do
       Fibonacci._stub(String)
-      expect(Fibonacci._get_mock_classes).to eq([String])
+      expect(Fibonacci._get_stub_classes).to eq([String])
     end
 
     it "tracks object calls" do

@@ -164,7 +164,7 @@ end
 
 awesome!
 
-You can also try this out with built-in libraries like MD5 for example ...
+You can also try this out with libraries like MD5 for example ...
 
 ```ruby
 #example.rb
@@ -260,6 +260,20 @@ end
 ```
 
 IMPORTANT: If using rails or if it is part of a larger app, make sure to enable this only when you intend to generate specs! delete the initializer or comment the code out when it is not needed.
+
+If the class is still to be defined, you may pass the name of the class as a string instead. However, calls to class methods can't be reliably captured in this manner:
+
+```ruby
+Pretentious.on(UsersController).method_called(:login).spec_for("UserAuthentication")
+```
+
+Of course, you call also pass a regex if you want to auto generate classes via some  name convention:
+
+```ruby
+Pretentious.on(UsersController).method_called(:login).spec_for(/^User/)
+```
+
+Classes starting with User will now be watched (e.g. UserController, UserProfile etc.)
 
 ## Minitest
 The minitest test framework is also supported, simply use Pretentious.minitest_for instead

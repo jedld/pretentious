@@ -13,12 +13,34 @@ require 'pretentious/utils/file_writer'
 
 Class.class_eval do
   def _stub(*classes)
-    @classes = classes
+    @stub_classes = classes
     self
   end
 
-  def _get_mock_classes
-    @classes
+  def _get_stub_classes
+    @stub_classes
+  end
+end
+
+Regexp.class_eval do
+  def _stub(*classes)
+    @stub_classes = classes
+    self
+  end
+
+  def _get_stub_classes
+    @stub_classes
+  end
+end
+
+String.class_eval do
+  def _stub(*classes)
+    @stub_classes = classes
+    self
+  end
+
+  def _get_stub_classes
+    @stub_classes
   end
 end
 

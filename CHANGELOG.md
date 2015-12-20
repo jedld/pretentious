@@ -1,3 +1,7 @@
+# 0.2.1 (2015-12-20)
+Features:
+- Allow regex to be used in specifying target classes
+
 # 0.2 (2015-12-19)
 Bugfixes:
 - Fix constants not getting resolved

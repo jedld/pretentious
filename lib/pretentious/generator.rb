@@ -384,17 +384,17 @@ module Pretentious
       mock_dict = {}
 
       klasses_or_instances.each do |klass_or_instance|
-        if klass_or_instance.is_a? String
-          Pretentious::LazyTrigger.new(klass_or_instance, {})
+        if klass_or_instance.is_a?(String) || klass_or_instance.is_a?(Regexp)
+          Pretentious::LazyTrigger.new(klass_or_instance, stubs: klass_or_instance._get_stub_classes)
         else
           klass = klass_or_instance.class == Class ? klass_or_instance : klass_or_instance.class
           klasses << replace_class(klass)
 
           mock_klasses = []
 
-          klass._get_mock_classes.each do |mock_klass|
+          klass._get_stub_classes.each do |mock_klass|
             mock_klasses << replace_class(mock_klass, true)
-          end unless klass._get_mock_classes.nil?
+          end unless klass._get_stub_classes.nil?
 
           mock_dict[klass] = mock_klasses
         end

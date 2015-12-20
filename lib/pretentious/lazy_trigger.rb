@@ -39,11 +39,21 @@ module Pretentious
       @targets[target.stand_in_klass] = target unless @targets.include? target.stand_in_klass
     end
 
+    def match(value)
+      if @target_class.is_a? Regexp
+        @target_class.match(value)
+      elsif @target_class.is_a? String
+        @target_class == value
+      else
+        @target_class.to_s == value
+      end
+    end
+
     class << self
       def lookup(class_name)
         @instances ||= []
         @instances.each do |instance|
-          return instance if instance.target_class == class_name
+          return instance if instance.match(class_name)
         end
         nil
       end
