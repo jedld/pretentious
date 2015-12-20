@@ -197,8 +197,10 @@ If you run pretentious without passing an example file, it will look for pretent
 
 ```YAML
 # Sample pretentious targets file
+# use $ to pass a regex or a ruby code that evals to a string
 targets:
   - class: Meme
+  - class: $/^TestClass/
 generators:
   - rspec
   - minitest
