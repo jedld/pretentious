@@ -29,13 +29,6 @@ class TestClassR2
   end
 end
 
-[:spec_for, :minitest_for].each do |method|
-  Pretentious.send(method, Digest::MD5) do
-    sample = "This is the digest"
-    Digest::MD5.hexdigest(sample)
-  end
-end
-
 test_class1 = TestClassR1.new
 test_class1.hello
 

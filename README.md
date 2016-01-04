@@ -43,7 +43,9 @@ The are various ways to use the pretentious gem. First is using an example file.
 
 The other way is using an init file to declare which classes to test and when. This is useful if you want to document how a class is used in an existing application. This is the prefered method for characterization testing on framework like rails.
 
-Both uses cases are discussed in the succeeding sections:
+There are also various commandline options available.
+
+Please refer to the table of contents to skip directly to the specific use case.
 
 ### Using an example file
 First Create an example file (etc. example.rb) and define the classes that you want to test, if the class is already defined elsewhere just require them. Below is an example:
@@ -162,7 +164,7 @@ RSpec.describe Fibonacci do
 end
 ```
 
-awesome!
+awesome! Note that this approach is the only way to capture calls to class methods.
 
 You can also try this out with libraries like MD5 for example ...
 
@@ -191,6 +193,24 @@ end
 ```
 
 Note: If your test subject is already part of a larger application and would like to capture behavior in the manner that the application uses it, please look at [Declarative Generation](#declarative-generation-without-using-example-files).
+
+### Commandline options
+If you already have an example file you can also use various command line options.
+
+passing --help will show these options
+
+```ruby
+pretentious --help
+```
+
+The command below will generate tests for Meme using the provided example file.
+
+```ruby
+pretentious -t Meme sample.rb
+pretentious -t $/Meme/ sample.rb # generate tests for all classes starting with Meme
+```
+
+Note: class methods are not captured using this method
 
 ### Using pretentious.yml
 If you run pretentious without passing an example file, it will look for pretentious.yml in the current location. Below is an example pretentious.yml file:

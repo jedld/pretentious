@@ -62,6 +62,8 @@ end
 output_folder = nil
 output_subfolder = nil
 targets = nil
+generators = "rspec"
+help = false
 
 # pretentious example.rb -t rspec -o rspec/
 options = OptionParser.new do |o|
@@ -69,8 +71,10 @@ options = OptionParser.new do |o|
     "Usage: pretentious FILENAME [options] # Generates tests using the specified example file\n"
   o.separator ''
   o.separator "options:"
-  o.on('-t=classnames', '--target',
+  o.on('-h', '--help', 'show this help module') { help = true }
+  o.on('-t=classnames', '--target=classnames',
        'target class to generate tests for') { |b| targets = b}
+  o.on('-g=GENERATORS', '--generators=GENERATORS', 'comma separated list of generators to use valid values rspec, minitest (defaults rspec)') { |b| generators = b}
   o.on('-n=namespace', '--namespace=NAMESPACE',
        'sub folder to place the generated files in (defaults to generated)') { |b| output_subfolder = b }
   o.on('-o=OUTPUT_DIR', '--output-dir=OUTPUT_DIR',
@@ -80,6 +84,10 @@ end
 
 filename = ARGV[0]
 
+if help
+  puts options
+  exit(1)
+end
 if filename.nil?
   if File.exists?('pretentious.yml')
     targets_file = YAML.load_file('pretentious.yml')
@@ -114,7 +122,7 @@ else
       end
     end
 
-    generate_specs filename.split(','), %w(rspec minitest), output_folder, output_subfolder
+    generate_specs filename.split(','), generators.split(','), output_folder, output_subfolder
   else
     process_file(filename, output_folder, output_subfolder)
   end
