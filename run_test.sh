@@ -2,5 +2,5 @@
 
 git add .
 gem build pretentious.gemspec
-gem install pretentious-0.2.1.gem
+gem install pretentious-0.2.2.gem
 ruby test/test_generator.rb

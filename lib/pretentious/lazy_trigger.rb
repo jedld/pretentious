@@ -50,6 +50,27 @@ module Pretentious
     end
 
     class << self
+      def generate_for_class(generator_class)
+        all_results = {}
+        Pretentious::LazyTrigger.collect_targets.each do |target|
+          standin_klass = target.stand_in_klass
+          klass = target.original_klass
+          puts "generate for #{klass}"
+          generator = generator_class.new
+
+          generator.begin_spec(klass)
+          generator.body(standin_klass._instances) unless standin_klass._instances.nil?
+          generator.end_spec
+
+          result = all_results[klass]
+          all_results[klass] = [] if result.nil?
+
+          result_output = generator.output.is_a?(String) ? generator.output.chomp : generator.output
+          all_results[klass] = { output: result_output, generator: generator.class }
+        end
+        all_results
+      end
+
       def lookup(class_name)
         @instances ||= []
         @instances.each do |instance|

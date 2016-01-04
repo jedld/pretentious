@@ -140,4 +140,10 @@ module Pretentious
   def self.on(target_class)
     Pretentious::Trigger.new(target_class)
   end
+
+  # deep merge without active support and does array deep merges as well
+  def self.deep_merge(hash, second)
+    merger = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : Array === v1 && Array === v2 ? v1 | v2 : [:undefined, nil, :nil].include?(v2) ? v1 : v2 }
+    hash.merge(second, &merger)
+  end
 end

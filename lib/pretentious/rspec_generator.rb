@@ -2,7 +2,7 @@ module Pretentious
   # Generator for RSPEC
   class RspecGenerator < Pretentious::GeneratorBase
     def self.to_sym
-      :rspec
+      :spec
     end
 
     def begin_spec(test_class)

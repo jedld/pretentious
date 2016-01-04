@@ -372,20 +372,20 @@ module Pretentious
     end
 
     def self.restore_class(module_space, klass, last_part)
-      module_space.send(:remove_const, "#{last_part}Impostor".to_sym)
-      module_space.send(:remove_const, "#{last_part}".to_sym)
+      module_space.send(:remove_const, "#{last_part}Impostor".to_sym) if Object.const_defined?("#{last_part}Impostor")
+      module_space.send(:remove_const, "#{last_part}".to_sym) if Object.const_defined?(last_part)
       module_space.const_set(last_part, klass)
-      module_space.send(:remove_const, "#{last_part}_ddt".to_sym)
+      module_space.send(:remove_const, "#{last_part}_ddt".to_sym) if Object.const_defined?("#{last_part}_ddt")
     end
 
     def self.generate_for(*klasses_or_instances, &block)
       all_results = {}
       klasses = []
       mock_dict = {}
-
+      lazy_triggers = []
       klasses_or_instances.each do |klass_or_instance|
         if klass_or_instance.is_a?(String) || klass_or_instance.is_a?(Regexp)
-          Pretentious::LazyTrigger.new(klass_or_instance, stubs: klass_or_instance._get_stub_classes)
+          lazy_triggers << Pretentious::LazyTrigger.new(klass_or_instance, stubs: klass_or_instance._get_stub_classes)
         else
           klass = klass_or_instance.class == Class ? klass_or_instance : klass_or_instance.class
           klasses << replace_class(klass)
@@ -400,16 +400,17 @@ module Pretentious
         end
       end
 
-      watch_new_instances
-
-      block.call
-
-      unwatch_new_instances
+      if !watched?
+        watch_new_instances
+        block.call
+        unwatch_new_instances
+      else
+        block.call
+      end
 
       # check for lazy triggers, collect and then clean
       klasses += Pretentious::LazyTrigger.collect_targets.map(&:to_a)
-      Pretentious::LazyTrigger.clear
-
+      lazy_triggers.each(&:disable!)
       klasses.each do |module_space, klass, last_part, new_standin_klass|
         # restore the previous class
         restore_class module_space, klass, last_part
@@ -536,8 +537,12 @@ module Pretentious
       unwatch_new_instances
     end
 
+    def self.watched?
+      Class.respond_to?(:_ddt_old_new)
+    end
+
     def self.unwatch_new_instances
-      if Class.respond_to?(:_ddt_old_new)
+      if watched?
         Class.class_eval do
           remove_method :new
           alias_method :new, :_ddt_old_new
