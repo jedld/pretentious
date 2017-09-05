@@ -146,8 +146,9 @@ module Pretentious
           @_instance.methods + [:method_calls]
         end
 
+        # don't really freeze
         def freeze
-          @_instance.freeze
+          @_instance
         end
 
         def hash
