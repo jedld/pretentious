@@ -516,7 +516,7 @@ module Pretentious
 
             # rescues for handling native objects that don't have standard methods
             begin
-              if instance.respond_to?(:_set_init_arguments) && !instance.respond_to?(:impostor?)
+              if instance.respond_to?(:_set_init_arguments) && !instance.respond_to?(:impostor?) && !instance.frozen?
                 instance._set_init_arguments(*args, &block)
               end
             rescue NoMethodError
